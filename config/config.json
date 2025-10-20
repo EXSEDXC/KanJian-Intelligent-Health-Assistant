@@ -1,0 +1,73 @@
+{
+  "system": {
+    "name": "智慧医疗平台",
+    "version": "1.0.0",
+    "copyright": "© 2023 智慧医疗平台 版权所有",
+    "icp": "京ICP备12345678号",
+    "updateTime": "2023-10-01"
+  },
+  "api": {
+    "baseUrl": "https://api.deepseek.com/v1",
+    "timeout": 10000,
+    "retryCount": 1
+  },
+  "theme": {
+    "primaryColor": "#2a7de1",
+    "secondaryColor": "#4fb0ae",
+    "accentColor": "#ff6b6b",
+    "darkColor": "#343a40",
+    "lightColor": "#f8f9fa"
+  },
+  "services": [
+    {
+      "id": "onlineConsult",
+      "name": "在线问诊",
+      "icon": "fas fa-video",
+      "color": "#2a7de1",
+      "desc": "足不出户，与专家医生进行视频问诊，获取专业医疗建议",
+      "btnText": "立即咨询"
+    },
+    {
+      "id": "medicineDelivery",
+      "name": "药品配送",
+      "icon": "fas fa-pills",
+      "color": "#4fb0ae",
+      "desc": "在线开具处方，药品直接配送到家，省时省力更省心",
+      "btnText": "购买药品"
+    },
+    {
+      "id": "appointment",
+      "name": "预约挂号",
+      "icon": "fas fa-calendar-check",
+      "color": "#ff6b6b",
+      "desc": "在线预约专家门诊，节省排队时间，轻松就医",
+      "btnText": "立即预约"
+    }
+  ],
+  "departments": [
+    {
+      "id": "cardiology",
+      "name": "心血管内科"
+    },
+    {
+      "id": "pediatrics",
+      "name": "儿科"
+    },
+    {
+      "id": "orthopedics",
+      "name": "骨科"
+    },
+    {
+      "id": "tcm",
+      "name": "中医科"
+    },
+    {
+      "id": "dermatology",
+      "name": "皮肤科"
+    },
+    {
+      "id": "neurology",
+      "name": "神经内科"
+    }
+  ]
+}

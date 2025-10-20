@@ -1,0 +1,92 @@
+{
+  "userId": "user123456",
+  "dateRange": {
+    "start": "2023-10-01",
+    "end": "2023-10-07"
+  },
+  "dailyStats": [
+    {
+      "date": "2023-10-01",
+      "step": 8256,
+      "stepTarget": 10000,
+      "sleep": 7.5,
+      "sleepTarget": 8,
+      "heartRate": 72,
+      "calorie": 420,
+      "calorieTarget": 500
+    },
+    {
+      "date": "2023-10-02",
+      "step": 9120,
+      "stepTarget": 10000,
+      "sleep": 6.8,
+      "sleepTarget": 8,
+      "heartRate": 75,
+      "calorie": 480,
+      "calorieTarget": 500
+    },
+    {
+      "date": "2023-10-03",
+      "step": 10500,
+      "stepTarget": 10000,
+      "sleep": 8.2,
+      "sleepTarget": 8,
+      "heartRate": 70,
+      "calorie": 520,
+      "calorieTarget": 500
+    },
+    {
+      "date": "2023-10-04",
+      "step": 7800,
+      "stepTarget": 10000,
+      "sleep": 7.0,
+      "sleepTarget": 8,
+      "heartRate": 73,
+      "calorie": 390,
+      "calorieTarget": 500
+    },
+    {
+      "date": "2023-10-05",
+      "step": 9500,
+      "stepTarget": 10000,
+      "sleep": 7.8,
+      "sleepTarget": 8,
+      "heartRate": 69,
+      "calorie": 460,
+      "calorieTarget": 500
+    },
+    {
+      "date": "2023-10-06",
+      "step": 12000,
+      "stepTarget": 10000,
+      "sleep": 6.5,
+      "sleepTarget": 8,
+      "heartRate": 76,
+      "calorie": 580,
+      "calorieTarget": 500
+    },
+    {
+      "date": "2023-10-07",
+      "step": 8800,
+      "stepTarget": 10000,
+      "sleep": 7.2,
+      "sleepTarget": 8,
+      "heartRate": 71,
+      "calorie": 430,
+      "calorieTarget": 500
+    }
+  ],
+  "heartRateTrend": [72, 75, 70, 73, 69, 76, 71],
+  "monthlySummary": {
+    "avgStep": 9200,
+    "avgSleep": 7.3,
+    "avgHeartRate": 72,
+    "calorieBurned": 13500,
+    "achievementRate": 85
+  },
+  "healthAdvice": [
+    "您的日均步数达标率85%，建议周末适当增加户外活动",
+    "睡眠质量整体良好，但周三夜间睡眠偏短，注意避免睡前使用电子设备",
+    "心率指标稳定在正常范围，继续保持当前运动习惯"
+  ]
+}

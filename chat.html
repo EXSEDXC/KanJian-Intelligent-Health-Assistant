@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>大模型聊天</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Arial, sans-serif;
+            background: radial-gradient(ellipse at 60% 20%, #e0f7fa 0%, #fffde4 100%);
+            min-height: 100vh;
+        }
+        .chat-container {
+            max-width: 520px;
+            margin: 48px auto;
+            background: rgba(255,255,255,0.95);
+            border-radius: 28px;
+            box-shadow: 0 8px 32px 0 #b3e5fc;
+            padding: 36px 28px 28px 28px;
+            backdrop-filter: blur(6px);
+            border: 2px solid #b3e5fc;
+        }
+        .chat-box {
+            height: 380px;
+            overflow-y: auto;
+            border-radius: 14px;
+            padding: 18px;
+            background: linear-gradient(120deg, #e0f7fa 0%, #fffde4 100%);
+            margin-bottom: 24px;
+            border: 1.5px solid #b3e5fc;
+            box-shadow: 0 2px 16px #b3e5fc;
+        }
+        .chat-message {
+            display: flex;
+            margin: 16px 0;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bubble {
+            padding: 14px 22px;
+            border-radius: 22px;
+            max-width: 75%;
+            word-break: break-word;
+            font-size: 17px;
+            box-shadow: 0 2px 16px #b3e5fc;
+            position: relative;
+        }
+        .user-bubble {
+            background: linear-gradient(90deg, #ffecb3 0%, #ffe082 100%);
+            color: #1565c0;
+            margin-left: auto;
+            border: 2px solid #ffe082;
+            box-shadow: 0 0 16px #ffe08288;
+        }
+        .model-bubble {
+            background: linear-gradient(90deg, #b3e5fc 0%, #81d4fa 100%);
+            color: #004d40;
+            margin-right: auto;
+            border: 2px solid #81d4fa;
+            box-shadow: 0 0 16px #81d4fa88;
+        }
+        .sender {
+            font-size: 14px;
+            margin-bottom: 2px;
+            opacity: 0.7;
+            color: #1565c0;
+            letter-spacing: 1px;
+        }
+        .input-area {
+            display: flex;
+            gap: 14px;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #b3e5fc;
+            border-radius: 14px;
+            font-size: 17px;
+            outline: none;
+            background: #fffde4;
+            color: #1565c0;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px #b3e5fc;
+        }
+        .input-area input:focus {
+            border-color: #81d4fa;
+            box-shadow: 0 0 8px #81d4fa88;
+        }
+        .input-area button {
+            padding: 14px 32px;
+            border: none;
+            background: linear-gradient(90deg, #81d4fa 0%, #ffe082 100%);
+            color: #1565c0;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: bold;
+            box-shadow: 0 0 16px #ffe08288, 0 2px 8px #b3e5fc;
+            transition: background 0.2s, box-shadow 0.2s;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px #ffe08244;
+        }
+        .input-area button:hover {
+            background: linear-gradient(90deg, #ffe082 0%, #81d4fa 100%);
+            box-shadow: 0 0 24px #81d4fa99;
+        }
+        @media (max-width: 600px) {
+            .chat-container {
+                max-width: 98vw;
+                padding: 10px 2vw;
+            }
+            .chat-box {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <button onclick="window.location.href='yiliao.html'" style="
+            position: absolute;
+            right: 38px;
+            top: 32px;
+            background: linear-gradient(90deg, #81d4fa 0%, #ffe082 100%);
+            color: #1565c0;
+            border: none;
+            border-radius: 14px;
+            padding: 10px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 0 12px #ffe08288, 0 2px 8px #b3e5fc;
+            cursor: pointer;
+            letter-spacing: 1px;
+            margin-bottom: 18px;
+            z-index: 10;
+        ">返回首页</button>
+        <h2>聊天</h2>
+        <div style="margin-bottom:18px; text-align:right;">
+            <form id="uploadForm" enctype="multipart/form-data" style="display:inline-block;">
+                <label for="imageUpload" style="cursor:pointer; color:#1565c0; font-weight:bold; margin-right:10px;">上传图片</label>
+                <input type="file" id="imageUpload" name="image" accept="image/*" style="display:none;">
+                <button type="submit" style="background:linear-gradient(90deg,#81d4fa 0%,#ffe082 100%);color:#1565c0;border:none;border-radius:10px;padding:7px 18px;font-size:15px;font-weight:bold;box-shadow:0 0 8px #ffe08244;cursor:pointer;">上传</button>
+            </form>
+            <div id="uploadPreview" style="margin-top:10px;"></div>
+        </div>
+        <div class="chat-box" id="chatBox"></div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="请输入你的问题..." />
+            <button onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+    <script>
+        function appendMessage(sender, text) {
+            const chatBox = document.getElementById('chatBox');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message';
+            const senderLabel = `<div class="sender">${sender === 'user' ? '你' : 'DeepSeek R1'}</div>`;
+            const bubbleClass = sender === 'user' ? 'bubble user-bubble' : 'bubble model-bubble';
+            msgDiv.innerHTML = `${senderLabel}<div class="${bubbleClass}">${text}</div>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // 图片上传功能
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const preview = document.getElementById('uploadPreview');
+                preview.innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:120px;max-height:120px;border-radius:10px;border:2px solid #81d4fa;box-shadow:0 0 8px #81d4fa88;" alt="预览">`;
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('imageUpload');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('请选择图片');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('image', file);
+            // TODO: 替换为你的识别接口地址
+            fetch('/api/upload-image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                // 假设返回 { analysis: 别内容", url: "图片地址" }
+                if (data.url) {
+                    document.getElementById('uploadPreview').innerHTML = `<img src="${data.url}" style="max-width:120px;max-height:120px;border-radius:10px;border:2px solid #81d4fa;box-shadow:0 0 8px #81d4fa88;" alt="已上传">`;
+                    appendMessage('user', `<img src='${data.url}' style='max-width:120px;max-height:120px;border-radius:10px;'>`);
+                }
+                if (data.analysis) {
+                    appendMessage('user', data.analysis);
+                    // 自动发起大模型对话
+                    fetch('https://api.deepseek.com/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer sk-389f9fda9281437cbdf8a5123d935aac' // 请替换为你的真实API密钥
+                        },
+                        body: JSON.stringify({
+                            model: 'deepseek-chat',
+                            messages: [
+                                { role: 'system', content: 'You are a helpful assistant.' },
+                                { role: 'user', content: data.analysis }
+                            ],
+                            stream: false
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(chatData => {
+                        const reply = chatData.choices && chatData.choices[0] && chatData.choices[0].message && chatData.choices[0].message.content ? chatData.choices[0].message.content : '未获取到模型回复';
+                        appendMessage('model', reply);
+                    })
+                    .catch(() => {
+                        appendMessage('model', '接口调用失败，请检查网络或API设置。');
+                    });
+                } else {
+                    alert('未获取到识别内容');
+                }
+            })
+            .catch(() => {
+                alert('上传失败，请检查网络或接口设置');
+            });
+        });
+        
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+            appendMessage('user', text);
+            input.value = '';
+            
+                        fetch('https://api.deepseek.com/chat/completions', {
+                                method: 'POST',
+                                headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': 'Bearer sk-389f9fda9281437cbdf8a5123d935aac' // 请替换为你的真实API密钥
+                                },
+                                body: JSON.stringify({
+                                        model: 'deepseek-chat',
+                                        messages: [
+                                                { role: 'system', content: 'You are a helpful assistant.' },
+                                                { role: 'user', content: text }
+                                        ],
+                                        stream: false
+                                })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                                const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content ? data.choices[0].message.content : '未获取到模型回复';
+                                appendMessage('model', reply);
+                        })
+                        .catch(() => {
+                                appendMessage('model', '接口调用失败，请检查网络或API设置。');
+                        });
+        }
+    </script>
+</body>
+</html>
