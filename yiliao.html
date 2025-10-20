@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧医疗 - 您的健康管理平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2a7de1;
+            --secondary: #4fb0ae;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --border-radius: 10px;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 导航栏样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 25px;
+            position: relative;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 5px 0;
+        }
+
+        .nav-links a:hover {
+            color: #ffeb3b;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffeb3b;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            border: none;
+        }
+
+        .btn-outline {
+            border: 2px solid white;
+            color: white;
+            margin-right: 10px;
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid white;
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 英雄区域样式 */
+        .hero {
+            padding: 100px 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-box button {
+            padding: 15px 25px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .search-box button:hover {
+            background: #ff5252;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            margin: 0 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffeb3b;
+        }
+
+        .stat-text {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* 服务区域样式 */
+        .services {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title p {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-icon {
+            background: var(--primary);
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        .service-content {
+            padding: 25px;
+        }
+
+        .service-content h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .service-content p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* 健康数据区域样式 */
+        .health-data {
+            background: var(--light);
+            padding: 80px 0;
+        }
+
+        .data-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .data-visualization {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .data-stats {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .stat-item {
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .stat-item h3 {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--dark);
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            border-radius: 5px;
+        }
+
+        .bg-primary {
+            background: var(--primary);
+        }
+
+        .bg-secondary {
+            background: var(--secondary);
+        }
+
+        .bg-accent {
+            background: var(--accent);
+        }
+
+        /* 医生展示区域样式 */
+        .doctors {
+            padding: 80px 0;
+        }
+
+        .doctors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .doctor-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .doctor-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .doctor-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .doctor-card:hover .doctor-image img {
+            transform: scale(1.1);
+        }
+
+        .doctor-info {
+            padding: 20px;
+        }
+
+        .doctor-info h3 {
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .doctor-specialty {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .doctor-rating {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+
+        /* 预约区域样式 */
+        .appointment {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .appointment-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .appointment-content {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .appointment-form {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .appointment-form h3 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42, 125, 225, 0.2);
+        }
+
+        /* 应用下载区域样式 */
+        .app-download {
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .app-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .app-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .app-btn {
+            display: flex;
+            align-items: center;
+            background: var(--dark);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .app-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            background: #2a2a2a;
+        }
+
+        .app-btn i {
+            font-size: 1.8rem;
+            margin-right: 10px;
+        }
+
+        /* 页脚样式 */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background: var(--primary);
+            bottom: 0;
+            left: 0;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-column a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .social-icons a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--primary);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links li {
+                margin: 10px 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+
+            .search-box {
+                flex-direction: column;
+                border-radius: 10px;
+            }
+
+            .search-box input {
+                border-radius: 10px 10px 0 0;
+                margin-bottom: 1px;
+            }
+
+            .search-box button {
+                border-radius: 0 0 10px 10px;
+            }
+
+            .auth-buttons {
+                display: none;
+            }
+
+            .mobile-auth {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .logo span {
+                font-size: 1.2rem;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>智慧医疗</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#">首页</a></li>
+                    <li><a href="chat.html">服务</a></li>
+                    <li><a href="#">医生团队</a></li>
+                    <li><a href="#">健康资讯</a></li>
+                    <li><a href="#">关于我们</a></li>
+                </ul>
+                <div class="auth-buttons">
+                    <a href="#" class="btn btn-outline">登录</a>
+                    <a href="#" class="btn btn-primary">注册</a>
+                </div>
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>智慧医疗，健康随行</h1>
+                <p>一站式医疗健康服务平台，为您提供专业的在线咨询、健康管理和医疗服务</p>
+                <div class="search-box">
+                    <input type="text" placeholder="搜索症状、疾病、医生、科室...">
+                    <button><i class="fas fa-search"></i> 搜索</button>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-text">专业医生</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">50,000+</div>
+                        <div class="stat-text">服务患者</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">98%</div>
+                        <div class="stat-text">满意率</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 服务区域 -->
+    <section class="services">
+        <div class="container">
+            <div class="section-title">
+                <h2>我们的服务</h2>
+                <p>全方位医疗健康服务，满足您和家人的健康需求</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>在线问诊</h3>
+                        <p>足不出户，与专家医生进行视频问诊，获取专业医疗建议</p>
+                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary);">立即咨询</a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon" style="background: var(--secondary);">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>药品配送</h3>
+                        <p>在线开具处方，药品直接配送到家，省时省力更省心</p>
+                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--secondary); border-color: var(--secondary);">购买药品</a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon" style="background: var(--accent);">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>预约挂号</h3>
+                        <p>在线预约专家门诊，节省排队时间，轻松就医</p>
+                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--accent); border-color: var(--accent);">立即预约</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 健康数据区域 -->
+    <section class="health-data">
+        <div class="container">
+            <div class="section-title">
+                <h2>健康数据管理</h2>
+                <p>智能记录与分析，全方位守护您的健康</p>
+            </div>
+            <div class="data-container">
+                <div class="data-visualization">
+                    <canvas id="healthChart" width="400" height="300"></canvas>
+                </div>
+                <div class="data-stats">
+                    <div class="stat-item">
+                        <h3>每日步数 <span>8,256/10,000</span></h3>
+                        <div class="progress-bar">
+                            <div class="progress bg-primary" style="width: 82.56%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <h3>睡眠质量 <span>7.5/10</span></h3>
+                        <div class="progress-bar">
+                            <div class="progress bg-secondary" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <h3>心率监测 <span>72bpm</span></h3>
+                        <div class="progress-bar">
+                            <div class="progress bg-accent" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <h3>卡路里消耗 <span>420/500cal</span></h3>
+                        <div class="progress-bar">
+                            <div class="progress bg-primary" style="width: 84%"></div>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-primary" style="background: var(--primary); color: white; border: none; margin-top: 20px; display: block; text-align: center;">查看详细报告</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 医生团队区域 -->
+    <section class="doctors">
+        <div class="container">
+            <div class="section-title">
+                <h2>专业医生团队</h2>
+                <p>经验丰富的医疗专家，为您提供专业的健康服务</p>
+            </div>
+            <div class="doctors-grid">
+                <div class="doctor-card">
+                    <div class="doctor-image">
+                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="张医生">
+                    </div>
+                    <div class="doctor-info">
+                        <h3>张明医生</h3>
+                        <div class="doctor-specialty">心血管内科主任</div>
+                        <div class="doctor-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span>4.8</span>
+                        </div>
+                        <p>20年临床经验，擅长高血压、冠心病等心血管疾病的诊治</p>
+                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                    </div>
+                </div>
+                <div class="doctor-card">
+                    <div class="doctor-image">
+                        <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="李医生">
+                    </div>
+                    <div class="doctor-info">
+                        <h3>李华医生</h3>
+                        <div class="doctor-specialty">儿科专家</div>
+                        <div class="doctor-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span>5.0</span>
+                        </div>
+                        <p>15年儿科经验，擅长儿童常见病及生长发育问题的诊疗</p>
+                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                    </div>
+                </div>
+                <div class="doctor-card">
+                    <div class="doctor-image">
+                        <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="王医生">
+                    </div>
+                    <div class="doctor-info">
+                        <h3>王丽医生</h3>
+                        <div class="doctor-specialty">中医科教授</div>
+                        <div class="doctor-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span>4.9</span>
+                        </div>
+                        <p>25年中医经验，擅长中医调理和慢性病的中西医结合治疗</p>
+                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                    </div>
+                </div>
+                <div class="doctor-card">
+                    <div class="doctor-image">
+                        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d15?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="刘医生">
+                    </div>
+                    <div class="doctor-info">
+                        <h3>刘强医生</h3>
+                        <div class="doctor-specialty">骨科主任</div>
+                        <div class="doctor-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span>4.7</span>
+                        </div>
+                        <p>18年骨科经验，擅长关节疾病和运动损伤的诊断与治疗</p>
+                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 预约区域 -->
+    <section class="appointment">
+        <div class="container">
+            <div class="appointment-container">
+                <div class="appointment-content">
+                    <h2>立即预约专家门诊</h2>
+                    <p>填写基本信息，我们的医疗顾问将尽快与您联系，为您安排最合适的专家和就诊时间</p>
+                    <ul style="margin-top: 20px; list-style: none;">
+                        <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #ffeb3b; margin-right: 10px;"></i> 专业医疗团队</li>
+                        <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #ffeb3b; margin-right: 10px;"></i> 快速预约通道</li>
+                        <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #ffeb3b; margin-right: 10px;"></i> 个性化服务</li>
+                    </ul>
+                </div>
+                <div class="appointment-form">
+                    <h3>预约咨询</h3>
+                    <form>
+                        <div class="form-group">
+                            <label for="name">姓名</label>
+                            <input type="text" id="name" class="form-control" placeholder="请输入您的姓名">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">手机号</label>
+                            <input type="tel" id="phone" class="form-control" placeholder="请输入您的手机号">
+                        </div>
+                        <div class="form-group">
+                            <label for="department">科室</label>
+                            <select id="department" class="form-control">
+                                <option value="">请选择科室</option>
+                                <option value="cardiology">心血管内科</option>
+                                <option value="pediatrics">儿科</option>
+                                <option value="orthopedics">骨科</option>
+                                <option value="tcm">中医科</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">预约时间</label>
+                            <input type="date" id="date" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; background: var(--primary); color: white; border: none;">提交预约</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 应用下载区域 -->
+    <section class="app-download">
+        <div class="container">
+            <div class="app-content">
+                <h2>下载智慧医疗APP</h2>
+                <p>随时随地管理您的健康，获取专业医疗建议</p>
+                <div class="app-buttons">
+                    <a href="#" class="app-btn">
+                        <i class="fab fa-apple"></i>
+                        <div>
+                            <div>下载自</div>
+                            <div>App Store</div>
+                        </div>
+                    </a>
+                    <a href="#" class="app-btn">
+                        <i class="fab fa-google-play"></i>
+                        <div>
+                            <div>下载自</div>
+                            <div>Google Play</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>智慧医疗</h3>
+                    <p>为您提供全面、便捷、专业的医疗健康服务</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-weixin"></i></a>
+                        <a href="#"><i class="fab fa-weibo"></i></a>
+                        <a href="#"><i class="fab fa-qq"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>服务项目</h3>
+                    <ul>
+                        <li><a href="#">在线问诊</a></li>
+                        <li><a href="#">药品配送</a></li>
+                        <li><a href="#">预约挂号</a></li>
+                        <li><a href="#">健康管理</a></li>
+                        <li><a href="#">体检套餐</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>关于我们</h3>
+                    <ul>
+                        <li><a href="#">公司简介</a></li>
+                        <li><a href="#">医生团队</a></li>
+                        <li><a href="#">加入我们</a></li>
+                        <li><a href="#">新闻动态</a></li>
+                        <li><a href="#">联系我们</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>联系方式</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> 北京市海淀区科技园区88号</li>
+                        <li><i class="fas fa-phone"></i> 400-888-9999</li>
+                        <li><i class="fas fa-envelope"></i> info@smartmed.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>© 2023 智慧医疗平台 版权所有 | 京ICP备12345678号</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 简单的交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 菜单切换
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+
+            menuToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+
+                if (navLinks.classList.contains('active')) {
+                    // 添加移动端登录按钮
+                    if (!document.querySelector('.mobile-auth')) {
+                        const mobileAuth = document.createElement('div');
+                        mobileAuth.className = 'mobile-auth';
+                        mobileAuth.innerHTML = `
+                            <a href="#" class="btn btn-outline" style="display: block; text-align: center;">登录</a>
+                            <a href="#" class="btn btn-primary" style="display: block; text-align: center;">注册</a>
+                        `;
+                        navLinks.appendChild(mobileAuth);
+                    }
+                }
+            });
+
+            // 服务卡片悬停效果
+            const serviceCards = document.querySelectorAll('.service-card');
+            serviceCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px)';
+                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.1)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.05)';
+                });
+            });
+
+            // 医生卡片悬停效果
+            const doctorCards = document.querySelectorAll('.doctor-card');
+            doctorCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.1)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.05)';
+                });
+            });
+
+            // 搜索框焦点效果
+            const searchInput = document.querySelector('.search-box input');
+            searchInput.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+
+            searchInput.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+
+            // 简单的健康图表
+            const healthChart = document.getElementById('healthChart');
+            if (healthChart) {
+                const ctx = healthChart.getContext('2d');
+
+                // 绘制简单的折线图
+                ctx.beginPath();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#2a7de1';
+                ctx.moveTo(50, 250);
+
+                // 模拟数据点
+                const dataPoints = [220, 180, 200, 160, 190, 150, 170];
+                const xInterval = 50;
+
+                dataPoints.forEach((point, index) => {
+                    ctx.lineTo(50 + (index * xInterval), 250 - point);
+                });
+
+                ctx.stroke();
+
+                // 绘制数据点
+                ctx.fillStyle = '#2a7de1';
+                dataPoints.forEach((point, index) => {
+                    ctx.beginPath();
+                    ctx.arc(50 + (index * xInterval), 250 - point, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // 绘制坐标轴
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#ccc';
+                ctx.moveTo(30, 50);
+                ctx.lineTo(30, 250);
+                ctx.lineTo(400, 250);
+                ctx.stroke();
+
+                // 添加标签
+                ctx.fillStyle = '#666';
+                ctx.font = '12px Arial';
+                ctx.fillText('心率(bpm)', 10, 150);
+                ctx.fillText('时间', 200, 270);
+
+                const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+                days.forEach((day, index) => {
+                    ctx.fillText(day, 40 + (index * xInterval), 265);
+                });
+            }
+
+            // 表单提交
+            const appointmentForm = document.querySelector('.appointment-form form');
+            if (appointmentForm) {
+                appointmentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('预约信息已提交，我们的医疗顾问将尽快联系您！');
+                    this.reset();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

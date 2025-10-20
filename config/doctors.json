@@ -1,0 +1,46 @@
+[
+  {
+    "id": "doc001",
+    "name": "周昊政医生",
+    "specialty": "心血管内科主任",
+    "avatar": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    "rating": 4.8,
+    "experience": "20年临床经验",
+    "intro": "擅长高血压、冠心病等心血管疾病的诊治，曾发表学术论文30余篇",
+    "departments": ["cardiology"],
+    "availableTime": ["周一上午", "周三下午", "周五全天"]
+  },
+  {
+    "id": "doc002",
+    "name": "李华医生",
+    "specialty": "儿科专家",
+    "avatar": "https://images.unsplash.com/photo-1594824476967-48c8b964273f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    "rating": 5.0,
+    "experience": "15年儿科经验",
+    "intro": "擅长儿童常见病及生长发育问题的诊疗，亲和力强，深受家长信赖",
+    "departments": ["pediatrics"],
+    "availableTime": ["周二全天", "周四上午", "周六上午"]
+  },
+  {
+    "id": "doc003",
+    "name": "王丽医生",
+    "specialty": "中医科教授",
+    "avatar": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    "rating": 4.9,
+    "experience": "25年中医经验",
+    "intro": "擅长中医调理和慢性病的中西医结合治疗，对亚健康调理有深入研究",
+    "departments": ["tcm"],
+    "availableTime": ["周一全天", "周三上午", "周日上午"]
+  },
+  {
+    "id": "doc004",
+    "name": "刘强医生",
+    "specialty": "骨科主任",
+    "avatar": "https://images.unsplash.com/photo-1576091160399-112ba8d25d15?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    "rating": 4.7,
+    "experience": "18年骨科经验",
+    "intro": "擅长关节疾病和运动损伤的诊断与治疗，曾主持多项骨科手术研究",
+    "departments": ["orthopedics"],
+    "availableTime": ["周二下午", "周四全天", "周六下午"]
+  }
+]
