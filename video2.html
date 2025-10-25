@@ -397,6 +397,14 @@
             border-bottom-left-radius: 5px;
         }
 
+        .message.system {
+            background: #e9ecef;
+            color: #495057;
+            margin: 0 auto;
+            border-radius: 10px;
+            max-width: 90%;
+        }
+
         .chat-input {
             display: flex;
             padding: 15px;
@@ -629,13 +637,24 @@
         // 连接信令服务器 (使用WebSocket)
         async function connectSignalingServer() {
             try {
-                // 这里使用简单的WebSocket连接
-                // 在实际应用中，您需要使用真实的信令服务器
+                // 这里使用简单的WebSocket连接模拟（实际项目需替换为真实WebSocket地址）
+                // 模拟WebSocket对象，包含send方法和onmessage回调
                 socket = {
                     send: (data) => {
                         console.log('发送信令:', data);
-                        // 模拟信令传输
-                        setTimeout(() => handleSignalingMessage(data), 100);
+                        // 模拟信令传输延迟
+                        setTimeout(() => {
+                            // 若为挂断信令，直接触发本地处理
+                            if (data.type === 'hangup') {
+                                handleHangupSignal();
+                            } else {
+                                handleSignalingMessage(data);
+                            }
+                        }, 100);
+                    },
+                    close: () => {
+                        console.log('信令连接已关闭');
+                        socket = null;
                     }
                 };
 
@@ -651,8 +670,6 @@
 
         // 处理信令消息
         function handleSignalingMessage(message) {
-            // 这里模拟接收到的信令消息
-            // 在实际应用中，这会通过WebSocket从服务器接收
             console.log('收到信令:', message);
 
             if (message.type === 'offer') {
@@ -664,6 +681,13 @@
             } else if (message.type === 'chat') {
                 addChatMessage('remote', message.text);
             }
+        }
+
+        // 处理挂断信令
+        function handleHangupSignal() {
+            // 远程端发起挂断，本地执行挂断逻辑
+            hangUp(false);
+            addChatMessage('system', '远程用户已结束通话');
         }
 
         // 获取媒体流
@@ -684,6 +708,10 @@
 
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
                 localVideo.srcObject = localStream;
+
+                // 初始化视频/音频按钮状态
+                toggleVideoBtn.innerHTML = `<i class="fas fa-video-slash"></i><span class="btn-text">关闭视频</span>`;
+                toggleAudioBtn.innerHTML = `<i class="fas fa-microphone-slash"></i><span class="btn-text">静音</span>`;
 
                 statusText.textContent = '摄像头和麦克风已开启！';
                 startBtn.disabled = true;
@@ -722,7 +750,8 @@
                     remoteStream = event.streams[0];
                     remoteVideo.srcObject = remoteStream;
                     statusText.textContent = '远程连接已建立！';
-                    addChatMessage('system', '远程用户已连接');
+                    connectionStatus.textContent = '通话中';
+                    addChatMessage('system', '远程用户已连接，通话开始');
                 };
 
                 // ICE连接状态处理
@@ -731,17 +760,20 @@
                     statusText.textContent = `ICE连接状态: ${state}`;
 
                     if (state === 'connected' || state === 'completed') {
-                        connectionStatus.textContent = '已连接';
+                        connectionStatus.textContent = '通话中';
                         statusIndicator.classList.add('connected');
-                    } else if (state === 'disconnected' || state === 'failed') {
-                        connectionStatus.textContent = '连接断开';
-                        statusIndicator.classList.remove('connected');
+                    } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+                        if (state !== 'closed') { // 排除主动关闭的情况
+                            connectionStatus.textContent = '连接断开';
+                            statusIndicator.classList.remove('connected');
+                            addChatMessage('system', '连接已断开');
+                        }
                     }
                 };
 
                 // ICE候选处理
                 peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
+                    if (event.candidate && socket) {
                         // 发送ICE候选到远程端
                         socket.send({
                             type: 'ice-candidate',
@@ -761,6 +793,11 @@
 
         // 创建Offer
         async function createOffer() {
+            if (!localStream) {
+                statusText.textContent = '请先开启摄像头';
+                return;
+            }
+
             if (!peerConnection) {
                 peerConnection = createPeerConnection();
                 if (!peerConnection) return;
@@ -775,21 +812,29 @@
                 await peerConnection.setLocalDescription(offer);
 
                 // 发送Offer到远程端
-                socket.send({
-                    type: 'offer',
-                    offer: offer,
-                    roomId: roomId
-                });
+                if (socket) {
+                    socket.send({
+                        type: 'offer',
+                        offer: offer,
+                        roomId: roomId
+                    });
+                }
 
             } catch (error) {
                 console.error('创建Offer失败:', error);
                 statusText.textContent = '创建连接失败: ' + error.message;
                 callBtn.disabled = false;
+                hangupBtn.disabled = true;
             }
         }
 
         // 处理收到的Offer
         async function handleOffer(message) {
+            if (!localStream) {
+                // 自动开启媒体流（远程发起通话时）
+                await getMediaStream();
+            }
+
             if (!peerConnection) {
                 peerConnection = createPeerConnection();
             }
@@ -800,21 +845,29 @@
                 await peerConnection.setLocalDescription(answer);
 
                 // 发送Answer到远程端
-                socket.send({
-                    type: 'answer',
-                    answer: answer,
-                    roomId: roomId
-                });
+                if (socket) {
+                    socket.send({
+                        type: 'answer',
+                        answer: answer,
+                        roomId: roomId
+                    });
+                }
+
+                // 收到Offer后自动启用挂断按钮
+                hangupBtn.disabled = false;
 
             } catch (error) {
                 console.error('处理Offer失败:', error);
+                statusText.textContent = '处理连接请求失败: ' + error.message;
             }
         }
 
         // 处理收到的Answer
         async function handleAnswer(message) {
             try {
-                await peerConnection.setRemoteDescription(message.answer);
+                if (peerConnection) {
+                    await peerConnection.setRemoteDescription(message.answer);
+                }
             } catch (error) {
                 console.error('处理Answer失败:', error);
             }
@@ -823,30 +876,69 @@
         // 处理ICE候选
         async function handleIceCandidate(message) {
             try {
-                await peerConnection.addIceCandidate(message.candidate);
+                if (peerConnection) {
+                    await peerConnection.addIceCandidate(message.candidate);
+                }
             } catch (error) {
                 console.error('处理ICE候选失败:', error);
             }
         }
 
-        // 挂断通话
-        function hangUp() {
+        // 挂断通话（isInitiator：true=本地发起挂断，false=远程发起挂断）
+        function hangUp(isInitiator = true) {
+            // 1. 关闭PeerConnection连接
             if (peerConnection) {
                 peerConnection.close();
                 peerConnection = null;
+                console.log('PeerConnection已关闭');
             }
 
+            // 2. 停止本地媒体流（释放摄像头/麦克风）
+            if (localStream) {
+                localStream.getTracks().forEach(track => {
+                    track.stop(); // 关键：停止媒体轨道，释放设备占用
+                });
+                localStream = null;
+                localVideo.srcObject = null; // 清空本地视频显示
+                console.log('本地媒体流已停止');
+            }
+
+            // 3. 清空远程视频
             if (remoteVideo.srcObject) {
                 remoteVideo.srcObject = null;
+                remoteStream = null;
             }
 
+            // 4. 发送挂断信令给远程端（仅本地发起时发送）
+            if (isInitiator && socket) {
+                socket.send({
+                    type: 'hangup',
+                    roomId: roomId
+                });
+            }
+
+            // 5. 重置按钮状态
+            startBtn.disabled = false;
+            callBtn.disabled = true;
+            hangupBtn.disabled = true;
+            toggleVideoBtn.disabled = true;
+            toggleAudioBtn.disabled = true;
+
+            // 6. 重置状态显示
             statusText.textContent = '通话已结束';
             connectionStatus.textContent = '未连接';
             statusIndicator.classList.remove('connected');
-            callBtn.disabled = false;
-            hangupBtn.disabled = true;
 
-            addChatMessage('system', '通话已结束');
+            // 7. 重置视频/音频按钮文本
+            toggleVideoBtn.innerHTML = `<i class="fas fa-video"></i><span class="btn-text">关闭视频</span>`;
+            toggleAudioBtn.innerHTML = `<i class="fas fa-microphone"></i><span class="btn-text">静音</span>`;
+            isVideoEnabled = true;
+            isAudioEnabled = true;
+
+            // 8. 聊天区域提示
+            if (isInitiator) {
+                addChatMessage('system', '你已结束通话');
+            }
         }
 
         // 切换视频
@@ -875,7 +967,7 @@
             }
         }
 
-        // 添加聊天消息
+        // 添加聊天消息（优化系统消息样式）
         function addChatMessage(type, text) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}`;
@@ -887,7 +979,7 @@
         // 发送聊天消息
         function sendChatMessage() {
             const text = chatInput.value.trim();
-            if (text) {
+            if (text && socket) {
                 addChatMessage('self', text);
 
                 // 发送到远程端
@@ -904,13 +996,26 @@
         // 事件监听
         startBtn.addEventListener('click', getMediaStream);
         callBtn.addEventListener('click', createOffer);
-        hangupBtn.addEventListener('click', hangUp);
+        hangupBtn.addEventListener('click', () => hangUp(true)); // 本地发起挂断
         toggleVideoBtn.addEventListener('click', toggleVideo);
         toggleAudioBtn.addEventListener('click', toggleAudio);
         sendMessageBtn.addEventListener('click', sendChatMessage);
         chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendChatMessage();
+            }
+        });
+
+        // 页面关闭时清理资源
+        window.addEventListener('beforeunload', () => {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            if (peerConnection) {
+                peerConnection.close();
+            }
+            if (socket && socket.close) {
+                socket.close();
             }
         });
 
