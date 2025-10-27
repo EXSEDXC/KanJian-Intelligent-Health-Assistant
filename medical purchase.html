@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧医疗 - 家庭常备药大全</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2a7de1;
+            --secondary: #4fb0ae;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --border-radius: 10px;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 导航栏样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 25px;
+            position: relative;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 5px 0;
+        }
+
+        .nav-links a:hover {
+            color: #ffeb3b;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffeb3b;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 300px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 8px 15px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-box button {
+            padding: 8px 15px;
+            background: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 安全提示 */
+        .safety-notice {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .safety-notice h3 {
+            color: #d32f2f;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .safety-notice h3 i {
+            margin-right: 10px;
+        }
+
+        .safety-notice p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* 内容区域样式 */
+        .content-section {
+            padding: 30px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title p {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+
+        /* 药品分类 */
+        .categories {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .category-btn.active, .category-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* 药品网格 */
+        .drugs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .drug-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .drug-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .drug-header {
+            padding: 15px 15px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .drug-number {
+            background: var(--light);
+            color: var(--dark);
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        .drug-tag {
+            background: var(--accent);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .drug-content {
+            padding: 0 15px 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drug-name {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--dark);
+            line-height: 1.3;
+        }
+
+        .drug-desc {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+
+        .taobao-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #ff5000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .taobao-btn:hover {
+            background: #e64600;
+            transform: translateY(-2px);
+        }
+
+        .taobao-btn i {
+            margin-right: 6px;
+        }
+
+        /* 自定义搜索区域 */
+        .custom-search {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .custom-search h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .custom-search p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .custom-search-box {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .custom-search-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .custom-search-box button {
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .custom-search-box button:hover {
+            background: #1a6bc9;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--primary);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links li {
+                margin: 10px 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .search-box {
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+
+            .drugs-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .logo span {
+                font-size: 1.2rem;
+            }
+
+            .drugs-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>智慧医疗</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="yiliao.html">首页</a></li>
+                    <li><a href="#" class="active">家庭常备药</a></li>
+
+                </ul>
+                <div class="search-box">
+                    <input type="text" placeholder="搜索药品...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 内容区域 -->
+    <section class="content-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>家庭常备药大全</h2>
+                <p>点击药品可直接跳转到淘宝搜索页面，方便您快速购买</p>
+            </div>
+
+            <!-- 安全提示 -->
+            <div class="safety-notice">
+                <h3><i class="fas fa-exclamation-triangle"></i> 用药安全提示</h3>
+                <p><strong>用药前需阅读说明书，注意过敏风险、禁忌人群及用法用量。</strong> 处方药需遵医嘱使用，非处方药也应按推荐剂量服用。如有疑问，请咨询医生或药师。</p>
+            </div>
+
+            <!-- 药品分类 -->
+            <div class="categories">
+                <button class="category-btn active" data-category="all">全部药品</button>
+                <button class="category-btn" data-category="cold">感冒发烧</button>
+                <button class="category-btn" data-category="stomach">肠胃不适</button>
+                <button class="category-btn" data-category="infection">抗感染药</button>
+                <button class="category-btn" data-category="heart">心血管药</button>
+                <button class="category-btn" data-category="respiratory">呼吸系统</button>
+                <button class="category-btn" data-category="nerve">神经系统</button>
+                <button class="category-btn" data-category="allergy">抗过敏药</button>
+                <button class="category-btn" data-category="hormone">激素类</button>
+                <button class="category-btn" data-category="external">外用药品</button>
+                <button class="category-btn" data-category="gynecology">妇科/男科</button>
+                <button class="category-btn" data-category="tonic">补益类</button>
+                <button class="category-btn" data-category="ent">五官/口腔</button>
+                <button class="category-btn" data-category="vitamin">维生素/矿物质</button>
+                <button class="category-btn" data-category="other">其他常用药</button>
+            </div>
+
+            <!-- 药品网格 -->
+            <div class="drugs-grid" id="drugsContainer">
+                <!-- 药品卡片将通过JavaScript动态生成 -->
+            </div>
+
+            <!-- 自定义搜索区域 -->
+            <div class="custom-search">
+                <h3>没有找到您需要的药品？</h3>
+                <p>在下方输入药品名称，我们将帮您跳转到淘宝搜索页面</p>
+                <div class="custom-search-box">
+                    <input type="text" id="customDrugSearch" placeholder="输入药品名称...">
+                    <button id="customSearchBtn">搜索淘宝</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 药品数据
+        const drugsData = [
+            // 感冒发烧类 (1-30)
+            { id: 1, name: "对乙酰氨基酚", desc: "解热镇痛，缓解发热、头痛、关节痛等", category: "cold" },
+            { id: 2, name: "布洛芬", desc: "解热、镇痛、抗炎，适用于发热、痛经、轻度炎症", category: "cold" },
+            { id: 3, name: "阿司匹林", desc: "解热镇痛+抗血小板，缓解发热疼痛，预防血栓", category: "cold", tag: "遵医嘱" },
+            { id: 4, name: "伪麻黄碱", desc: "收缩鼻黏膜血管，快速缓解鼻塞、流涕", category: "cold" },
+            { id: 5, name: "马来酸氯苯那敏", desc: "抗过敏，减轻感冒引起的打喷嚏、流清涕", category: "cold" },
+            { id: 6, name: "苯海拉明", desc: "抗过敏、镇静，缓解感冒过敏症状及轻度失眠", category: "cold" },
+            { id: 7, name: "氯雷他定", desc: "长效抗过敏，无嗜睡，缓解感冒过敏或过敏性鼻炎症状", category: "cold" },
+            { id: 8, name: "右美沙芬", desc: "中枢性镇咳，缓解无痰干咳", category: "cold" },
+            { id: 9, name: "喷托维林", desc: "镇咳+轻度祛痰，适用于上呼吸道感染引起的咳嗽", category: "cold" },
+            { id: 10, name: "苯丙哌林", desc: "强效镇咳，针对急慢性支气管炎等引发的咳嗽", category: "cold" },
+            { id: 11, name: "复方氨酚伪麻缓释胶囊", desc: "综合缓解感冒引起的发热、鼻塞、头痛等多症状", category: "cold" },
+            { id: 12, name: "复方氨酚烷胺片", desc: "解热镇痛+抗病毒，适用于普通感冒及流行性感冒", category: "cold" },
+            { id: 13, name: "氨咖黄敏胶囊", desc: "缓解感冒引发的发热、鼻塞、咽痛、头痛等", category: "cold" },
+            { id: 14, name: "连花清瘟胶囊", desc: "清瘟解毒、宣肺泄热，适用于热毒袭肺型流感", category: "cold", tag: "推荐" },
+            { id: 15, name: "桑菊感冒片", desc: "疏风清热、宣肺止咳，针对风热感冒、咳嗽咽痛", category: "cold" },
+            { id: 16, name: "银翘解毒颗粒", desc: "疏风解表、清热解毒，用于风热感冒初期", category: "cold" },
+            { id: 17, name: "复方板蓝根颗粒", desc: "清热解毒、凉血，缓解风热感冒、咽喉肿痛", category: "cold" },
+            { id: 18, name: "金刚烷胺", desc: "抗流感病毒，预防及治疗甲型流感", category: "cold" },
+            { id: 19, name: "利巴韦林", desc: "广谱抗病毒，用于呼吸道合胞病毒等引起的感染", category: "cold" },
+            { id: 20, name: "奥司他韦", desc: "强效抗流感病毒，缩短流感病程、减轻症状", category: "cold" },
+            { id: 21, name: "999小儿氨酚黄那敏颗粒", desc: "缓解小儿感冒引起的发热、鼻塞、流涕", category: "cold" },
+            { id: 22, name: "银胡感冒散", desc: "外用解表散热，适用于小儿风热感冒发热", category: "cold" },
+            { id: 23, name: "维C银翘片", desc: "疏风解表+补充维生素C，缓解风热感冒相关症状", category: "cold" },
+            { id: 24, name: "太极复方对乙酰氨基酚片", desc: "解热镇痛，针对感冒发热、头痛牙痛", category: "cold" },
+            { id: 25, name: "感冒清热颗粒", desc: "疏风散寒、解表清热，用于风寒感冒、恶寒发热", category: "cold" },
+            { id: 26, name: "小柴胡颗粒", desc: "解表散热、疏肝和胃，缓解感冒少阳证", category: "cold" },
+            { id: 27, name: "正柴胡饮颗粒", desc: "发散风寒、解热止痛，针对风寒感冒初期", category: "cold" },
+            { id: 28, name: "羚羊感冒片", desc: "清热解表，用于流行性感冒、头痛发热", category: "cold" },
+            { id: 29, name: "感冒灵颗粒", desc: "解热镇痛，缓解感冒引起的头痛、发热、鼻塞咽痛", category: "cold" },
+            { id: 30, name: "抗病毒口服液", desc: "清热祛湿、凉血解毒，用于风热感冒、流感", category: "cold" },
+            
+            // 肠胃不适类 (31-55)
+            { id: 31, name: "蒙脱石散", desc: "吸附肠道病菌及毒素，安全止泻，保护肠黏膜", category: "stomach" },
+            { id: 32, name: "枯草杆菌二联活菌颗粒", desc: "调节肠道菌群，改善小儿腹泻、消化不良", category: "stomach" },
+            { id: 33, name: "双歧杆菌三联活菌散", desc: "补充肠道有益菌，缓解腹泻、便秘、腹胀", category: "stomach" },
+            { id: 34, name: "健胃消食片", desc: "促进消化，缓解积食、腹胀、食欲不振", category: "stomach", tag: "推荐" },
+            { id: 35, name: "多酶片", desc: "补充消化酶，改善消化不良、食欲缺乏", category: "stomach" },
+            { id: 36, name: "铝碳酸镁咀嚼片", desc: "中和胃酸、保护胃黏膜，缓解烧心、胃痛、反酸", category: "stomach" },
+            { id: 37, name: "奥美拉唑肠溶胶囊", desc: "抑制胃酸分泌，用于胃酸过多、胃溃疡", category: "stomach", tag: "遵医嘱" },
+            { id: 38, name: "多潘立酮", desc: "促进胃肠动力，缓解胃胀、嗳气、恶心、胃排空延迟", category: "stomach" },
+            { id: 39, name: "保和丸", desc: "消食导滞、和胃，针对食积停滞、脘腹胀满、嗳腐吞酸", category: "stomach" },
+            { id: 40, name: "大山楂丸", desc: "开胃消食，缓解食欲不振、消化不良、积食腹胀", category: "stomach" },
+            { id: 41, name: "麻仁润肠丸", desc: "润肠通便，用于肠胃积热、大便秘结", category: "stomach" },
+            { id: 42, name: "乳果糖", desc: "调节肠道渗透压，温和改善慢性便秘", category: "stomach" },
+            { id: 43, name: "藿香正气水", desc: "解表化湿、理气和中，缓解外感风寒、胃肠型感冒", category: "stomach" },
+            { id: 44, name: "藿香正气胶囊", desc: "功效同藿香正气水，温和不刺激肠胃", category: "stomach" },
+            { id: 45, name: "附子理中丸", desc: "温中健脾，用于脾胃虚寒、脘腹冷痛、腹泻", category: "stomach" },
+            { id: 46, name: "参苓白术散", desc: "补脾胃、益肺气，缓解脾胃虚弱、食少便溏、气短咳嗽", category: "stomach" },
+            { id: 47, name: "香砂养胃丸", desc: "温中和胃，改善胃阳不足、湿阻气滞所致的胃痛胃胀", category: "stomach" },
+            { id: 48, name: "胶体果胶铋胶囊", desc: "保护胃黏膜，用于慢性胃炎、胃酸过多", category: "stomach", tag: "遵医嘱" },
+            { id: 49, name: "雷贝拉唑钠肠溶片", desc: "强效抑酸，用于胃溃疡、十二指肠溃疡", category: "stomach", tag: "遵医嘱" },
+            { id: 50, name: "枸橼酸莫沙必利片", desc: "促进胃肠动力，缓解功能性消化不良、胃胀", category: "stomach" },
+            { id: 51, name: "健胃消食口服液", desc: "健脾消食，适用于小儿积食、食欲不振", category: "stomach" },
+            { id: 52, name: "四磨汤口服液", desc: "顺气降逆、消积止痛，缓解腹胀、便秘", category: "stomach" },
+            { id: 53, name: "肠炎宁片", desc: "清热利湿、行气，用于大肠湿热所致的腹泻、腹痛", category: "stomach" },
+            { id: 54, name: "补脾益肠丸", desc: "补中益气、健脾和胃，缓解脾虚泄泻、腹痛腹胀", category: "stomach" },
+            { id: 55, name: "西甲硅油乳剂", desc: "消除肠道泡沫，缓解腹胀（婴幼儿可用）", category: "stomach" },
+            
+            // 抗感染药物 (56-75)
+            { id: 56, name: "阿莫西林", desc: "口服青霉素类抗生素，治疗敏感细菌引起的呼吸道、泌尿系统感染", category: "infection", tag: "遵医嘱" },
+            { id: 57, name: "头孢呋辛", desc: "第二代头孢类抗生素，针对细菌引起的呼吸道、皮肤软组织感染", category: "infection", tag: "遵医嘱" },
+            { id: 58, name: "头孢克洛", desc: "口服头孢类抗生素，治疗敏感菌所致的咽炎、中耳炎、尿路感染", category: "infection", tag: "遵医嘱" },
+            { id: 59, name: "左氧氟沙星", desc: "喹诺酮类抗生素，用于敏感菌引起的呼吸道、泌尿系统感染", category: "infection", tag: "遵医嘱" },
+            { id: 60, name: "阿奇霉素", desc: "大环内酯类抗生素，治疗支原体、衣原体等引起的呼吸道感染", category: "infection", tag: "遵医嘱" },
+            { id: 61, name: "红霉素", desc: "大环内酯类抗生素，针对细菌引起的皮肤感染、呼吸道感染", category: "infection" },
+            { id: 62, name: "阿昔洛韦", desc: "抗病毒，治疗疱疹病毒引起的皮肤疱疹、生殖器疱疹", category: "infection" },
+            { id: 63, name: "头孢克肟分散片", desc: "第三代头孢类抗生素，治疗敏感菌所致的肺炎、尿路感染", category: "infection", tag: "遵医嘱" },
+            { id: 64, name: "人工牛黄甲硝唑", desc: "抗菌消炎，用于智齿冠周炎、牙周炎等口腔感染", category: "infection" },
+            { id: 65, name: "头孢丙烯颗粒", desc: "小儿适用头孢类抗生素，治疗敏感菌引起的呼吸道感染", category: "infection", tag: "遵医嘱" },
+            { id: 66, name: "罗红霉素胶囊", desc: "大环内酯类抗生素，缓解敏感菌所致的咽炎、扁桃体炎", category: "infection" },
+            { id: 67, name: "克拉霉素缓释片", desc: "抗生素，用于幽门螺杆菌感染、呼吸道感染", category: "infection", tag: "遵医嘱" },
+            { id: 68, name: "替硝唑片", desc: "抗厌氧菌，用于牙周炎、滴虫性阴道炎", category: "infection", tag: "遵医嘱" },
+            { id: 69, name: "氟康唑胶囊", desc: "抗真菌，治疗念珠菌感染（如鹅口疮、阴道炎）", category: "infection", tag: "遵医嘱" },
+            { id: 70, name: "伊曲康唑胶囊", desc: "广谱抗真菌，用于皮肤癣菌、酵母菌等感染", category: "infection", tag: "遵医嘱" },
+            { id: 71, name: "甲硝唑口颊片", desc: "局部抗菌，用于口腔溃疡、牙周炎", category: "infection" },
+            { id: 72, name: "阿莫西林克拉维酸钾片", desc: "增强型青霉素类抗生素，治疗混合细菌感染", category: "infection", tag: "遵医嘱" },
+            { id: 73, name: "克林霉素磷酸酯凝胶", desc: "外用抗生素，治疗痤疮、皮肤细菌感染", category: "infection" },
+            { id: 74, name: "夫西地酸乳膏", desc: "外用抗菌，缓解皮肤毛囊炎、甲沟炎等细菌感染", category: "infection" },
+            { id: 75, name: "制霉菌素片", desc: "抗真菌，用于消化道、皮肤黏膜念珠菌感染", category: "infection", tag: "遵医嘱" },
+            
+            // 心血管系统药物 (76-110)
+            { id: 76, name: "硝苯地平", desc: "钙通道阻滞剂，扩张血管，降低血压，缓解心绞痛", category: "heart", tag: "遵医嘱" },
+            { id: 77, name: "厄贝沙坦", desc: "血管紧张素II受体拮抗剂，平稳降压，保护心肾功能", category: "heart", tag: "遵医嘱" },
+            { id: 78, name: "卡托普利", desc: "血管紧张素转换酶抑制剂，降压，用于高血压、心力衰竭", category: "heart", tag: "遵医嘱" },
+            { id: 79, name: "阿托伐他汀", desc: "他汀类降脂药，降低血脂（尤其是胆固醇），预防动脉粥样硬化", category: "heart", tag: "遵医嘱" },
+            { id: 80, name: "瑞舒伐他汀", desc: "强效降脂，用于高胆固醇血症、混合型血脂异常", category: "heart", tag: "遵医嘱" },
+            { id: 81, name: "辛伐他汀", desc: "降脂，降低冠心病、脑梗死风险", category: "heart", tag: "遵医嘱" },
+            { id: 82, name: "美托洛尔", desc: "β受体阻滞剂，降压、减慢心率，用于高血压、心绞痛、心律失常", category: "heart", tag: "遵医嘱" },
+            { id: 83, name: "胺碘酮", desc: "广谱抗心律失常，用于室上性、室性心律失常", category: "heart", tag: "遵医嘱" },
+            { id: 84, name: "硝酸甘油", desc: "扩张冠状动脉，快速缓解心绞痛（舌下含服）", category: "heart", tag: "遵医嘱" },
+            { id: 85, name: "速效救心丸", desc: "行气活血、祛瘀止痛，缓解冠心病心绞痛", category: "heart" },
+            { id: 86, name: "复方丹参滴丸", desc: "活血化瘀、理气止痛，用于气滞血瘀型冠心病", category: "heart" },
+            { id: 87, name: "阿司匹林肠溶片", desc: "抗血小板聚集，预防心肌梗死、脑梗死", category: "heart", tag: "遵医嘱" },
+            { id: 88, name: "硫酸氢氯吡格雷片", desc: "抗血小板，用于心脑血管疾病血栓预防", category: "heart", tag: "遵医嘱" },
+            { id: 89, name: "替格瑞洛片", desc: "快速抗血小板，用于急性冠脉综合征", category: "heart", tag: "遵医嘱" },
+            { id: 90, name: "华法林钠片", desc: "抗凝，预防血栓形成", category: "heart", tag: "遵医嘱" },
+            { id: 91, name: "利伐沙班片", desc: "新型口服抗凝药，用于血栓预防", category: "heart", tag: "遵医嘱" },
+            { id: 92, name: "达比加群酯胶囊", desc: "口服抗凝，预防房颤患者血栓栓塞", category: "heart", tag: "遵医嘱" },
+            { id: 93, name: "呋塞米片", desc: "强效利尿剂，降压、消除水肿", category: "heart", tag: "遵医嘱" },
+            { id: 94, name: "螺内酯片", desc: "保钾利尿剂，辅助降压、缓解水肿", category: "heart", tag: "遵医嘱" },
+            { id: 95, name: "氢氯噻嗪片", desc: "中效利尿剂，降压、治疗水肿", category: "heart", tag: "遵医嘱" },
+            { id: 96, name: "吲达帕胺片", desc: "利尿+扩张血管，用于轻中度高血压", category: "heart", tag: "遵医嘱" },
+            { id: 97, name: "依那普利片", desc: "降压，保护心脏，用于高血压、心力衰竭", category: "heart", tag: "遵医嘱" },
+            { id: 98, name: "贝那普利片", desc: "降压，改善心肌重构，适用于高血压合并肾病", category: "heart", tag: "遵医嘱" },
+            { id: 99, name: "赖诺普利片", desc: "长效降压，用于高血压、充血性心力衰竭", category: "heart", tag: "遵医嘱" },
+            { id: 100, name: "氨氯地平片", desc: "长效钙通道阻滞剂，平稳降压，缓解心绞痛", category: "heart", tag: "遵医嘱" },
+            { id: 101, name: "硝苯地平缓释片", desc: "长效降压，避免血压剧烈波动", category: "heart", tag: "遵医嘱" },
+            { id: 102, name: "硝苯地平控释片", desc: "平稳控压，用于高血压、冠心病", category: "heart", tag: "遵医嘱" },
+            { id: 103, name: "非洛地平缓释片", desc: "长效降压，保护血管，适用于高血压", category: "heart", tag: "遵医嘱" },
+            { id: 104, name: "硝酸异山梨酯片", desc: "扩张冠脉，预防和缓解心绞痛", category: "heart", tag: "遵医嘱" },
+            { id: 105, name: "单硝酸异山梨酯片", desc: "长效缓解心绞痛，改善心肌供血", category: "heart", tag: "遵医嘱" },
+            { id: 106, name: "曲美他嗪片", desc: "改善心肌能量代谢，缓解心绞痛、心力衰竭症状", category: "heart", tag: "遵医嘱" },
+            { id: 107, name: "辅酶Q10片", desc: "营养心肌，辅助治疗心肌炎、心力衰竭", category: "heart" },
+            { id: 108, name: "复方丹参片", desc: "活血化瘀，用于冠心病、心绞痛", category: "heart" },
+            { id: 109, name: "丹参川芎嗪注射液", desc: "活血化瘀，用于脑梗死、冠心病", category: "heart", tag: "遵医嘱" },
+            { id: 110, name: "银杏达莫注射液", desc: "扩张血管、改善循环，用于缺血性心脑血管疾病", category: "heart", tag: "遵医嘱" },
+            
+            // 呼吸系统药物 (111-130)
+            { id: 111, name: "氨溴索", desc: "稀释痰液，促进痰液排出，用于急慢性支气管炎痰多", category: "respiratory" },
+            { id: 112, name: "沙丁胺醇", desc: "支气管扩张剂，快速缓解哮喘、慢阻肺引起的喘息", category: "respiratory" },
+            { id: 113, name: "茶碱", desc: "舒张支气管、抗炎，用于哮喘、慢性阻塞性肺疾病", category: "respiratory" },
+            { id: 114, name: "咳特灵胶囊", desc: "镇咳、祛痰、平喘、消炎，用于慢性支气管炎咳嗽", category: "respiratory" },
+            { id: 115, name: "氢溴酸右美沙芬", desc: "中枢镇咳，缓解无痰干咳", category: "respiratory" },
+            { id: 116, name: "乙酰半胱氨酸", desc: "稀释痰液，用于浓稠痰不易咳出的呼吸道疾病", category: "respiratory" },
+            { id: 117, name: "羧甲司坦", desc: "祛痰，缓解慢性支气管炎、哮喘所致的痰多", category: "respiratory" },
+            { id: 118, name: "布地奈德气雾剂", desc: "吸入性糖皮质激素，抗炎平喘，用于哮喘维持治疗", category: "respiratory", tag: "遵医嘱" },
+            { id: 119, name: "异丙托溴铵气雾剂", desc: "抗胆碱能药物，缓解哮喘、慢阻肺喘息症状", category: "respiratory" },
+            { id: 120, name: "孟鲁司特钠片", desc: "白三烯受体拮抗剂，预防哮喘发作、缓解过敏性鼻炎", category: "respiratory" },
+            { id: 121, name: "氨茶碱片", desc: "舒张支气管，用于哮喘、喘息型支气管炎", category: "respiratory" },
+            { id: 122, name: "愈创甘油醚", desc: "祛痰，用于呼吸道感染引起的痰多咳嗽", category: "respiratory" },
+            { id: 123, name: "急支糖浆", desc: "清热化痰、宣肺止咳，用于外感风热所致咳嗽", category: "respiratory" },
+            { id: 124, name: "川贝枇杷膏", desc: "润肺化痰、生津利咽，缓解燥热咳嗽、咽干声嘶", category: "respiratory" },
+            { id: 125, name: "养阴清肺丸", desc: "养阴润燥、清肺利咽，用于阴虚肺燥、咽痛干咳", category: "respiratory" },
+            { id: 126, name: "通宣理肺丸", desc: "解表散寒、宣肺止嗽，用于风寒感冒咳嗽、鼻塞流涕", category: "respiratory" },
+            { id: 127, name: "蛇胆川贝液", desc: "祛风止咳、除痰散结，用于风热咳嗽、痰多", category: "respiratory" },
+            { id: 128, name: "肺力咳合剂", desc: "清热解毒、镇咳祛痰，用于小儿肺热咳嗽", category: "respiratory" },
+            { id: 129, name: "橘红痰咳液", desc: "理气化痰、润肺止咳，用于痰湿引起的咳嗽", category: "respiratory" },
+            { id: 130, name: "乙酰半胱氨酸雾化液", desc: "雾化祛痰，用于痰多黏稠不易咳出", category: "respiratory", tag: "遵医嘱" },
+            
+            // 神经系统药物 (131-145)
+            { id: 131, name: "氟西汀", desc: "选择性5-羟色胺再摄取抑制剂，治疗抑郁症、强迫症", category: "nerve", tag: "遵医嘱" },
+            { id: 132, name: "舍曲林", desc: "抗抑郁、抗强迫，用于抑郁症、强迫症", category: "nerve", tag: "遵医嘱" },
+            { id: 133, name: "地西泮", desc: "苯二氮䓬类，抗焦虑、镇静催眠、抗惊厥", category: "nerve", tag: "遵医嘱" },
+            { id: 134, name: "卡马西平", desc: "抗癫痫、镇痛，用于癫痫发作、三叉神经痛", category: "nerve", tag: "遵医嘱" },
+            { id: 135, name: "枣仁安神丸", desc: "养血安神，用于心血不足所致的失眠、健忘", category: "nerve" },
+            { id: 136, name: "柏子养心丸", desc: "补气、养血、安神，用于心气虚寒、心悸失眠", category: "nerve" },
+            { id: 137, name: "天王补心丹", desc: "滋阴养血、补心安神，用于心阴不足、心悸健忘", category: "nerve" },
+            { id: 138, name: "谷维素片", desc: "调节植物神经功能，缓解神经官能症、失眠、焦虑", category: "nerve" },
+            { id: 139, name: "吡拉西坦片", desc: "改善脑代谢，用于脑外伤、脑血管病后的记忆减退", category: "nerve" },
+            { id: 140, name: "尼莫地平片", desc: "扩张脑血管，改善脑循环，用于脑供血不足、蛛网膜下腔出血", category: "nerve" },
+            { id: 141, name: "氟桂利嗪胶囊", desc: "改善脑循环、缓解血管痉挛，用于脑供血不足、偏头痛", category: "nerve" },
+            { id: 142, name: "胞磷胆碱钠片", desc: "营养脑细胞，辅助治疗颅脑损伤、脑血管意外", category: "nerve" },
+            { id: 143, name: "甲钴胺片", desc: "营养周围神经，用于周围神经病、维生素B12缺乏", category: "nerve" },
+            { id: 144, name: "腺苷钴胺片", desc: "维生素B12活性形式，用于贫血、周围神经病变", category: "nerve" },
+            { id: 145, name: "安神补脑液", desc: "生精补髓、益气养血、强脑安神，用于肾精气血不足所致失眠", category: "nerve" },
+            
+            // 抗过敏药物 (146-155)
+            { id: 146, name: "西替利嗪", desc: "长效抗过敏，缓解荨麻疹、过敏性鼻炎、皮肤瘙痒", category: "allergy" },
+            { id: 147, name: "氯雷他定片", desc: "无嗜睡抗过敏，用于过敏性鼻炎、荨麻疹、瘙痒性皮肤病", category: "allergy" },
+            { id: 148, name: "盐酸西替利嗪滴剂", desc: "小儿适用，缓解过敏引起的打喷嚏、皮疹", category: "allergy" },
+            { id: 149, name: "依巴斯汀片", desc: "长效抗过敏，用于过敏性鼻炎、慢性荨麻疹", category: "allergy" },
+            { id: 150, name: "地氯雷他定干混悬剂", desc: "小儿抗过敏，缓解湿疹、荨麻疹症状", category: "allergy" },
+            { id: 151, name: "左西替利嗪片", desc: "高选择性抗过敏，副作用小，用于多种过敏反应", category: "allergy" },
+            { id: 152, name: "酮替芬片", desc: "抗过敏+平喘，用于过敏性鼻炎、哮喘预防", category: "allergy" },
+            { id: 153, name: "色甘酸钠滴眼液", desc: "预防过敏性结膜炎、春季卡他性结膜炎", category: "allergy" },
+            { id: 154, name: "盐酸赛庚啶片", desc: "抗过敏，缓解荨麻疹、湿疹、过敏性鼻炎瘙痒", category: "allergy" },
+            { id: 155, name: "氯雷他定糖浆", desc: "小儿抗过敏，口感温和，缓解过敏症状", category: "allergy" },
+            
+            // 激素类药物 (156-170)
+            { id: 156, name: "地塞米松", desc: "糖皮质激素，抗炎、抗过敏、抗休克", category: "hormone", tag: "遵医嘱" },
+            { id: 157, name: "泼尼松", desc: "糖皮质激素，抗炎、免疫抑制，用于风湿免疫病、过敏", category: "hormone", tag: "遵医嘱" },
+            { id: 158, name: "左甲状腺素钠", desc: "补充甲状腺激素，用于甲状腺功能减退症", category: "hormone", tag: "遵医嘱" },
+            { id: 159, name: "氢化可的松片", desc: "糖皮质激素，抗炎、抗过敏，用于肾上腺皮质功能减退", category: "hormone", tag: "遵医嘱" },
+            { id: 160, name: "醋酸泼尼松片", desc: "抗炎、免疫抑制，用于过敏性疾病、自身免疫病", category: "hormone", tag: "遵医嘱" },
+            { id: 161, name: "地塞米松乳膏", desc: "外用抗炎抗过敏，缓解湿疹、皮炎、瘙痒", category: "hormone" },
+            { id: 162, name: "曲安奈德注射液", desc: "糖皮质激素，用于局部炎症、过敏", category: "hormone", tag: "遵医嘱" },
+            { id: 163, name: "哈西奈德溶液", desc: "外用抗炎，用于湿疹、神经性皮炎、银屑病", category: "hormone" },
+            { id: 164, name: "糠酸莫米松乳膏", desc: "外用中效激素，缓解湿疹、皮炎、过敏性皮炎", category: "hormone" },
+            { id: 165, name: "丁酸氢化可的松乳膏", desc: "弱效激素，小儿可用，缓解轻度湿疹、皮炎", category: "hormone" },
+            { id: 166, name: "地奈德乳膏", desc: "弱效激素，温和抗炎，用于婴幼儿湿疹、皮炎", category: "hormone" },
+            { id: 167, name: "卤米松乳膏", desc: "强效激素，用于重度湿疹、银屑病", category: "hormone", tag: "遵医嘱" },
+            { id: 168, name: "醋酸氟轻松乳膏", desc: "外用激素，缓解湿疹、皮炎、瘙痒性皮肤病", category: "hormone" },
+            { id: 169, name: "甲状腺片", desc: "补充甲状腺激素，用于甲状腺功能减退", category: "hormone", tag: "遵医嘱" },
+            { id: 170, name: "丙硫氧嘧啶片", desc: "抑制甲状腺激素合成，用于甲状腺功能亢进", category: "hormone", tag: "遵医嘱" },
+            
+            // 外用药品 (171-210)
+            { id: 171, name: "碘伏", desc: "温和消毒，用于皮肤伤口、黏膜消毒（无刺激）", category: "external" },
+            { id: 172, name: "75%医用酒精", desc: "皮肤表面消毒，杀灭细菌（避免接触黏膜）", category: "external" },
+            { id: 173, name: "炉甘石洗剂", desc: "收敛、止痒，用于湿疹、痱子、蚊虫叮咬瘙痒", category: "external" },
+            { id: 174, name: "氢化可的松乳膏", desc: "外用抗炎抗过敏，缓解轻度湿疹、皮炎", category: "external" },
+            { id: 175, name: "丁酸氢化可的松乳膏", desc: "弱效激素，温和缓解湿疹、过敏性皮炎", category: "external" },
+            { id: 176, name: "莫匹罗星软膏", desc: "外用抗菌，治疗皮肤细菌感染（如毛囊炎、脓疱疮）", category: "external" },
+            { id: 177, name: "红霉素软膏", desc: "外用抗菌，缓解皮肤轻微创伤、细菌感染", category: "external" },
+            { id: 178, name: "云南白药气雾剂", desc: "活血散瘀、消肿止痛，用于跌打损伤、肌肉酸痛", category: "external" },
+            { id: 179, name: "京万红软膏", desc: "清热解毒、去腐生新，用于轻度水火烫伤", category: "external" },
+            { id: 180, name: "白云山曲咪新乳膏", desc: "抗炎、抗过敏、抗菌，用于湿疹、皮炎、癣症", category: "external" },
+            { id: 181, name: "999糠酸莫米松软膏", desc: "外用抗炎，缓解湿疹、神经性皮炎", category: "external" },
+            { id: 182, name: "金霉素眼膏", desc: "抗菌，用于细菌性结膜炎、麦粒肿、眼睑炎", category: "external" },
+            { id: 183, name: "氧氟沙星滴眼液", desc: "抗菌，用于细菌性结膜炎、角膜炎", category: "external" },
+            { id: 184, name: "珍视明滴眼液", desc: "缓解眼疲劳、干涩，改善视力模糊", category: "external" },
+            { id: 185, name: "复方一枝花喷雾", desc: "清热解毒、宣散风热，用于急慢性咽炎、扁桃体炎", category: "external" },
+            { id: 186, name: "克林霉素磷酸酯凝胶", desc: "外用抗菌，治疗痤疮（痘痘）", category: "external" },
+            { id: 187, name: "夫西地酸乳膏", desc: "外用抗菌，缓解皮肤细菌感染、痤疮", category: "external" },
+            { id: 188, name: "阿昔洛韦乳膏", desc: "外用抗病毒，治疗皮肤疱疹（如口唇疱疹、带状疱疹）", category: "external" },
+            { id: 189, name: "特比萘芬乳膏", desc: "外用抗真菌，治疗脚气、手癣、体癣", category: "external" },
+            { id: 190, name: "咪康唑乳膏", desc: "抗真菌，用于皮肤癣菌、酵母菌感染（如脚气、股癣）", category: "external" },
+            { id: 191, name: "克霉唑乳膏", desc: "抗真菌，治疗手足癣、体癣、花斑癣", category: "external" },
+            { id: 192, name: "尿素软膏", desc: "保湿、软化角质，用于手足皲裂、鱼鳞病", category: "external" },
+            { id: 193, name: "维A酸乳膏", desc: "调节角质代谢，治疗痤疮、扁平疣", category: "external", tag: "遵医嘱" },
+            { id: 194, name: "过氧化苯甲酰凝胶", desc: "杀菌、抗炎，用于炎性痤疮（痘痘红肿）", category: "external" },
+            { id: 195, name: "复方酮康唑软膏", desc: "抗真菌+抗炎，用于脚气、湿疹合并真菌感染", category: "external" },
+            { id: 196, name: "炉甘石洗剂（小儿专用）", desc: "温和止痒，用于婴幼儿湿疹、痱子", category: "external" },
+            { id: 197, name: "硼砂溶液", desc: "含漱消毒，缓解口腔炎、咽喉炎", category: "external" },
+            { id: 198, name: "碘甘油", desc: "消毒、收敛，用于口腔溃疡、牙龈炎、牙周炎", category: "external" },
+            { id: 199, name: "过氧化氢溶液（双氧水）", desc: "伤口消毒、除臭，用于污染伤口冲洗", category: "external" },
+            { id: 200, name: "云南白药膏", desc: "活血散瘀、消肿止痛，用于跌打损伤、瘀血肿痛", category: "external" },
+            { id: 201, name: "活血止痛膏", desc: "活血化瘀、消肿止痛，用于肌肉劳损、关节疼痛", category: "external" },
+            { id: 202, name: "麝香壮骨膏", desc: "镇痛、消炎，用于风湿痛、关节痛、肌肉酸痛", category: "external" },
+            { id: 203, name: "狗皮膏", desc: "祛风散寒、活血止痛，用于风寒湿痹、腰腿疼痛", category: "external" },
+            { id: 204, name: "伤湿止痛膏", desc: "祛风湿、活血止痛，用于风湿性关节炎、肌肉疼痛", category: "external" },
+            { id: 205, name: "关节止痛膏", desc: "活血散瘀、温经镇痛，用于风湿关节痛、扭伤", category: "external" },
+            { id: 206, name: "消肿止痛酊", desc: "舒筋活络、消肿止痛，用于跌打扭伤、风湿骨痛", category: "external" },
+            { id: 207, name: "活络油", desc: "舒筋活络、祛风散瘀，用于肌肉酸痛、关节肿痛", category: "external" },
+            { id: 208, name: "正红花油", desc: "活血散寒、消肿止痛，用于跌打损伤、风湿骨痛", category: "external" },
+            { id: 209, name: "骨通贴膏", desc: "祛风散寒、活血通络，用于寒湿阻络所致的关节疼痛", category: "external" },
+            { id: 210, name: "奇正消痛贴膏", desc: "活血化瘀、消肿止痛，用于急慢性扭挫伤、风湿痛", category: "external" },
+            
+            // 妇科/男科常用药 (211-225)
+            { id: 211, name: "乌鸡白凤丸", desc: "补气养血、调经止带，用于气血两虚所致的月经不调、白带异常", category: "gynecology" },
+            { id: 212, name: "益母草颗粒", desc: "活血调经，用于血瘀所致的月经不调、产后恶露不尽", category: "gynecology" },
+            { id: 213, name: "逍遥丸", desc: "疏肝健脾、养血调经，用于肝郁脾虚所致的月经不调、胸胁胀痛", category: "gynecology" },
+            { id: 214, name: "妇科千金片", desc: "清热除湿、益气化瘀，用于湿热瘀阻所致的盆腔炎、宫颈炎", category: "gynecology" },
+            { id: 215, name: "甲硝唑栓", desc: "抗厌氧菌、滴虫，用于滴虫性阴道炎、细菌性阴道病", category: "gynecology", tag: "遵医嘱" },
+            { id: 216, name: "克霉唑栓", desc: "抗真菌，用于外阴阴道假丝酵母菌病（霉菌性阴道炎）", category: "gynecology" },
+            { id: 217, name: "保妇康栓", desc: "行气破瘀、生肌止痛，用于湿热瘀滞所致的带下病", category: "gynecology" },
+            { id: 218, name: "洁尔阴洗液", desc: "清热燥湿、杀虫止痒，用于外阴炎、阴道炎的辅助治疗", category: "gynecology" },
+            { id: 219, name: "红核妇洁洗液", desc: "解毒祛湿、杀虫止痒，用于霉菌性阴道炎、非特异性阴道炎", category: "gynecology" },
+            { id: 220, name: "桂枝茯苓丸", desc: "活血化瘀，用于血瘀所致的癥瘕（如子宫肌瘤辅助治疗）", category: "gynecology", tag: "遵医嘱" },
+            { id: 221, name: "妇炎康片", desc: "清热利湿、理气活血，用于湿热下注所致的带下病、盆腔炎", category: "gynecology" },
+            { id: 222, name: "六味地黄丸（男科）", desc: "滋阴补肾，用于肾阴亏损所致的头晕耳鸣、腰膝酸软", category: "gynecology" },
+            { id: 223, name: "金匮肾气丸（男科）", desc: "温补肾阳，用于肾阳不足所致的腰膝酸软、畏寒肢冷", category: "gynecology" },
+            { id: 224, name: "前列康片", desc: "补肾固本，用于肾气不固所致的前列腺增生、前列腺炎", category: "gynecology" },
+            { id: 225, name: "左氧氟沙星片（男科）", desc: "抗菌，用于前列腺炎、尿路感染", category: "gynecology", tag: "遵医嘱" },
+            
+            // 补益类药物 (226-245)
+            { id: 226, name: "六味地黄丸", desc: "滋阴补肾，用于肾阴亏损、头晕耳鸣、腰膝酸软", category: "tonic" },
+            { id: 227, name: "桂附地黄丸", desc: "温补肾阳，用于肾阳不足、腰膝冷痛、小便不利", category: "tonic" },
+            { id: 228, name: "归脾丸", desc: "益气健脾、养血安神，用于心脾两虚、气短心悸、失眠多梦", category: "tonic" },
+            { id: 229, name: "十全大补丸", desc: "温补气血，用于气血两虚、面色苍白、气短心悸", category: "tonic" },
+            { id: 230, name: "补中益气丸", desc: "补中益气、升阳举陷，用于脾胃虚弱、中气下陷所致的体倦乏力", category: "tonic" },
+            { id: 231, name: "知柏地黄丸", desc: "滋阴降火，用于阴虚火旺、潮热盗汗、口干咽痛", category: "tonic" },
+            { id: 232, name: "明目地黄丸", desc: "滋肾、养肝、明目，用于肝肾阴虚所致的目涩畏光、视物模糊", category: "tonic" },
+            { id: 233, name: "麦味地黄丸", desc: "滋肾养肺，用于肺肾阴亏、潮热盗汗、干咳少痰", category: "tonic" },
+            { id: 234, name: "金水宝胶囊", desc: "补益肺肾、秘精益气，用于肺肾两虚、精气不足", category: "tonic" },
+            { id: 235, name: "仙灵骨葆胶囊", desc: "滋补肝肾、接骨续筋，用于骨质疏松、骨折恢复期", category: "tonic" },
+            { id: 236, name: "金匮肾气丸", desc: "温补肾阳，用于肾阳不足、腰膝酸软、畏寒肢冷", category: "tonic" },
+            { id: 237, name: "附子理中丸", desc: "温中健脾，用于脾胃虚寒、脘腹冷痛、呕吐泄泻", category: "tonic" },
+            { id: 238, name: "参苓白术散", desc: "补脾胃、益肺气，用于脾胃虚弱、食少便溏、气短咳嗽", category: "tonic" },
+            { id: 239, name: "人参健脾丸", desc: "健脾益气、和胃止泻，用于脾胃虚弱所致的饮食不化、脘闷嘈杂", category: "tonic" },
+            { id: 240, name: "阿胶补血口服液", desc: "滋阴补血、补中益气，用于气血两虚、久病体弱", category: "tonic" },
+            { id: 241, name: "当归补血丸", desc: "补养气血，用于气血两虚、面色萎黄、头晕乏力", category: "tonic" },
+            { id: 242, name: "黄芪精口服液", desc: "补气养血、固本止汗，用于气虚血亏、表虚自汗", category: "tonic" },
+            { id: 243, name: "鹿茸口服液", desc: "温肾壮阳、生精养血，用于肾阳不足、精血亏虚所致的畏寒肢冷", category: "tonic" },
+            { id: 244, name: "枸杞地黄丸", desc: "滋肾养肝，用于肝肾阴亏、眩晕耳鸣、目昏不明", category: "tonic" },
+            { id: 245, name: "龟鹿补肾丸", desc: "补肾壮阳、益气血、壮筋骨，用于肾阳虚所致的身体虚弱、精神疲乏", category: "tonic" },
+            
+            // 五官/口腔常用药 (246-260)
+            { id: 246, name: "桂林西瓜霜", desc: "清热解毒、消肿止痛，用于口腔溃疡、咽喉肿痛", category: "ent" },
+            { id: 247, name: "草珊瑚含片", desc: "疏风清热、消肿止痛，用于外感风热所致的咽喉肿痛", category: "ent" },
+            { id: 248, name: "金嗓子喉宝", desc: "疏风清热、解毒利咽，用于改善急性咽炎、扁桃体炎的咽痛", category: "ent" },
+            { id: 249, name: "西瓜霜喷剂", desc: "清热解毒、活血化瘀，用于口腔溃疡、咽喉肿痛、牙龈出血", category: "ent" },
+            { id: 250, name: "冰硼散", desc: "清热解毒、消肿止痛，用于热毒蕴结所致的口腔溃疡、咽喉疼痛", category: "ent" },
+            { id: 251, name: "复方硼砂含漱液", desc: "清洁口腔、杀菌，用于口腔炎、咽喉炎、扁桃体炎", category: "ent" },
+            { id: 252, name: "丁硼乳膏", desc: "消炎止痛，用于牙龈炎、牙周炎、牙龈红肿", category: "ent" },
+            { id: 253, name: "甲硝唑口颊片", desc: "局部抗菌，用于口腔溃疡、牙周炎", category: "ent" },
+            { id: 254, name: "人工牛黄甲硝唑胶囊", desc: "抗菌消炎，用于智齿冠周炎、牙周炎", category: "ent" },
+            { id: 255, name: "黄连上清丸", desc: "清热通便、散风止痛，用于上火所致的牙龈肿痛、口舌生疮", category: "ent" },
+            { id: 256, name: "牛黄解毒丸", desc: "清热解毒，用于火热内盛、咽喉肿痛、牙龈肿痛、口舌生疮", category: "ent" },
+            { id: 257, name: "珍视明滴眼液", desc: "缓解眼疲劳、干涩，改善视力模糊", category: "ent" },
+            { id: 258, name: "萘敏维滴眼液", desc: "缓解眼疲劳、结膜充血、眼睛发痒", category: "ent" },
+            { id: 259, name: "氯霉素滴眼液", desc: "抗菌，用于细菌性结膜炎、角膜炎", category: "ent" },
+            { id: 260, name: "硼砂甘油", desc: "润滑、保护口腔黏膜，用于口腔溃疡辅助治疗", category: "ent" },
+            
+            // 维生素/矿物质补充剂 (261-275)
+            { id: 261, name: "维生素C", desc: "补充维生素C，增强免疫力、促进铁吸收、抗氧化", category: "vitamin" },
+            { id: 262, name: "维生素D", desc: "促进钙吸收，预防佝偻病、骨质疏松", category: "vitamin" },
+            { id: 263, name: "维生素E", desc: "抗氧化、保护细胞，辅助改善皮肤状态、生殖健康", category: "vitamin" },
+            { id: 264, name: "叶酸", desc: "预防胎儿神经管畸形，补充叶酸缺乏、辅助治疗贫血", category: "vitamin" },
+            { id: 265, name: "葡萄糖酸钙口服液", desc: "补充钙质，用于钙缺乏所致的骨质疏松、手足抽搐", category: "vitamin" },
+            { id: 266, name: "碳酸钙D3片", desc: "补充钙和维生素D，预防骨质疏松", category: "vitamin" },
+            { id: 267, name: "维D钙咀嚼片", desc: "补钙+补维D，口感好，适合日常补充", category: "vitamin" },
+            { id: 268, name: "骨化三醇胶丸", desc: "活性维生素D，促进钙吸收，用于骨质疏松", category: "vitamin", tag: "遵医嘱" },
+            { id: 269, name: "阿法骨化醇软胶囊", desc: "转化为活性维D，用于钙吸收障碍、骨质疏松", category: "vitamin", tag: "遵医嘱" },
+            { id: 270, name: "维生素B1片", desc: "补充维生素B1，预防脚气病、改善神经功能", category: "vitamin" },
+            { id: 271, name: "维生素B2片", desc: "补充维生素B2，预防口角炎、舌炎、脂溢性皮炎", category: "vitamin" },
+            { id: 272, name: "维生素B6片", desc: "补充维生素B6，辅助治疗脂溢性皮炎、妊娠呕吐", category: "vitamin" },
+            { id: 273, name: "复合维生素B片", desc: "补充多种B族维生素，用于B族维生素缺乏所致的疾病", category: "vitamin" },
+            { id: 274, name: "谷维素片", desc: "调节植物神经功能，缓解神经官能症、失眠、焦虑", category: "vitamin" },
+            { id: 275, name: "葡萄糖酸锌口服液", desc: "补充锌元素，改善缺锌所致的食欲缺乏、生长迟缓", category: "vitamin" },
+            
+            // 其他常用药 (276-300)
+            { id: 276, name: "开塞露", desc: "润滑肠道、刺激排便，临时缓解严重便秘", category: "other" },
+            { id: 277, name: "茶苯海明片", desc: "抗晕动，预防和缓解晕车、晕船、晕机所致的恶心呕吐", category: "other" },
+            { id: 278, name: "黄连上清丸", desc: "清热通便、散风止痛，用于上火所致的头晕、头痛、咽喉肿痛", category: "other" },
+            { id: 279, name: "牛黄上清丸", desc: "清热泻火、散风止痛，用于热毒内盛所致的头痛、眩晕、咽喉肿痛", category: "other" },
+            { id: 280, name: "龙胆泻肝丸", desc: "清肝胆、利湿热，用于肝胆湿热所致的头晕目赤、耳鸣耳聋", category: "other" },
+            { id: 281, name: "颈复康颗粒", desc: "活血通络、散风止痛，用于风湿瘀阻所致的颈椎病", category: "other" },
+            { id: 282, name: "独活寄生丸", desc: "养血舒筋、祛风除湿，用于风寒湿痹、腰膝冷痛、肢体麻木", category: "other" },
+            { id: 283, name: "三黄片", desc: "清热解毒、泻火通便，用于三焦热盛所致的目赤肿痛、口鼻生疮、便秘", category: "other" },
+            { id: 284, name: "一清颗粒", desc: "清热泻火、解毒化瘀，用于火毒血热所致的身热烦躁、咽喉肿痛", category: "other" },
+            { id: 285, name: "麻仁丸", desc: "润肠通便，用于肠热津亏所致的便秘", category: "other" },
+            { id: 286, name: "酚酞片", desc: "刺激肠道蠕动，用于习惯性便秘（避免长期用）", category: "other" },
+            { id: 287, name: "阿苯达唑片", desc: "广谱驱虫，用于治疗蛔虫、蛲虫等肠道寄生虫感染", category: "other" },
+            { id: 288, name: "甲苯咪唑片", desc: "驱虫，用于蛔虫病、蛲虫病、鞭虫病等", category: "other" },
+            { id: 289, name: "左旋咪唑片", desc: "驱虫+调节免疫，用于蛔虫病、钩虫病，辅助治疗免疫缺陷", category: "other" },
+            { id: 290, name: "正红花油", desc: "活血散寒、消肿止痛，用于跌打损伤、风湿骨痛", category: "other" },
+            { id: 291, name: "云南白药胶囊", desc: "化瘀止血、活血止痛，用于跌打损伤、瘀血肿痛、出血", category: "other" },
+            { id: 292, name: "独一味胶囊", desc: "活血止痛、化瘀止血，用于多种外科手术后的刀口疼痛、出血", category: "other" },
+            { id: 293, name: "活血止痛胶囊", desc: "活血散瘀、消肿止痛，用于跌打损伤、瘀血肿痛", category: "other" },
+            { id: 294, name: "舒筋活血片", desc: "舒筋活络、活血散瘀，用于筋骨疼痛、肢体拘挛、跌打损伤", category: "other" },
+            { id: 295, name: "跌打丸", desc: "活血散瘀、消肿止痛，用于跌打损伤、筋断骨折、瘀血肿痛", category: "other" },
+            { id: 296, name: "三七伤药片", desc: "舒筋活血、散瘀止痛，用于跌打损伤、风湿瘀阻所致的关节疼痛", category: "other" },
+            { id: 297, name: "连花清瘟颗粒", desc: "清瘟解毒、宣肺泄热，用于热毒袭肺型流感", category: "other" },
+            { id: 298, name: "夏桑菊颗粒", desc: "清肝明目、疏风散热，用于风热感冒、目赤头痛、咽喉肿痛", category: "other" },
+            { id: 299, name: "金银花露", desc: "清热解毒，用于小儿痱毒、暑热口渴", category: "other" },
+            { id: 300, name: "众生丸", desc: "清热解毒、活血凉血，用于上呼吸道感染、急性扁桃体炎、咽喉炎", category: "other" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const drugsContainer = document.getElementById('drugsContainer');
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const searchInput = document.querySelector('.search-box input');
+            const customSearchInput = document.getElementById('customDrugSearch');
+            const customSearchBtn = document.getElementById('customSearchBtn');
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+
+            // 初始化显示所有药品
+            renderDrugs(drugsData);
+
+            // 菜单切换
+            menuToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+
+            // 药品分类筛选
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    // 为当前点击的按钮添加active类
+                    this.classList.add('active');
+                    
+                    const category = this.getAttribute('data-category');
+                    
+                    // 筛选药品
+                    if (category === 'all') {
+                        renderDrugs(drugsData);
+                    } else {
+                        const filteredDrugs = drugsData.filter(drug => drug.category === category);
+                        renderDrugs(filteredDrugs);
+                    }
+                });
+            });
+
+            // 搜索功能
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                if (searchTerm === '') {
+                    renderDrugs(drugsData);
+                } else {
+                    const filteredDrugs = drugsData.filter(drug => 
+                        drug.name.toLowerCase().includes(searchTerm) || 
+                        drug.desc.toLowerCase().includes(searchTerm)
+                    );
+                    renderDrugs(filteredDrugs);
+                }
+            });
+
+            // 自定义搜索功能
+            customSearchBtn.addEventListener('click', function() {
+                const searchTerm = customSearchInput.value.trim();
+                if (searchTerm) {
+                    window.open(`https://s.taobao.com/search?q=${encodeURIComponent(searchTerm)}`, '_blank');
+                }
+            });
+
+            customSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    customSearchBtn.click();
+                }
+            });
+
+            // 渲染药品卡片
+            function renderDrugs(drugs) {
+                drugsContainer.innerHTML = '';
+                
+                if (drugs.length === 0) {
+                    drugsContainer.innerHTML = '<p style="text-align: center; grid-column: 1 / -1; padding: 40px; color: #666;">未找到相关药品，请尝试其他搜索词或分类</p>';
+                    return;
+                }
+                
+                drugs.forEach(drug => {
+                    const drugCard = document.createElement('div');
+                    drugCard.className = 'drug-card';
+                    drugCard.setAttribute('data-category', drug.category);
+                    
+                    drugCard.innerHTML = `
+                        <div class="drug-header">
+                            <span class="drug-number">${drug.id}</span>
+                            ${drug.tag ? `<span class="drug-tag">${drug.tag}</span>` : ''}
+                        </div>
+                        <div class="drug-content">
+                            <h3 class="drug-name">${drug.name}</h3>
+                            <p class="drug-desc">${drug.desc}</p>
+                            <a href="https://s.taobao.com/search?q=${encodeURIComponent(drug.name)}" target="_blank" class="taobao-btn">
+                                <i class="fab fa-taobao"></i> 淘宝搜索
+                            </a>
+                        </div>
+                    `;
+                    
+                    drugsContainer.appendChild(drugCard);
+                });
+            }
+
+            // 点击药品卡片任意位置跳转（除了按钮）
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.drug-card') && !e.target.closest('.taobao-btn')) {
+                    const drugCard = e.target.closest('.drug-card');
+                    const drugName = drugCard.querySelector('.drug-name').textContent;
+                    window.open(`https://s.taobao.com/search?q=${encodeURIComponent(drugName)}`, '_blank');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

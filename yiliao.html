@@ -3,19 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智慧医疗 - 您的健康管理平台</title>
+    <title>智慧医疗 - 病症找药平台</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary: #2a7de1;
+            --primary-light: rgba(42, 125, 225, 0.1);
+            --primary-dark: #1a67d4;
             --secondary: #4fb0ae;
+            --secondary-light: rgba(79, 176, 174, 0.1);
             --accent: #ff6b6b;
+            --accent-light: rgba(255, 107, 107, 0.1);
             --light: #f8f9fa;
             --dark: #343a40;
             --success: #28a745;
+            --warning: #ffc107;
             --border-radius: 10px;
-            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --border-radius-sm: 6px;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.12);
             --transition: all 0.3s ease;
+            --spacing-xs: 5px;
+            --spacing-sm: 10px;
+            --spacing-md: 20px;
+            --spacing-lg: 30px;
+            --spacing-xl: 50px;
+            
+            /* 默认字体大小（成年身份） */
+            --font-base: 16px;
+            --font-h1: 3rem;
+            --font-h2: 2.5rem;
+            --font-h3: 1.5rem;
+            --font-p: 1.1rem;
+            --font-sm: 0.9rem;
+            --font-stat-number: 2.5rem;
+        }
+
+        /* 老年身份主题 */
+        body.elderly {
+            --primary: #3e64ff;
+            --primary-light: rgba(62, 100, 255, 0.1);
+            --primary-dark: #2d55e0;
+            --secondary: #2d93ad;
+            --accent: #ff8787;
+            /* 字体放大，提升可读性 */
+            --font-base: 18px;
+            --font-h1: 3.5rem;
+            --font-h2: 3rem;
+            --font-h3: 1.8rem;
+            --font-p: 1.3rem;
+            --font-sm: 1.1rem;
+            --font-stat-number: 3rem;
+            /* 背景更柔和，减少视觉疲劳 */
+            background-color: #f0f2f5;
+        }
+
+        /* 儿童身份主题 */
+        body.child {
+            --primary: #ff7a90;
+            --primary-light: rgba(255, 122, 144, 0.1);
+            --primary-dark: #ff5d78;
+            --secondary: #4effc1;
+            --accent: #ffc857;
+            /* 字体圆润活泼 */
+            --font-base: 17px;
+            --font-h1: 2.8rem;
+            --font-h2: 2.3rem;
+            --font-h3: 1.6rem;
+            --font-p: 1.2rem;
+            --font-sm: 1rem;
+            --font-stat-number: 2.8rem;
+            /* 可爱风格调整 */
+            background-color: #fff9f5;
+            --border-radius: 15px;
+            --border-radius-sm: 8px;
+            --box-shadow: 0 5px 20px rgba(255, 122, 144, 0.2);
+            --box-shadow-hover: 0 12px 30px rgba(255, 122, 144, 0.25);
         }
 
         * {
@@ -30,6 +93,8 @@
             color: #333;
             line-height: 1.6;
             overflow-x: hidden;
+            font-size: var(--font-base);
+            scroll-behavior: smooth;
         }
 
         .container {
@@ -37,6 +102,79 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 15px;
+        }
+
+        /* 身份切换组件样式 */
+        .identity-container {
+            position: relative;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1001;
+        }
+
+        .identity-text {
+            color: white;
+            font-weight: 500;
+            font-size: var(--font-base);
+        }
+
+        .identity-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+            font-size: var(--font-base);
+        }
+
+        .identity-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .identity-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 10px;
+            background: white;
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--box-shadow);
+            list-style: none;
+            padding: 10px 0;
+            width: 120px;
+            display: none;
+            z-index: 1001;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .identity-dropdown.active {
+            display: block;
+        }
+
+        .identity-dropdown li {
+            padding: 8px 20px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: var(--font-base);
+        }
+
+        .identity-dropdown li:hover {
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
         /* 导航栏样式 */
@@ -59,8 +197,15 @@
         .logo {
             display: flex;
             align-items: center;
-            font-size: 1.5rem;
+            font-size: var(--font-h3);
             font-weight: bold;
+            text-decoration: none;
+            color: white;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
         }
 
         .logo i {
@@ -84,6 +229,8 @@
             font-weight: 500;
             transition: var(--transition);
             padding: 5px 0;
+            font-size: var(--font-base);
+            position: relative;
         }
 
         .nav-links a:hover {
@@ -120,6 +267,7 @@
             display: inline-block;
             text-align: center;
             border: none;
+            font-size: var(--font-base);
         }
 
         .btn-outline {
@@ -132,22 +280,36 @@
         .btn-outline:hover {
             background: white;
             color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary {
             background: white;
             color: var(--primary);
             border: 2px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary:hover {
             background: transparent;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: none;
         }
 
         .btn-sm {
             padding: 8px 16px;
-            font-size: 0.9rem;
+            font-size: var(--font-sm);
+        }
+
+        .btn-service {
+            transition: var(--transition);
+        }
+
+        .btn-service:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .menu-toggle {
@@ -157,108 +319,306 @@
             background: none;
             border: none;
             cursor: pointer;
+            transition: var(--transition);
         }
 
-        /* 英雄区域样式 */
+        .menu-toggle:hover {
+            transform: rotate(90deg);
+        }
+
+        /* 英雄区域样式 - 优化搜索框 */
         .hero {
-            padding: 100px 0;
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
+            padding: 80px 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
             color: white;
-            text-align: center;
             position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(42, 125, 225, 0.1), rgba(79, 176, 174, 0.1));
+        }
+
+        .hero-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--spacing-xl);
         }
 
         .hero-content {
-            max-width: 800px;
-            margin: 0 auto;
-            animation: fadeIn 1s ease;
+            flex: 1;
+            min-width: 300px;
+            animation: fadeInUp 1s ease;
+            position: relative;
+            z-index: 2;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .hero h1 {
-            font-size: 3rem;
+            font-size: var(--font-h1);
             margin-bottom: 20px;
             line-height: 1.2;
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
         }
 
         .hero p {
-            font-size: 1.2rem;
+            font-size: var(--font-p);
             margin-bottom: 30px;
             opacity: 0.9;
+            max-width: 600px;
         }
 
+        /* 病症搜索框样式 */
         .search-box {
             display: flex;
             max-width: 600px;
-            margin: 0 auto;
             background: white;
             border-radius: 50px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .search-box:focus-within {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow-hover);
         }
 
         .search-box input {
             flex: 1;
-            padding: 15px 20px;
+            padding: 15px 25px;
             border: none;
-            font-size: 1rem;
+            font-size: var(--font-base);
             outline: none;
         }
 
         .search-box button {
             padding: 15px 25px;
-            background: var(--accent);
+            background: var(--secondary); /* 药品相关的绿色系 */
             color: white;
             border: none;
             cursor: pointer;
             font-weight: 500;
             transition: var(--transition);
+            font-size: var(--font-base);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .search-box button:hover {
-            background: #ff5252;
+            background: #3d918f;
+        }
+
+        /* 症状联想下拉框 */
+        .med-search-suggest {
+            margin-top: 10px;
+            max-width: 600px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 10px;
+            display: none;
+        }
+
+        .med-search-suggest.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .suggest-item {
+            padding: 8px 15px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .suggest-item:hover {
+            background: var(--secondary-light);
+        }
+
+        .symptom {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .drug {
+            color: var(--secondary);
+            font-size: var(--font-sm);
+        }
+
+        /* 快捷症状标签 */
+        .med-symptom-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-start;
+        }
+
+        .med-symptom-tag {
+            padding: 6px 15px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-radius: 20px;
+            font-size: var(--font-base);
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+
+        .med-symptom-tag:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
         }
 
         .hero-stats {
-            display: flex;
-            justify-content: center;
-            margin-top: 50px;
-            flex-wrap: wrap;
+            flex: 1;
+            min-width: 300px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            position: relative;
+            z-index: 2;
         }
 
         .stat-item {
-            margin: 0 20px;
+            margin: 0;
             text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.12);
         }
 
         .stat-number {
-            font-size: 2.5rem;
+            font-size: var(--font-stat-number);
             font-weight: bold;
             margin-bottom: 5px;
             color: #ffeb3b;
         }
 
         .stat-text {
-            font-size: 1rem;
+            font-size: var(--font-base);
             opacity: 0.8;
+        }
+
+        /* 快捷入口区域 */
+        .quick-actions {
+            padding: 40px 0;
+            background: white;
+            position: relative;
+            margin-top: -50px;
+            z-index: 50;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border-radius: var(--border-radius);
+            margin-bottom: 60px;
+        }
+
+        .quick-actions-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .quick-action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            min-width: 120px;
+            cursor: pointer;
+        }
+
+        .quick-action-item:hover {
+            background: var(--primary-light);
+            transform: translateY(-5px);
+        }
+
+        .quick-action-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+
+        .quick-action-item:hover .quick-action-icon {
+            transform: scale(1.1);
+        }
+
+        .quick-action-item:nth-child(2) .quick-action-icon {
+            background: var(--secondary);
+        }
+
+        .quick-action-item:nth-child(3) .quick-action-icon {
+            background: var(--accent);
+        }
+
+        .quick-action-item:nth-child(4) .quick-action-icon {
+            background: #7b61ff;
+        }
+
+        .quick-action-text {
+            font-weight: 500;
+            color: var(--dark);
         }
 
         /* 服务区域样式 */
         .services {
-            padding: 80px 0;
+            padding: 60px 0;
+            position: relative;
         }
 
         .section-title {
             text-align: center;
             margin-bottom: 50px;
+            position: relative;
+            z-index: 2;
         }
 
         .section-title h2 {
-            font-size: 2.5rem;
+            font-size: var(--font-h2);
             color: var(--dark);
             margin-bottom: 15px;
             position: relative;
@@ -274,18 +634,19 @@
             bottom: -10px;
             left: 50%;
             transform: translateX(-50%);
+            border-radius: 3px;
         }
 
         .section-title p {
             color: #666;
             max-width: 700px;
             margin: 0 auto;
-            font-size: 1.1rem;
+            font-size: var(--font-p);
         }
 
         .services-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 30px;
         }
 
@@ -296,11 +657,18 @@
             box-shadow: var(--box-shadow);
             transition: var(--transition);
             position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .service-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .service-card:hover .service-icon {
+            transform: scale(1.05);
         }
 
         .service-icon {
@@ -311,26 +679,47 @@
             justify-content: center;
             color: white;
             font-size: 2.5rem;
+            transition: var(--transition);
         }
 
         .service-content {
             padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .service-content h3 {
             margin-bottom: 15px;
             color: var(--dark);
+            font-size: var(--font-h3);
         }
 
         .service-content p {
             color: #666;
             margin-bottom: 20px;
+            font-size: var(--font-p);
+            flex: 1;
         }
 
         /* 健康数据区域样式 */
         .health-data {
             background: var(--light);
             padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+            margin-top: 60px;
+        }
+
+        .health-data::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMyYTdkZTEiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTMwIDBoLTZWMGg2djB6bTAgMGgtNlYwaDYwdjB6bTAgMGgtNlYwaDYwdjB6Ii8+PC9nPjwvZz48L3N2Zz4=') repeat;
+            opacity: 0.3;
         }
 
         .data-container {
@@ -338,6 +727,8 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 30px;
+            position: relative;
+            z-index: 2;
         }
 
         .data-visualization {
@@ -347,6 +738,11 @@
             padding: 20px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .data-visualization:hover {
+            box-shadow: var(--box-shadow-hover);
         }
 
         .data-stats {
@@ -354,19 +750,26 @@
             min-width: 300px;
         }
 
-        .stat-item {
+        .stat-item.data {
             margin-bottom: 30px;
             background: white;
             padding: 20px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            transition: var(--transition);
         }
 
-        .stat-item h3 {
+        .stat-item.data:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .stat-item.data h3 {
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             color: var(--dark);
+            font-size: var(--font-h3);
         }
 
         .progress-bar {
@@ -374,11 +777,13 @@
             background: #e9ecef;
             border-radius: 5px;
             overflow: hidden;
+            position: relative;
         }
 
         .progress {
             height: 100%;
             border-radius: 5px;
+            transition: width 1.5s ease;
         }
 
         .bg-primary {
@@ -393,14 +798,56 @@
             background: var(--accent);
         }
 
-        /* 医生展示区域样式 */
+        /* 医生团队区域样式 */
         .doctors {
             padding: 80px 0;
         }
 
+        .doctors-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .doctors-header h2 {
+            font-size: var(--font-h2);
+            color: var(--dark);
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .doctors-header h2::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            bottom: 0;
+            left: 0;
+            border-radius: 3px;
+        }
+
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .view-all:hover {
+            color: var(--primary-dark);
+            transform: translateX(5px);
+        }
+
         .doctors-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 30px;
         }
 
@@ -411,11 +858,12 @@
             box-shadow: var(--box-shadow);
             text-align: center;
             transition: var(--transition);
+            position: relative;
         }
 
         .doctor-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--box-shadow-hover);
         }
 
         .doctor-image {
@@ -435,6 +883,19 @@
             transform: scale(1.1);
         }
 
+        .doctor-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: var(--font-sm);
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
         .doctor-info {
             padding: 20px;
         }
@@ -442,16 +903,33 @@
         .doctor-info h3 {
             margin-bottom: 5px;
             color: var(--dark);
+            font-size: var(--font-h3);
         }
 
         .doctor-specialty {
             color: var(--primary);
             margin-bottom: 15px;
             font-weight: 500;
+            font-size: var(--font-base);
         }
 
         .doctor-rating {
             color: #ffc107;
+            margin-bottom: 15px;
+            font-size: var(--font-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .doctor-rating span {
+            color: #666;
+        }
+
+        .doctor-info p {
+            font-size: var(--font-p);
+            color: #666;
             margin-bottom: 15px;
         }
 
@@ -460,6 +938,20 @@
             padding: 80px 0;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
+            position: relative;
+            overflow: hidden;
+            margin-top: 60px;
+        }
+
+        .appointment::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjxwYXRoIGQ9Ik0zMCAwaC02VjBoNnYwem0wIDBoLTZWMGg2MHYwem0wIDBoLTZWMGg2MHYweiIvPjwvZz48L2c+PC9zdmc+') repeat;
+            opacity: 0.1;
         }
 
         .appointment-container {
@@ -467,11 +959,56 @@
             flex-wrap: wrap;
             gap: 30px;
             align-items: center;
+            position: relative;
+            z-index: 2;
         }
 
         .appointment-content {
             flex: 1;
             min-width: 300px;
+        }
+
+        .appointment-content h2 {
+            font-size: var(--font-h2);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .appointment-content h2::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: white;
+            bottom: -10px;
+            left: 0;
+            border-radius: 3px;
+        }
+
+        .appointment-content p {
+            font-size: var(--font-p);
+            margin-bottom: 20px;
+            max-width: 500px;
+        }
+
+        .appointment-features {
+            margin-top: 20px;
+            list-style: none;
+        }
+
+        .appointment-features li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: var(--font-base);
+        }
+
+        .appointment-features li i {
+            color: #ffeb3b;
+            margin-top: 5px;
+            flex-shrink: 0;
         }
 
         .appointment-form {
@@ -481,12 +1018,18 @@
             padding: 30px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .appointment-form:hover {
+            box-shadow: var(--box-shadow-hover);
         }
 
         .appointment-form h3 {
             color: var(--dark);
             margin-bottom: 20px;
             text-align: center;
+            font-size: var(--font-h3);
         }
 
         .form-group {
@@ -498,32 +1041,140 @@
             margin-bottom: 5px;
             color: #666;
             font-weight: 500;
+            font-size: var(--font-base);
         }
 
         .form-control {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-base);
             transition: var(--transition);
         }
 
         .form-control:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(42, 125, 225, 0.2);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* 健康资讯区域 */
+        .health-news {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .news-card {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .news-image {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .news-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .news-card:hover .news-image img {
+            transform: scale(1.05);
+        }
+
+        .news-content {
+            padding: 20px;
+        }
+
+        .news-date {
+            color: #666;
+            font-size: var(--font-sm);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .news-content h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-size: var(--font-h3);
+        }
+
+        .news-content p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: var(--font-p);
+        }
+
+        .read-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .read-more:hover {
+            color: var(--primary-dark);
+            transform: translateX(5px);
         }
 
         /* 应用下载区域样式 */
         .app-download {
             padding: 80px 0;
             text-align: center;
+            background: var(--light);
+            position: relative;
+            margin-top: 60px;
+        }
+
+        .app-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 50px;
         }
 
         .app-content {
+            flex: 1;
+            min-width: 300px;
             max-width: 700px;
-            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .app-content h2 {
+            font-size: var(--font-h2);
+            margin-bottom: 15px;
+        }
+
+        .app-content p {
+            font-size: var(--font-p);
+            margin-bottom: 30px;
+            color: #666;
         }
 
         .app-buttons {
@@ -540,15 +1191,17 @@
             background: var(--dark);
             color: white;
             padding: 12px 25px;
-            border-radius: 10px;
+            border-radius: var(--border-radius-sm);
             text-decoration: none;
             font-weight: 500;
             transition: var(--transition);
+            font-size: var(--font-base);
+            box-shadow: var(--box-shadow);
         }
 
         .app-btn:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--box-shadow-hover);
             background: #2a2a2a;
         }
 
@@ -557,11 +1210,35 @@
             margin-right: 10px;
         }
 
+        .app-mockup {
+            flex: 0 0 200px;
+            margin-top: 20px;
+        }
+
+        .app-mockup img {
+            max-width: 200px;
+            border-radius: 30px;
+            box-shadow: var(--box-shadow-hover);
+            border: 8px solid var(--dark);
+        }
+
         /* 页脚样式 */
         footer {
             background: var(--dark);
             color: white;
             padding: 60px 0 30px;
+            position: relative;
+            margin-top: 60px;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
         }
 
         .footer-content {
@@ -573,9 +1250,10 @@
 
         .footer-column h3 {
             margin-bottom: 20px;
-            font-size: 1.2rem;
+            font-size: var(--font-h3);
             position: relative;
             padding-bottom: 10px;
+            color: white;
         }
 
         .footer-column h3::after {
@@ -594,17 +1272,36 @@
 
         .footer-column ul li {
             margin-bottom: 10px;
+            font-size: var(--font-base);
         }
 
         .footer-column a {
             color: #ddd;
             text-decoration: none;
             transition: var(--transition);
+            font-size: var(--font-base);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .footer-column a:hover {
             color: white;
             padding-left: 5px;
+        }
+
+        .footer-contact {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .footer-contact i {
+            color: var(--primary);
+            margin-top: 5px;
+            flex-shrink: 0;
         }
 
         .social-icons {
@@ -622,11 +1319,12 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             transition: var(--transition);
+            padding: 0 !important;
         }
 
         .social-icons a:hover {
             background: var(--primary);
-            transform: translateY(-3px);
+            transform: translateY(-3px) scale(1.1);
         }
 
         .copyright {
@@ -634,7 +1332,7 @@
             padding-top: 30px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: #aaa;
-            font-size: 0.9rem;
+            font-size: var(--font-sm);
         }
 
         /* 响应式设计 */
@@ -649,6 +1347,7 @@
                 flex-direction: column;
                 padding: 20px;
                 box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                animation: fadeIn 0.3s ease;
             }
 
             .nav-links.active {
@@ -664,35 +1363,44 @@
             }
 
             .hero h1 {
-                font-size: 2.5rem;
+                font-size: calc(var(--font-h1) * 0.8);
             }
 
             .hero p {
-                font-size: 1.1rem;
+                font-size: calc(var(--font-p) * 0.9);
+            }
+
+            .app-mockup {
+                display: block;
             }
         }
 
         @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0;
+            }
+
             .hero h1 {
-                font-size: 2rem;
+                font-size: calc(var(--font-h1) * 0.7);
             }
 
             .section-title h2 {
-                font-size: 2rem;
+                font-size: calc(var(--font-h2) * 0.7);
             }
 
             .search-box {
                 flex-direction: column;
-                border-radius: 10px;
+                border-radius: var(--border-radius);
             }
 
             .search-box input {
-                border-radius: 10px 10px 0 0;
+                border-radius: var(--border-radius) var(--border-radius) 0 0;
                 margin-bottom: 1px;
             }
 
             .search-box button {
-                border-radius: 0 0 10px 10px;
+                border-radius: 0 0 var(--border-radius) var(--border-radius);
+                justify-content: center;
             }
 
             .auth-buttons {
@@ -707,27 +1415,64 @@
             }
 
             .hero-stats {
-                flex-direction: column;
-                gap: 20px;
+                grid-template-columns: 1fr;
+            }
+
+            .stat-item {
+                width: 100%;
+                max-width: 300px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            /* 移动端身份组件调整 */
+            .identity-container {
+                margin-right: 10px;
+            }
+
+            .identity-toggle {
+                padding: 3px 8px;
+                font-size: calc(var(--font-base) * 0.9);
+            }
+
+            .services, .health-data, .doctors, .appointment, .app-download, .health-news {
+                padding: 60px 0;
             }
         }
 
         @media (max-width: 576px) {
             .logo span {
-                font-size: 1.2rem;
+                font-size: calc(var(--font-h3) * 0.8);
             }
 
             .hero h1 {
-                font-size: 1.8rem;
+                font-size: calc(var(--font-h1) * 0.6);
             }
 
             .section-title h2 {
-                font-size: 1.8rem;
+                font-size: calc(var(--font-h2) * 0.6);
             }
 
             .btn {
                 padding: 8px 16px;
-                font-size: 0.9rem;
+                font-size: calc(var(--font-base) * 0.9);
+            }
+
+            /* 移动端身份下拉菜单宽度调整 */
+            .identity-dropdown {
+                width: 100px;
+            }
+
+            .services-grid, .doctors-grid, .news-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .appointment-form {
+                padding: 20px;
             }
         }
     </style>
@@ -737,12 +1482,24 @@
     <header>
         <div class="container">
             <nav>
-                <div class="logo">
+                <!-- 身份切换组件 -->
+                <div class="identity-container">
+                    <span id="current-identity" class="identity-text">身份：成年</span>
+                    <button id="toggle-identity" class="identity-toggle">
+                        切换 <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <ul id="identity-list" class="identity-dropdown">
+                        <li data-identity="student">成年</li>
+                        <li data-identity="elderly">老年</li>
+                        <li data-identity="child">儿童</li>
+                    </ul>
+                </div>
+
+                <a href="#" class="logo">
                     <i class="fas fa-heartbeat"></i>
                     <span>智慧医疗</span>
-                </div>
+                </a>
                 <ul class="nav-links">
-                    <li><a href="#">首页</a></li>
                     <li><a href="chat.html">服务</a></li>
                     <li><a href="#">医生团队</a></li>
                     <li><a href="#">健康资讯</a></li>
@@ -762,31 +1519,70 @@
     <!-- 英雄区域 -->
     <section class="hero">
         <div class="container">
-            <div class="hero-content">
-                <h1>智慧医疗，健康随行</h1>
-                <p>一站式医疗健康服务平台，为您提供专业的在线咨询、健康管理和医疗服务</p>
-                <div class="search-box">
-                    <input type="text" placeholder="搜索症状、疾病、医生、科室...">
-                    <button><i class="fas fa-search"></i> 搜索</button>
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1>搜症状，找对症药品</h1>
+                    <p>输入具体症状，获取对症药品推荐及专业用药指导</p>
+                    
+                    <!-- 病症搜索框 -->
+                    <div class="search-box">
+                        <input type="text" id="symptom-search" placeholder="输入症状（如‘咳嗽’‘发烧’），找对症药品">
+                        <button id="search-btn"><i class="fas fa-pills"></i> 找药品</button>
+                    </div>
+                    
+                    <!-- 症状联想下拉框 -->
+                    <div id="search-suggest" class="med-search-suggest">
+                        <div class="suggest-item">
+                            <span class="symptom">感冒</span>
+                            <span class="drug">→ 复方氨酚烷胺片、感冒灵颗粒</span>
+                        </div>
+                        <div class="suggest-item">
+                            <span class="symptom">感冒咳嗽</span>
+                            <span class="drug">→ 川贝枇杷膏、氨溴索口服溶液</span>
+                        </div>
+                        <div class="suggest-item">
+                            <span class="symptom">头痛</span>
+                            <span class="drug">→ 布洛芬缓释胶囊、对乙酰氨基酚</span>
+                        </div>
+                        <div class="suggest-item">
+                            <span class="symptom">胃痛</span>
+                            <span class="drug">→ 铝碳酸镁片、奥美拉唑肠溶胶囊</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 快捷症状标签 -->
+                    <div class="med-symptom-tags">
+                        <div class="med-symptom-tag" data-symptom="发烧">发烧</div>
+                        <div class="med-symptom-tag" data-symptom="咳嗽">咳嗽</div>
+                        <div class="med-symptom-tag" data-symptom="胃痛">胃痛</div>
+                        <div class="med-symptom-tag" data-symptom="过敏">过敏</div>
+                        <div class="med-symptom-tag" data-symptom="头痛">头痛</div>
+                        <div class="med-symptom-tag" data-symptom="腹泻">腹泻</div>
+                    </div>
                 </div>
 
                 <div class="hero-stats">
                     <div class="stat-item">
                         <div class="stat-number">500+</div>
-                        <div class="stat-text">专业医生</div>
+                        <div class="stat-text">药品信息</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">50,000+</div>
-                        <div class="stat-text">服务患者</div>
+                        <div class="stat-number">200+</div>
+                        <div class="stat-text">症状库</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-number">98%</div>
-                        <div class="stat-text">满意率</div>
+                        <div class="stat-text">匹配准确率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">药师在线</div>
+                        <div class="stat-text">专业指导</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- 服务区域 -->
     <section class="services">
@@ -802,8 +1598,8 @@
                     </div>
                     <div class="service-content">
                         <h3>在线问诊</h3>
-                        <p>足不出户，与专家医生进行视频问诊，获取专业医疗建议</p>
-                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary);">立即咨询</a>
+                        <p>足不出户，与专家医生进行视频问诊，获取专业医疗建议，避免排队等候的烦恼。支持图文咨询、语音问诊等多种方式。</p>
+                        <a href="video2.html" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary);">立即咨询</a>
                     </div>
                 </div>
                 <div class="service-card">
@@ -812,8 +1608,8 @@
                     </div>
                     <div class="service-content">
                         <h3>药品配送</h3>
-                        <p>在线开具处方，药品直接配送到家，省时省力更省心</p>
-                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--secondary); border-color: var(--secondary);">购买药品</a>
+                        <p>在线开具处方，药品直接配送到家，省时省力更省心，支持多种支付方式。提供用药指导和药品溯源服务。</p>
+                        <a href="medical purchase.html" class="btn btn-outline btn-sm btn-service" style="color: var(--secondary); border-color: var(--secondary);">购买药品</a>
                     </div>
                 </div>
                 <div class="service-card">
@@ -822,8 +1618,8 @@
                     </div>
                     <div class="service-content">
                         <h3>预约挂号</h3>
-                        <p>在线预约专家门诊，节省排队时间，轻松就医</p>
-                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--accent); border-color: var(--accent);">立即预约</a>
+                        <p>在线预约专家门诊，节省排队时间，轻松就医，支持门诊时间查询和预约管理。实时更新号源信息。</p>
+                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--accent); border-color: var(--accent);">立即预约</a>
                     </div>
                 </div>
             </div>
@@ -842,28 +1638,28 @@
                     <canvas id="healthChart" width="400" height="300"></canvas>
                 </div>
                 <div class="data-stats">
-                    <div class="stat-item">
+                    <div class="stat-item data">
                         <h3>每日步数 <span>8,256/10,000</span></h3>
-                        <div class="progress-bar">
-                            <div class="progress bg-primary" style="width: 82.56%"></div>
+                        <div class="progress-bar" style="width: 82.56%">
+                            <div class="progress bg-primary" style="width: 0%"></div>
                         </div>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item data">
                         <h3>睡眠质量 <span>7.5/10</span></h3>
-                        <div class="progress-bar">
-                            <div class="progress bg-secondary" style="width: 75%"></div>
+                        <div class="progress-bar" style="width: 75%">
+                            <div class="progress bg-secondary" style="width: 0%"></div>
                         </div>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item data">
                         <h3>心率监测 <span>72bpm</span></h3>
-                        <div class="progress-bar">
-                            <div class="progress bg-accent" style="width: 60%"></div>
+                        <div class="progress-bar" style="width: 72%">
+                            <div class="progress bg-accent" style="width: 0%"></div>
                         </div>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item data">
                         <h3>卡路里消耗 <span>420/500cal</span></h3>
-                        <div class="progress-bar">
-                            <div class="progress bg-primary" style="width: 84%"></div>
+                        <div class="progress-bar" style="width: 84%">
+                            <div class="progress bg-primary" style="width: 0%"></div>
                         </div>
                     </div>
                     <a href="#" class="btn btn-primary" style="background: var(--primary); color: white; border: none; margin-top: 20px; display: block; text-align: center;">查看详细报告</a>
@@ -875,14 +1671,17 @@
     <!-- 医生团队区域 -->
     <section class="doctors">
         <div class="container">
-            <div class="section-title">
+            <div class="doctors-header">
                 <h2>专业医生团队</h2>
-                <p>经验丰富的医疗专家，为您提供专业的健康服务</p>
+                <a href="#" class="view-all">查看全部 <i class="fas fa-arrow-right"></i></a>
             </div>
+            <p style="color: #666; margin-bottom: 30px; font-size: var(--font-p);">经验丰富的医疗专家，为您提供专业的健康服务</p>
+            
             <div class="doctors-grid">
                 <div class="doctor-card">
                     <div class="doctor-image">
                         <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="张医生">
+                        <div class="doctor-badge">主任医师</div>
                     </div>
                     <div class="doctor-info">
                         <h3>张明医生</h3>
@@ -893,15 +1692,16 @@
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star-half-alt"></i>
-                            <span>4.8</span>
+                            <span>(128评价)</span>
                         </div>
-                        <p>20年临床经验，擅长高血压、冠心病等心血管疾病的诊治</p>
-                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                        <p>20年临床经验，擅长高血压、冠心病等心血管疾病的诊治，曾发表学术论文30余篇。</p>
+                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
                     </div>
                 </div>
                 <div class="doctor-card">
                     <div class="doctor-image">
                         <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="李医生">
+                        <div class="doctor-badge">副主任医师</div>
                     </div>
                     <div class="doctor-info">
                         <h3>李华医生</h3>
@@ -912,15 +1712,16 @@
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star"></i>
-                            <span>5.0</span>
+                            <span>(96评价)</span>
                         </div>
-                        <p>15年儿科经验，擅长儿童常见病及生长发育问题的诊疗</p>
-                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                        <p>15年儿科经验，擅长儿童常见病及生长发育问题的诊疗，深受小患者及家长的信赖。</p>
+                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
                     </div>
                 </div>
                 <div class="doctor-card">
                     <div class="doctor-image">
                         <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="王医生">
+                        <div class="doctor-badge">教授</div>
                     </div>
                     <div class="doctor-info">
                         <h3>王丽医生</h3>
@@ -931,15 +1732,16 @@
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star"></i>
-                            <span>4.9</span>
+                            <span>(156评价)</span>
                         </div>
-                        <p>25年中医经验，擅长中医调理和慢性病的中西医结合治疗</p>
-                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                        <p>25年中医经验，擅长中医调理和慢性病的中西医结合治疗，对亚健康调理有独到见解。</p>
+                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
                     </div>
                 </div>
                 <div class="doctor-card">
                     <div class="doctor-image">
                         <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d15?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="刘医生">
+                        <div class="doctor-badge">主任医师</div>
                     </div>
                     <div class="doctor-info">
                         <h3>刘强医生</h3>
@@ -950,10 +1752,57 @@
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star-half-alt"></i>
-                            <span>4.7</span>
+                            <span>(87评价)</span>
                         </div>
-                        <p>18年骨科经验，擅长关节疾病和运动损伤的诊断与治疗</p>
-                        <a href="#" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                        <p>18年骨科经验，擅长关节疾病和运动损伤的诊断与治疗，成功完成手术逾千例。</p>
+                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 健康资讯区域 -->
+    <section class="health-news">
+        <div class="container">
+            <div class="doctors-header">
+                <h2>健康资讯</h2>
+                <a href="#" class="view-all">更多资讯 <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <p style="color: #666; margin-bottom: 30px; font-size: var(--font-p);">了解最新健康知识，掌握科学养生方法</p>
+            
+            <div class="news-grid">
+                <div class="news-card">
+                    <div class="news-image">
+                        <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="健康饮食">
+                    </div>
+                    <div class="news-content">
+                        <div class="news-date"><i class="far fa-calendar"></i> 2023-10-15</div>
+                        <h3>秋季养生：如何通过饮食调理增强免疫力</h3>
+                        <p>秋季气候干燥，是呼吸道疾病高发季节。本文将介绍如何通过合理饮食增强免疫力，预防秋季常见疾病...</p>
+                        <a href="#" class="read-more">阅读全文 <i class="fas fa-angle-right"></i></a>
+                    </div>
+                </div>
+                <div class="news-card">
+                    <div class="news-image">
+                        <img src="https://images.unsplash.com/photo-1518655048521-f130df041f66?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="运动健康">
+                    </div>
+                    <div class="news-content">
+                        <div class="news-date"><i class="far fa-calendar"></i> 2023-10-10</div>
+                        <h3>适合办公室人群的5分钟健康运动</h3>
+                        <p>长时间久坐容易导致颈椎、腰椎问题。本文推荐几个适合办公室人群的简易运动，每天只需5分钟，有效缓解疲劳...</p>
+                        <a href="#" class="read-more">阅读全文 <i class="fas fa-angle-right"></i></a>
+                    </div>
+                </div>
+                <div class="news-card">
+                    <div class="news-image">
+                        <img src="https://images.unsplash.com/photo-1505664194779-8beaceb93744?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="睡眠健康">
+                    </div>
+                    <div class="news-content">
+                        <div class="news-date"><i class="far fa-calendar"></i> 2023-10-05</div>
+                        <h3>改善睡眠质量的7个实用小技巧</h3>
+                        <p>良好的睡眠是健康的基础。本文分享7个经过科学验证的改善睡眠质量的小技巧，帮助您摆脱失眠困扰...</p>
+                        <a href="#" class="read-more">阅读全文 <i class="fas fa-angle-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -966,11 +1815,12 @@
             <div class="appointment-container">
                 <div class="appointment-content">
                     <h2>立即预约专家门诊</h2>
-                    <p>填写基本信息，我们的医疗顾问将尽快与您联系，为您安排最合适的专家和就诊时间</p>
-                    <ul style="margin-top: 20px; list-style: none;">
-                        <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #ffeb3b; margin-right: 10px;"></i> 专业医疗团队</li>
-                        <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #ffeb3b; margin-right: 10px;"></i> 快速预约通道</li>
-                        <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #ffeb3b; margin-right: 10px;"></i> 个性化服务</li>
+                    <p>填写基本信息，我们的医疗顾问将尽快与您联系，为您安排最合适的专家和就诊时间，让您的就医更加便捷高效。</p>
+                    <ul class="appointment-features">
+                        <li><i class="fas fa-check-circle"></i> 专业医疗团队，经验丰富</li>
+                        <li><i class="fas fa-check-circle"></i> 快速预约通道，无需排队</li>
+                        <li><i class="fas fa-check-circle"></i> 个性化服务，量身定制</li>
+                        <li><i class="fas fa-check-circle"></i> 全程跟踪服务，就医无忧</li>
                     </ul>
                 </div>
                 <div class="appointment-form">
@@ -1008,24 +1858,29 @@
     <!-- 应用下载区域 -->
     <section class="app-download">
         <div class="container">
-            <div class="app-content">
-                <h2>下载智慧医疗APP</h2>
-                <p>随时随地管理您的健康，获取专业医疗建议</p>
-                <div class="app-buttons">
-                    <a href="#" class="app-btn">
-                        <i class="fab fa-apple"></i>
-                        <div>
-                            <div>下载自</div>
-                            <div>App Store</div>
-                        </div>
-                    </a>
-                    <a href="#" class="app-btn">
-                        <i class="fab fa-google-play"></i>
-                        <div>
-                            <div>下载自</div>
-                            <div>Google Play</div>
-                        </div>
-                    </a>
+            <div class="app-container">
+                <div class="app-content">
+                    <h2>下载智慧医疗APP</h2>
+                    <p>随时随地管理您的健康，获取专业医疗建议，让健康管理更加便捷高效。支持健康数据同步、在线问诊、预约挂号等功能。</p>
+                    <div class="app-buttons">
+                        <a href="#" class="app-btn">
+                            <i class="fab fa-apple"></i>
+                            <div>
+                                <div>下载自</div>
+                                <div>App Store</div>
+                            </div>
+                        </a>
+                        <a href="#" class="app-btn">
+                            <i class="fab fa-google-play"></i>
+                            <div>
+                                <div>下载自</div>
+                                <div>Google Play</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="app-mockup">
+                    <img src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="智慧医疗APP">
                 </div>
             </div>
         </div>
@@ -1037,7 +1892,7 @@
             <div class="footer-content">
                 <div class="footer-column">
                     <h3>智慧医疗</h3>
-                    <p>为您提供全面、便捷、专业的医疗健康服务</p>
+                    <p>为您提供全面、便捷、专业的医疗健康服务，让健康管理触手可及。</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-weixin"></i></a>
                         <a href="#"><i class="fab fa-weibo"></i></a>
@@ -1048,41 +1903,111 @@
                 <div class="footer-column">
                     <h3>服务项目</h3>
                     <ul>
-                        <li><a href="#">在线问诊</a></li>
-                        <li><a href="#">药品配送</a></li>
-                        <li><a href="#">预约挂号</a></li>
-                        <li><a href="#">健康管理</a></li>
-                        <li><a href="#">体检套餐</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 在线问诊</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 药品配送</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 预约挂号</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 健康管理</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 体检套餐</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h3>关于我们</h3>
                     <ul>
-                        <li><a href="#">公司简介</a></li>
-                        <li><a href="#">医生团队</a></li>
-                        <li><a href="#">加入我们</a></li>
-                        <li><a href="#">新闻动态</a></li>
-                        <li><a href="#">联系我们</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 公司简介</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 医生团队</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 加入我们</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 新闻动态</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right"></i> 联系我们</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h3>联系方式</h3>
-                    <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> 北京市海淀区科技园区88号</li>
-                        <li><i class="fas fa-phone"></i> 400-888-9999</li>
-                        <li><i class="fas fa-envelope"></i> info@smartmed.com</li>
-                    </ul>
+                    <div class="footer-contact">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>北京市海淀区科技园区88号智慧医疗大厦</span>
+                    </div>
+                    <div class="footer-contact">
+                        <i class="fas fa-phone"></i>
+                        <span>400-888-9999（工作日 8:00-20:00）</span>
+                    </div>
+                    <div class="footer-contact">
+                        <i class="fas fa-envelope"></i>
+                        <span>info@smartmed.com</span>
+                    </div>
                 </div>
             </div>
             <div class="copyright">
-                <p>© 2023 智慧医疗平台 版权所有 | 京ICP备12345678号</p>
+                <p>© 2023 智慧医疗平台 版权所有 | 京ICP备12345678号 | 京卫网审字(2023)第001号</p>
+                <p style="margin-top: 10px; font-size: 0.8em;">药品信息仅供参考，用药前请咨询医生或药师</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // 简单的交互效果
         document.addEventListener('DOMContentLoaded', function() {
+            // 身份切换逻辑
+            const toggleBtn = document.getElementById('toggle-identity');
+            const identityList = document.getElementById('identity-list');
+            const currentIdentity = document.getElementById('current-identity');
+            const body = document.body;
+
+            // 1. 切换按钮点击：显示/隐藏下拉菜单
+            toggleBtn.addEventListener('click', function() {
+                identityList.classList.toggle('active');
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
+            });
+
+            // 2. 点击身份选项：切换身份
+            identityList.querySelectorAll('li').forEach(item => {
+                item.addEventListener('click', function() {
+                    const identity = this.getAttribute('data-identity');
+                    const identityName = this.textContent;
+
+                    // 更新显示身份
+                    currentIdentity.textContent = `身份：${identityName}`;
+                    
+                    // 切换body样式类
+                    body.classList.remove('student', 'elderly', 'child');
+                    body.classList.add(identity);
+
+                    // 隐藏菜单并恢复箭头
+                    identityList.classList.remove('active');
+                    toggleBtn.querySelector('i').classList.remove('fa-chevron-up');
+                    toggleBtn.querySelector('i').classList.add('fa-chevron-down');
+
+                    // 本地存储身份，刷新保留
+                    localStorage.setItem('userIdentity', identity);
+                    
+                    // 添加切换动画效果
+                    body.style.opacity = '0.5';
+                    setTimeout(() => {
+                        body.style.opacity = '1';
+                    }, 300);
+                });
+            });
+
+            // 3. 页面加载：恢复上次选择的身份
+            const savedIdentity = localStorage.getItem('userIdentity') || 'student';
+            const savedIdentityNames = {
+                student: '成年',
+                elderly: '老年',
+                child: '儿童'
+            };
+            const savedIdentityName = savedIdentityNames[savedIdentity];
+            currentIdentity.textContent = `身份：${savedIdentityName}`;
+            body.classList.add(savedIdentity);
+
+            // 4. 点击页面其他区域：关闭下拉菜单
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.identity-container')) {
+                    identityList.classList.remove('active');
+                    toggleBtn.querySelector('i').classList.remove('fa-chevron-up');
+                    toggleBtn.querySelector('i').classList.add('fa-chevron-down');
+                }
+            });
+
             // 菜单切换
             const menuToggle = document.querySelector('.menu-toggle');
             const navLinks = document.querySelector('.nav-links');
@@ -1091,7 +2016,6 @@
                 navLinks.classList.toggle('active');
 
                 if (navLinks.classList.contains('active')) {
-                    // 添加移动端登录按钮
                     if (!document.querySelector('.mobile-auth')) {
                         const mobileAuth = document.createElement('div');
                         mobileAuth.className = 'mobile-auth';
@@ -1103,6 +2027,81 @@
                     }
                 }
             });
+
+            // 病症搜索功能
+            const searchInput = document.getElementById('symptom-search');
+            const searchSuggest = document.getElementById('search-suggest');
+            const searchBtn = document.getElementById('search-btn');
+            const symptomTags = document.querySelectorAll('.med-symptom-tag');
+            const suggestItems = document.querySelectorAll('.suggest-item');
+
+            // 搜索框输入显示联想
+            searchInput.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    searchSuggest.classList.add('active');
+                    // 这里可以根据输入内容动态过滤联想项
+                } else {
+                    searchSuggest.classList.remove('active');
+                }
+            });
+
+            // 点击其他区域隐藏联想
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.search-box') && !e.target.closest('.med-search-suggest')) {
+                    searchSuggest.classList.remove('active');
+                }
+            });
+
+            // 联想项点击
+            suggestItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const symptom = this.querySelector('.symptom').textContent;
+                    searchInput.value = symptom;
+                    searchSuggest.classList.remove('active');
+                    performSearch(symptom);
+                });
+            });
+
+            // 快捷症状标签点击
+            symptomTags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    const symptom = this.getAttribute('data-symptom');
+                    searchInput.value = symptom;
+                    searchSuggest.classList.remove('active');
+                    performSearch(symptom);
+                });
+            });
+
+            // 搜索按钮点击
+            searchBtn.addEventListener('click', function() {
+                const symptom = searchInput.value.trim();
+                if (symptom) {
+                    performSearch(symptom);
+                } else {
+                    alert('请输入症状名称');
+                }
+            });
+
+            // 回车键搜索
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const symptom = this.value.trim();
+                    if (symptom) {
+                        performSearch(symptom);
+                    } else {
+                        alert('请输入症状名称');
+                    }
+                }
+            });
+
+            // 执行搜索函数
+            function performSearch(symptom) {
+                // 这里可以添加实际搜索逻辑，如跳转到结果页
+                alert(`正在搜索“${symptom}”对应的药品，即将展示结果...`);
+                
+                // 实际应用中可以使用下面的代码跳转到结果页
+                // window.location.href = `drug-results.html?symptom=${encodeURIComponent(symptom)}`;
+            }
 
             // 服务卡片悬停效果
             const serviceCards = document.querySelectorAll('.service-card');
@@ -1132,28 +2131,48 @@
                 });
             });
 
-            // 搜索框焦点效果
-            const searchInput = document.querySelector('.search-box input');
-            searchInput.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.02)';
+            // 新闻卡片悬停效果
+            const newsCards = document.querySelectorAll('.news-card');
+            newsCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.1)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.05)';
+                });
             });
 
-            searchInput.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'scale(1)';
+            // 快捷入口悬停效果
+            const quickActions = document.querySelectorAll('.quick-action-item');
+            quickActions.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 这里可以添加点击跳转逻辑
+                    alert(`即将跳转到${this.querySelector('.quick-action-text').textContent}功能`);
+                });
             });
 
-            // 简单的健康图表
+            // 进度条动画效果
+            setTimeout(() => {
+                const progressBars = document.querySelectorAll('.progress');
+                progressBars.forEach(bar => {
+                    const width = bar.parentElement.style.width;
+                    bar.style.width = width;
+                });
+            }, 500);
+
+            // 健康图表
             const healthChart = document.getElementById('healthChart');
             if (healthChart) {
                 const ctx = healthChart.getContext('2d');
 
-                // 绘制简单的折线图
                 ctx.beginPath();
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = '#2a7de1';
                 ctx.moveTo(50, 250);
 
-                // 模拟数据点
                 const dataPoints = [220, 180, 200, 160, 190, 150, 170];
                 const xInterval = 50;
 
@@ -1163,7 +2182,6 @@
 
                 ctx.stroke();
 
-                // 绘制数据点
                 ctx.fillStyle = '#2a7de1';
                 dataPoints.forEach((point, index) => {
                     ctx.beginPath();
@@ -1171,7 +2189,6 @@
                     ctx.fill();
                 });
 
-                // 绘制坐标轴
                 ctx.beginPath();
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = '#ccc';
@@ -1180,7 +2197,6 @@
                 ctx.lineTo(400, 250);
                 ctx.stroke();
 
-                // 添加标签
                 ctx.fillStyle = '#666';
                 ctx.font = '12px Arial';
                 ctx.fillText('心率(bpm)', 10, 150);
@@ -1197,10 +2213,50 @@
             if (appointmentForm) {
                 appointmentForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    alert('预约信息已提交，我们的医疗顾问将尽快联系您！');
-                    this.reset();
+                    
+                    // 获取表单数据
+                    const name = document.getElementById('name').value;
+                    const phone = document.getElementById('phone').value;
+                    const department = document.getElementById('department').value;
+                    const date = document.getElementById('date').value;
+                    
+                    // 简单验证
+                    if (!name || !phone || !department || !date) {
+                        alert('请填写完整的预约信息');
+                        return;
+                    }
+                    
+                    // 提交成功动画
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+                    
+                    setTimeout(() => {
+                        alert(`预约成功！我们将尽快与 ${name} 联系，确认${department}的${date}就诊安排。`);
+                        this.reset();
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }, 1500);
                 });
             }
+
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
         });
     </script>
 </body>
