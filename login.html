@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录 - 智慧医疗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        neutral: '#F5F7FA',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .form-input-focus {
+                @apply focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none;
+            }
+            .btn-hover {
+                @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-neutral min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-2xl card-shadow overflow-hidden">
+        <div class="p-8 md:p-10">
+            <!-- 品牌标识 -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-14 h-14 bg-primary/10 rounded-full mb-4">
+                    <i class="fa fa-heartbeat text-2xl text-primary"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">用户登录</h2>
+                <p class="text-gray-500 mt-2">欢迎回来，请登录您的账号</p>
+            </div>
+            
+            <!-- 登录表单 -->
+            <form id="loginForm">
+                <div class="mb-5">
+                    <label for="loginPhone" class="block text-gray-700 mb-2 text-sm font-medium">手机号码</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                            <i class="fa fa-phone"></i>
+                        </span>
+                        <input type="tel" id="loginPhone" 
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg form-input-focus"
+                            placeholder="请输入手机号码" required>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2">
+                        <label for="loginPassword" class="block text-gray-700 text-sm font-medium">密码</label>
+                        <a href="#" class="text-primary text-sm hover:underline">忘记密码?</a>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                            <i class="fa fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" 
+                            class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg form-input-focus"
+                            placeholder="请输入密码" required>
+                        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 toggle-password" data-target="loginPassword">
+                            <i class="fa fa-eye-slash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-medium btn-hover mb-4">
+                    登录
+                </button>
+                
+                <div class="text-center text-gray-500 text-sm mb-6">
+                    登录即表示同意我们的<a href="#" class="text-primary hover:underline">服务条款</a>和<a href="#" class="text-primary hover:underline">隐私政策</a>
+                </div>
+            </form>
+            
+            <!-- 注册链接 -->
+            <div class="text-center pt-6 border-t border-gray-100">
+                <span class="text-gray-600">还没有账号? </span>
+                <a href="register.html" class="text-primary font-medium hover:underline">
+                    立即注册
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 密码显示/隐藏切换
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = button.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            });
+        });
+        
+        // 登录表单提交
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('loginPhone').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            // 简单验证
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                alert('请输入有效的手机号码');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('密码长度不能少于6位');
+                return;
+            }
+            
+            try {
+                // 调用登录接口
+                const response = await fetch('http://127.0.0.1:5000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        username: phone,  // 用手机号作为用户名（与后端保持一致）
+                        password: password 
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 登录成功：保存token并跳转到首页（yiliao.html）
+                    localStorage.setItem('token', result.token);  // 存储token用于后续认证
+                    window.location.href = 'yiliao.html';  // 跳转到指定首页
+                } else {
+                    // 登录失败：显示错误信息
+                    alert(result.message || '登录失败，请重试');
+                }
+            } catch (error) {
+                console.error('登录请求出错:', error);
+                alert('网络错误，请检查服务器是否运行');
+            }
+        });
+    </script>
+</body>
+</html>
