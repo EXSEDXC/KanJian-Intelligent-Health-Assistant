@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康运动管理 - 智慧医疗</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2a7de1;
+            --secondary: #4fb0ae;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --border-radius: 10px;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 导航栏样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 25px;
+            position: relative;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 5px 0;
+        }
+
+        .nav-links a:hover {
+            color: #ffeb3b;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffeb3b;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            border: none;
+        }
+
+        .btn-outline {
+            border: 2px solid white;
+            color: white;
+            margin-right: 10px;
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid white;
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border: 2px solid var(--success);
+        }
+
+        .btn-success:hover {
+            background: transparent;
+            color: var(--success);
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 页面标题区域 */
+        .page-header {
+            padding: 60px 0 30px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .page-title {
+            text-align: center;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .page-title p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 健康概览区域 */
+        .health-overview {
+            padding: 50px 0;
+        }
+
+        .overview-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .overview-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .overview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .overview-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .bg-primary {
+            background: var(--primary);
+        }
+
+        .bg-secondary {
+            background: var(--secondary);
+        }
+
+        .bg-accent {
+            background: var(--accent);
+        }
+
+        .bg-success {
+            background: var(--success);
+        }
+
+        .overview-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .overview-card p {
+            color: #666;
+        }
+
+        /* 图表区域 */
+        .charts-section {
+            padding: 30px 0;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* 运动记录区域 */
+        .activity-section {
+            padding: 50px 0;
+            background: var(--light);
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .activity-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .activity-item {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+        }
+
+        .activity-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-info h4 {
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .activity-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .activity-stats {
+            text-align: right;
+        }
+
+        .activity-stats .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .activity-stats .unit {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* 健康报告区域 */
+        .report-section {
+            padding: 50px 0;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .report-content {
+            margin-bottom: 30px;
+        }
+
+        .report-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background: var(--light);
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* 健康建议区域 */
+        .recommendations {
+            padding: 50px 0;
+            background: var(--light);
+        }
+
+        .recommendation-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .recommendation-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .recommendation-card h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .recommendation-card h3 i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .recommendation-card ul {
+            list-style: none;
+        }
+
+        .recommendation-card li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .recommendation-card li:before {
+            content: '•';
+            color: var(--primary);
+            position: absolute;
+            left: 0;
+        }
+
+        /* 页脚样式 */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background: var(--primary);
+            bottom: 0;
+            left: 0;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-column a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .social-icons a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--primary);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links li {
+                margin: 10px 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .auth-buttons {
+                display: none;
+            }
+
+            .mobile-auth {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .activity-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .report-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .logo span {
+                font-size: 1.2rem;
+            }
+
+            .page-title h1 {
+                font-size: 2rem;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            .overview-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 报告预览区域 */
+        .report-preview {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .report-preview.active {
+            display: block;
+        }
+
+        .preview-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 20px;
+        }
+
+        .preview-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .preview-section {
+            margin-bottom: 20px;
+        }
+
+        .preview-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .preview-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .preview-chart {
+            height: 200px;
+        }
+
+        /* 打印样式 - 修复空白页问题 */
+        @media print {
+            /* 隐藏所有不需要打印的元素 */
+            body * {
+                visibility: hidden;
+            }
+
+            /* 只显示报告预览区域 */
+            .report-preview,
+            .report-preview * {
+                visibility: visible;
+            }
+
+            /* 确保报告预览占据整个页面 */
+            .report-preview {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                margin: 0;
+                padding: 20mm;
+                box-shadow: none;
+                border-radius: 0;
+                background: white;
+                overflow: visible;
+            }
+
+            /* 防止内容被分割到不同页面 */
+            .preview-section {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            /* 确保图表在打印时显示 */
+            .preview-chart {
+                height: 150px;
+            }
+
+            /* 隐藏打印按钮本身 */
+            .btn {
+                display: none !important;
+            }
+
+            /* 确保报告内容不会超出页面 */
+            .preview-content {
+                display: block;
+            }
+
+            .report-metrics {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            /* 优化打印布局 */
+            .preview-header {
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+            }
+
+            /* 移除不必要的边距和填充 */
+            .container {
+                padding: 0;
+                margin: 0;
+                max-width: none;
+            }
+        }
+
+        /* 专门的打印样式表 */
+        <style type="text/css" media="print">
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>智慧医疗</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="health-management.html" class="active">健康管理</a></li>
+                    <li><a href="#">医生团队</a></li>
+                    <li><a href="#">健康资讯</a></li>
+                    <li><a href="#">关于我们</a></li>
+                </ul>
+                <div class="auth-buttons">
+                    <a href="#" class="btn btn-outline">登录</a>
+                    <a href="#" class="btn btn-primary">注册</a>
+                </div>
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 页面标题区域 -->
+    <section class="page-header">
+        <div class="container">
+            <div class="page-title">
+                <h1>健康运动管理</h1>
+                <p>追踪您的健康数据，生成个性化健康报告，获取专业运动建议</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 健康概览区域 -->
+    <section class="health-overview">
+        <div class="container">
+            <div class="overview-cards">
+                <div class="overview-card">
+                    <div class="overview-icon bg-primary">
+                        <i class="fas fa-walking"></i>
+                    </div>
+                    <h3>8,256</h3>
+                    <p>今日步数</p>
+                </div>
+                <div class="overview-card">
+                    <div class="overview-icon bg-secondary">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <h3>420</h3>
+                    <p>消耗卡路里 (cal)</p>
+                </div>
+                <div class="overview-card">
+                    <div class="overview-icon bg-accent">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h3>72</h3>
+                    <p>平均心率 (bpm)</p>
+                </div>
+                <div class="overview-card">
+                    <div class="overview-icon bg-success">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <h3>7.5</h3>
+                    <p>睡眠质量 (小时)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 图表区域 -->
+    <section class="charts-section">
+        <div class="container">
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>步数趋势</h3>
+                    <div class="chart-container">
+                        <canvas id="stepsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>活动分布</h3>
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 运动记录区域 -->
+    <section class="activity-section">
+        <div class="container">
+            <div class="activity-header">
+                <h2>今日运动记录</h2>
+                <a href="#" class="btn btn-primary">添加运动记录</a>
+            </div>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div class="activity-icon bg-primary">
+                        <i class="fas fa-walking"></i>
+                    </div>
+                    <div class="activity-info">
+                        <h4>步行</h4>
+                        <p>上午 08:30 - 09:15</p>
+                    </div>
+                    <div class="activity-stats">
+                        <div class="value">4,256</div>
+                        <div class="unit">步数</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon bg-secondary">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <div class="activity-info">
+                        <h4>跑步</h4>
+                        <p>下午 18:00 - 18:45</p>
+                    </div>
+                    <div class="activity-stats">
+                        <div class="value">4.2</div>
+                        <div class="unit">公里</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon bg-accent">
+                        <i class="fas fa-bicycle"></i>
+                    </div>
+                    <div class="activity-info">
+                        <h4>骑行</h4>
+                        <p>下午 19:30 - 20:15</p>
+                    </div>
+                    <div class="activity-stats">
+                        <div class="value">8.5</div>
+                        <div class="unit">公里</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 健康报告区域 -->
+    <section class="report-section">
+        <div class="container">
+            <div class="report-card">
+                <div class="report-header">
+                    <h2>健康报告</h2>
+                    <div class="report-date">生成日期: <span id="currentDate">2023年11月15日</span></div>
+                </div>
+                <div class="report-content">
+                    <p>根据您过去一周的健康数据，我们为您生成了这份个性化健康报告。报告显示您的整体健康状况良好，但在运动强度和睡眠质量方面还有提升空间。</p>
+
+                    <div class="report-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value">82%</div>
+                            <div class="metric-label">运动目标完成率</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">7.2/10</div>
+                            <div class="metric-label">睡眠质量评分</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">75%</div>
+                            <div class="metric-label">活动强度达标率</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">68</div>
+                            <div class="metric-label">平均静息心率(bpm)</div>
+                        </div>
+                    </div>
+
+                    <h3>健康趋势分析</h3>
+                    <p>与上周相比，您的日均步数增加了12%，睡眠质量提高了5%，静息心率下降了3%。继续保持当前的运动习惯，您的健康状况将持续改善。</p>
+                </div>
+                <div class="report-actions">
+                    <button class="btn btn-primary" id="generateReport">
+                        <i class="fas fa-file-pdf"></i> 生成详细报告
+                    </button>
+                    <button class="btn btn-outline" style="color: var(--primary); border-color: var(--primary);" id="previewReport">
+                        <i class="fas fa-eye"></i> 预览报告
+                    </button>
+                    <button class="btn btn-success" id="downloadReport" disabled>
+                        <i class="fas fa-download"></i> 下载报告
+                    </button>
+                    <button class="btn btn-outline" style="color: var(--secondary); border-color: var(--secondary);" id="printReport">
+                        <i class="fas fa-print"></i> 打印报告
+                    </button>
+                </div>
+            </div>
+
+            <!-- 报告预览区域 -->
+            <div class="report-preview" id="reportPreview">
+                <div class="preview-header">
+                    <h1>个人健康报告</h1>
+                    <p>生成日期: <span id="previewDate">2023年11月15日</span></p>
+                </div>
+
+                <div class="preview-content">
+                    <div class="preview-section">
+                        <h3>健康概览</h3>
+                        <p>根据您过去一周的健康数据，您的整体健康状况良好。以下是您的关键健康指标概览：</p>
+
+                        <div class="report-metrics">
+                            <div class="metric-item">
+                                <div class="metric-value">8,256</div>
+                                <div class="metric-label">日均步数</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">420</div>
+                                <div class="metric-label">日均卡路里消耗</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">72</div>
+                                <div class="metric-label">平均心率(bpm)</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">7.5</div>
+                                <div class="metric-label">平均睡眠时长(小时)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-section">
+                        <h3>运动分析</h3>
+                        <p>您本周的运动表现良好，完成了82%的运动目标。活动分布如下：</p>
+
+                        <div class="preview-charts">
+                            <div class="preview-chart">
+                                <canvas id="previewActivityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-section">
+                        <h3>健康趋势</h3>
+                        <p>与上周相比，您的健康指标呈现积极变化：</p>
+                        <ul>
+                            <li>日均步数增加12%</li>
+                            <li>睡眠质量提高5%</li>
+                            <li>静息心率下降3%</li>
+                            <li>卡路里消耗增加8%</li>
+                        </ul>
+                    </div>
+
+                    <div class="preview-section">
+                        <h3>专业建议</h3>
+                        <p>基于您的健康数据，我们为您提供以下建议：</p>
+                        <ul>
+                            <li>继续保持当前的运动强度，逐步增加有氧运动时间</li>
+                            <li>注意睡眠质量，尝试建立规律的睡眠时间表</li>
+                            <li>适当增加力量训练，每周2-3次</li>
+                            <li>保持均衡饮食，增加蛋白质和膳食纤维摄入</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="report-footer" style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p>本报告由智慧医疗平台生成，仅供参考，如有健康问题请咨询专业医生。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 健康建议区域 -->
+    <section class="recommendations">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 40px;">个性化健康建议</h2>
+            <div class="recommendation-cards">
+                <div class="recommendation-card">
+                    <h3><i class="fas fa-utensils"></i> 饮食建议</h3>
+                    <ul>
+                        <li>增加蛋白质摄入，建议每日摄入量达到体重的1.2-1.5克/公斤</li>
+                        <li>减少精制碳水化合物，增加全谷物和膳食纤维</li>
+                        <li>保持充足水分摄入，每日至少2升水</li>
+                        <li>适当补充维生素D和钙质</li>
+                    </ul>
+                </div>
+                <div class="recommendation-card">
+                    <h3><i class="fas fa-running"></i> 运动建议</h3>
+                    <ul>
+                        <li>增加有氧运动强度，每周至少150分钟中等强度运动</li>
+                        <li>加入力量训练，每周2-3次，每次30-45分钟</li>
+                        <li>尝试高强度间歇训练，提高心肺功能</li>
+                        <li>运动前后做好热身和拉伸，预防运动损伤</li>
+                    </ul>
+                </div>
+                <div class="recommendation-card">
+                    <h3><i class="fas fa-bed"></i> 休息与恢复</h3>
+                    <ul>
+                        <li>保证每晚7-9小时高质量睡眠</li>
+                        <li>建立规律的睡眠时间表，即使在周末也保持一致</li>
+                        <li>睡前1小时避免使用电子设备</li>
+                        <li>考虑午间小憩，但不超过30分钟</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>智慧医疗</h3>
+                    <p>为您提供全面、便捷、专业的医疗健康服务</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-weixin"></i></a>
+                        <a href="#"><i class="fab fa-weibo"></i></a>
+                        <a href="#"><i class="fab fa-qq"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>服务项目</h3>
+                    <ul>
+                        <li><a href="#">在线问诊</a></li>
+                        <li><a href="#">药品配送</a></li>
+                        <li><a href="#">预约挂号</a></li>
+                        <li><a href="#">健康管理</a></li>
+                        <li><a href="#">体检套餐</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>关于我们</h3>
+                    <ul>
+                        <li><a href="#">公司简介</a></li>
+                        <li><a href="#">医生团队</a></li>
+                        <li><a href="#">加入我们</a></li>
+                        <li><a href="#">新闻动态</a></li>
+                        <li><a href="#">联系我们</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>联系方式</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> 北京市海淀区科技园区88号</li>
+                        <li><i class="fas fa-phone"></i> 400-888-9999</li>
+                        <li><i class="fas fa-envelope"></i> info@smartmed.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>© 2023 智慧医疗平台 版权所有 | 京ICP备12345678号</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 菜单切换
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+
+            menuToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+
+                if (navLinks.classList.contains('active')) {
+                    if (!document.querySelector('.mobile-auth')) {
+                        const mobileAuth = document.createElement('div');
+                        mobileAuth.className = 'mobile-auth';
+                        mobileAuth.innerHTML = `
+                            <a href="#" class="btn btn-outline" style="display: block; text-align: center;">登录</a>
+                            <a href="#" class="btn btn-primary" style="display: block; text-align: center;">注册</a>
+                        `;
+                        navLinks.appendChild(mobileAuth);
+                    }
+                }
+            });
+
+            // 设置当前日期
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const currentDate = now.toLocaleDateString('zh-CN', options);
+            document.getElementById('currentDate').textContent = currentDate;
+            document.getElementById('previewDate').textContent = currentDate;
+
+            // 生成报告按钮事件
+            const generateReportBtn = document.getElementById('generateReport');
+            const previewReportBtn = document.getElementById('previewReport');
+            const downloadReportBtn = document.getElementById('downloadReport');
+            const printReportBtn = document.getElementById('printReport');
+            const reportPreview = document.getElementById('reportPreview');
+
+            if (generateReportBtn) {
+                generateReportBtn.addEventListener('click', function() {
+                    // 模拟生成报告的过程
+                    this.innerHTML = '<span class="loading"></span> 生成中...';
+                    this.disabled = true;
+
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-check"></i> 报告已生成';
+                        this.classList.remove('btn-primary');
+                        this.classList.add('btn-success');
+
+                        // 启用下载和打印按钮
+                        downloadReportBtn.disabled = false;
+                        printReportBtn.disabled = false;
+
+                        // 显示成功消息
+                        alert('健康报告已生成！您现在可以预览、下载或打印报告。');
+                    }, 1500);
+                });
+            }
+
+            // 预览报告按钮事件
+            if (previewReportBtn) {
+                previewReportBtn.addEventListener('click', function() {
+                    reportPreview.classList.toggle('active');
+
+                    if (reportPreview.classList.contains('active')) {
+                        this.innerHTML = '<i class="fas fa-eye-slash"></i> 隐藏预览';
+                        initPreviewCharts();
+                    } else {
+                        this.innerHTML = '<i class="fas fa-eye"></i> 预览报告';
+                    }
+                });
+            }
+
+            // 下载报告按钮事件
+            if (downloadReportBtn) {
+                downloadReportBtn.addEventListener('click', function() {
+                    this.innerHTML = '<span class="loading"></span> 准备下载...';
+
+                    // 使用更简单的文本报告下载方法
+                    setTimeout(() => {
+                        const reportContent = generateTextReport();
+                        downloadTextReport(reportContent, '健康报告_' + currentDate + '.txt');
+
+                        this.innerHTML = '<i class="fas fa-download"></i> 下载报告';
+                        alert('健康报告已成功下载为文本文件！');
+                    }, 1000);
+                });
+            }
+
+            // 打印报告按钮事件 - 修复空白页问题
+            if (printReportBtn) {
+                printReportBtn.addEventListener('click', function() {
+                    // 显示报告预览
+                    if (!reportPreview.classList.contains('active')) {
+                        reportPreview.classList.add('active');
+                        initPreviewCharts();
+                    }
+
+                    // 等待DOM更新后打印
+                    setTimeout(() => {
+                        // 创建一个专门用于打印的样式
+                        const printStyle = document.createElement('style');
+                        printStyle.innerHTML = `
+                            @media print {
+                                @page {
+                                    size: A4;
+                                    margin: 15mm;
+                                }
+                                body, html {
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                    height: 100% !important;
+                                }
+                                .report-preview {
+                                    position: fixed !important;
+                                    top: 0 !important;
+                                    left: 0 !important;
+                                    width: 100% !important;
+                                    height: auto !important;
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                    box-shadow: none !important;
+                                    border-radius: 0 !important;
+                                    background: white !important;
+                                    overflow: visible !important;
+                                }
+                                .preview-section {
+                                    page-break-inside: avoid !important;
+                                    break-inside: avoid !important;
+                                }
+                                * {
+                                    -webkit-print-color-adjust: exact !important;
+                                    print-color-adjust: exact !important;
+                                }
+                            }
+                        `;
+                        document.head.appendChild(printStyle);
+
+                        window.print();
+
+                        // 打印完成后移除样式
+                        setTimeout(() => {
+                            document.head.removeChild(printStyle);
+                        }, 100);
+                    }, 500);
+                });
+            }
+
+            // 初始化图表
+            initCharts();
+        });
+
+        // 生成文本报告内容
+        function generateTextReport() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('zh-CN');
+
+            return `个人健康报告
+生成日期: ${dateStr}
+
+健康概览
+========
+根据您过去一周的健康数据，您的整体健康状况良好。
+关键健康指标:
+- 日均步数: 8,256
+- 日均卡路里消耗: 420 cal
+- 平均心率: 72 bpm
+- 平均睡眠时长: 7.5 小时
+
+运动分析
+========
+您本周的运动表现良好，完成了82%的运动目标。
+活动分布:
+- 步行: 45%
+- 跑步: 25%
+- 骑行: 20%
+- 其他: 10%
+
+健康趋势
+========
+与上周相比，您的健康指标呈现积极变化:
+- 日均步数增加12%
+- 睡眠质量提高5%
+- 静息心率下降3%
+- 卡路里消耗增加8%
+
+专业建议
+========
+基于您的健康数据，我们为您提供以下建议:
+1. 继续保持当前的运动强度，逐步增加有氧运动时间
+2. 注意睡眠质量，尝试建立规律的睡眠时间表
+3. 适当增加力量训练，每周2-3次
+4. 保持均衡饮食，增加蛋白质和膳食纤维摄入
+
+本报告由智慧医疗平台生成，仅供参考，如有健康问题请咨询专业医生。`;
+        }
+
+        // 下载文本报告
+        function downloadTextReport(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function initCharts() {
+            // 步数趋势图
+            const stepsCtx = document.getElementById('stepsChart').getContext('2d');
+            const stepsChart = new Chart(stepsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '步数',
+                        data: [7520, 8120, 7850, 8650, 9250, 10250, 8250],
+                        borderColor: '#2a7de1',
+                        backgroundColor: 'rgba(42, 125, 225, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '步数'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 活动分布图
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            const activityChart = new Chart(activityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['步行', '跑步', '骑行', '其他'],
+                    datasets: [{
+                        data: [45, 25, 20, 10],
+                        backgroundColor: [
+                            '#2a7de1',
+                            '#4fb0ae',
+                            '#ff6b6b',
+                            '#28a745'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function initPreviewCharts() {
+            // 预览活动分布图
+            const previewActivityCtx = document.getElementById('previewActivityChart').getContext('2d');
+            new Chart(previewActivityCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['步行', '跑步', '骑行', '其他'],
+                    datasets: [{
+                        data: [45, 25, 20, 10],
+                        backgroundColor: [
+                            '#2a7de1',
+                            '#4fb0ae',
+                            '#ff6b6b',
+                            '#28a745'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: '活动分布'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
