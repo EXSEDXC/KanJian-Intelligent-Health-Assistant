@@ -1,3 +1,5 @@
 A.MD
 serve
 app.log
+node_modules/
+.venv/

@@ -875,7 +875,7 @@
         .doctor-image img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             transition: transform 0.5s ease;
         }
 
@@ -1059,168 +1059,6 @@
             box-shadow: 0 0 0 3px var(--primary-light);
         }
 
-        /* 健康资讯区域 */
-        .health-news {
-            padding: 80px 0;
-            background: white;
-        }
-
-        .news-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .news-card {
-            background: var(--light);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--box-shadow);
-            transition: var(--transition);
-        }
-
-        .news-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--box-shadow-hover);
-        }
-
-        .news-image {
-            height: 200px;
-            overflow: hidden;
-        }
-
-        .news-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .news-card:hover .news-image img {
-            transform: scale(1.05);
-        }
-
-        .news-content {
-            padding: 20px;
-        }
-
-        .news-date {
-            color: #666;
-            font-size: var(--font-sm);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .news-content h3 {
-            margin-bottom: 10px;
-            color: var(--dark);
-            font-size: var(--font-h3);
-        }
-
-        .news-content p {
-            color: #666;
-            margin-bottom: 15px;
-            font-size: var(--font-p);
-        }
-
-        .read-more {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .read-more:hover {
-            color: var(--primary-dark);
-            transform: translateX(5px);
-        }
-
-        /* 应用下载区域样式 */
-        .app-download {
-            padding: 80px 0;
-            text-align: center;
-            background: var(--light);
-            position: relative;
-            margin-top: 60px;
-        }
-
-        .app-container {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 50px;
-        }
-
-        .app-content {
-            flex: 1;
-            min-width: 300px;
-            max-width: 700px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .app-content h2 {
-            font-size: var(--font-h2);
-            margin-bottom: 15px;
-        }
-
-        .app-content p {
-            font-size: var(--font-p);
-            margin-bottom: 30px;
-            color: #666;
-        }
-
-        .app-buttons {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .app-btn {
-            display: flex;
-            align-items: center;
-            background: var(--dark);
-            color: white;
-            padding: 12px 25px;
-            border-radius: var(--border-radius-sm);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            font-size: var(--font-base);
-            box-shadow: var(--box-shadow);
-        }
-
-        .app-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--box-shadow-hover);
-            background: #2a2a2a;
-        }
-
-        .app-btn i {
-            font-size: 1.8rem;
-            margin-right: 10px;
-        }
-
-        .app-mockup {
-            flex: 0 0 200px;
-            margin-top: 20px;
-        }
-
-        .app-mockup img {
-            max-width: 200px;
-            border-radius: 30px;
-            box-shadow: var(--box-shadow-hover);
-            border: 8px solid var(--dark);
-        }
 
         /* 页脚样式 */
         footer {
@@ -1582,7 +1420,19 @@
             </div>
         </div>
     </section>
-
+<!-- 药品展示区域 -->
+<section class="drug-results" style="padding: 40px 0; background: white;">
+    <div class="container">
+        <div id="drug-results-container" class="services-grid" style="display: none;">
+            <!-- 药品卡片将动态插入这里 -->
+        </div>
+        <div id="no-result" style="text-align: center; padding: 50px 0; display: none;">
+            <i class="fas fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 20px;"></i>
+            <h3 style="color: #666; margin-bottom: 10px;">未找到对应药品</h3>
+            <p style="color: #999;">请尝试输入其他症状或联系在线药师咨询</p>
+        </div>
+    </div>
+</section>
 
     <!-- 服务区域 -->
     <section class="services">
@@ -1619,7 +1469,7 @@
                     <div class="service-content">
                         <h3>预约挂号</h3>
                         <p>在线预约专家门诊，节省排队时间，轻松就医，支持门诊时间查询和预约管理。实时更新号源信息。</p>
-                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--accent); border-color: var(--accent);">立即预约</a>
+                        <a href="lo.html" class="btn btn-outline btn-sm btn-service" style="color: var(--accent); border-color: var(--accent);">立即预约</a>
                     </div>
                 </div>
             </div>
@@ -1740,11 +1590,11 @@
                 </div>
                 <div class="doctor-card">
                     <div class="doctor-image">
-                        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d15?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="刘医生">
+                       <img src="07412e853388ea52b83d733e090e3749.jpg" alt="杨医生">
                         <div class="doctor-badge">主任医师</div>
                     </div>
                     <div class="doctor-info">
-                        <h3>刘强医生</h3>
+                        <h3>杨书泓医生</h3>
                         <div class="doctor-specialty">骨科主任</div>
                         <div class="doctor-rating">
                             <i class="fas fa-star"></i>
@@ -1755,59 +1605,14 @@
                             <span>(87评价)</span>
                         </div>
                         <p>18年骨科经验，擅长关节疾病和运动损伤的诊断与治疗，成功完成手术逾千例。</p>
-                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                        <a href="video2.html" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 健康资讯区域 -->
-    <section class="health-news">
-        <div class="container">
-            <div class="doctors-header">
-                <h2>健康资讯</h2>
-                <a href="#" class="view-all">更多资讯 <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <p style="color: #666; margin-bottom: 30px; font-size: var(--font-p);">了解最新健康知识，掌握科学养生方法</p>
-            
-            <div class="news-grid">
-                <div class="news-card">
-                    <div class="news-image">
-                        <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="健康饮食">
-                    </div>
-                    <div class="news-content">
-                        <div class="news-date"><i class="far fa-calendar"></i> 2023-10-15</div>
-                        <h3>秋季养生：如何通过饮食调理增强免疫力</h3>
-                        <p>秋季气候干燥，是呼吸道疾病高发季节。本文将介绍如何通过合理饮食增强免疫力，预防秋季常见疾病...</p>
-                        <a href="#" class="read-more">阅读全文 <i class="fas fa-angle-right"></i></a>
-                    </div>
-                </div>
-                <div class="news-card">
-                    <div class="news-image">
-                        <img src="https://images.unsplash.com/photo-1518655048521-f130df041f66?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="运动健康">
-                    </div>
-                    <div class="news-content">
-                        <div class="news-date"><i class="far fa-calendar"></i> 2023-10-10</div>
-                        <h3>适合办公室人群的5分钟健康运动</h3>
-                        <p>长时间久坐容易导致颈椎、腰椎问题。本文推荐几个适合办公室人群的简易运动，每天只需5分钟，有效缓解疲劳...</p>
-                        <a href="#" class="read-more">阅读全文 <i class="fas fa-angle-right"></i></a>
-                    </div>
-                </div>
-                <div class="news-card">
-                    <div class="news-image">
-                        <img src="https://images.unsplash.com/photo-1505664194779-8beaceb93744?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="睡眠健康">
-                    </div>
-                    <div class="news-content">
-                        <div class="news-date"><i class="far fa-calendar"></i> 2023-10-05</div>
-                        <h3>改善睡眠质量的7个实用小技巧</h3>
-                        <p>良好的睡眠是健康的基础。本文分享7个经过科学验证的改善睡眠质量的小技巧，帮助您摆脱失眠困扰...</p>
-                        <a href="#" class="read-more">阅读全文 <i class="fas fa-angle-right"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+ 
 
     <!-- 预约区域 -->
     <section class="appointment">
@@ -2095,14 +1900,69 @@
             });
 
             // 执行搜索函数
-            function performSearch(symptom) {
-                // 这里可以添加实际搜索逻辑，如跳转到结果页
-                alert(`正在搜索“${symptom}”对应的药品，即将展示结果...`);
-                
-                // 实际应用中可以使用下面的代码跳转到结果页
-                // window.location.href = `drug-results.html?symptom=${encodeURIComponent(symptom)}`;
-            }
+// 执行搜索函数（后端调用版）
+async function performSearch(symptom) {
+    const resultsContainer = document.getElementById('drug-results-container');
+    const noResult = document.getElementById('no-result');
+    
+    // 清空容器，显示加载状态
+    resultsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px 0;">加载中...</div>';
+    resultsContainer.style.display = 'grid';
+    noResult.style.display = 'none';
 
+    try {
+        // 1. 向后端发送请求（携带症状参数）
+        const response = await fetch('http://localhost:3000/api/getDrugsBySymptom', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ symptom: symptom }) // 传症状给后端
+        });
+
+        // 2. 解析后端返回的结果
+        const result = await response.json();
+        const drugs = result.drugs || [];
+
+        // 3. 渲染结果（动态生成药品卡片）
+        resultsContainer.innerHTML = '';
+        if (drugs.length > 0) {
+            const title = document.createElement('h2');
+            title.style.gridColumn = '1/-1';
+            title.style.textAlign = 'center';
+            title.textContent = `${symptom} 对应药品推荐`;
+            resultsContainer.appendChild(title);
+
+            drugs.forEach(drug => {
+                const drugCard = document.createElement('div');
+                drugCard.className = 'service-card';
+                drugCard.innerHTML = `
+                    <div class="service-icon" style="background: var(--secondary);">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>${drug.name}</h3>
+                        <p><strong>适应症：</strong>${drug.desc}</p>
+                        <p><strong>用法用量：</strong>${drug.usage}</p>
+                        <a href="medical purchase.html" class="btn btn-outline btn-sm btn-service" style="color: var(--secondary); border-color: var(--secondary); margin-top: 15px;">立即购买</a>
+                    </div>
+                `;
+                resultsContainer.appendChild(drugCard);
+            });
+        } else {
+            resultsContainer.style.display = 'none';
+            noResult.style.display = 'block';
+        }
+
+        // 滚动到结果区域
+        document.querySelector('.drug-results').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (error) {
+        // 错误处理
+        resultsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px 0; color: #ff6b6b;">查询失败，请重试！</div>';
+        console.error('请求错误：', error);
+    }
+}
             // 服务卡片悬停效果
             const serviceCards = document.querySelectorAll('.service-card');
             serviceCards.forEach(card => {
