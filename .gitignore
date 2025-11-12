@@ -3,3 +3,4 @@ serve
 app.log
 node_modules/
 .venv/
+node_modules
