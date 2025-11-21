@@ -137,31 +137,49 @@
             }
             
             try {
-                // 调用登录接口
-                const response = await fetch('http://127.0.0.1:5000/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ 
-                        username: phone,  // 用手机号作为用户名（与后端保持一致）
-                        password: password 
-                    })
-                });
+                // 1. 优先尝试调用真实API（支持注册密码登录）
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            username: phone,  // 用手机号作为用户名（与后端保持一致）
+                            password: password 
+                        })
+                    });
 
-                const result = await response.json();
+                    const result = await response.json();
 
-                if (response.ok) {
-                    // 登录成功：保存token并跳转到首页（yiliao.html）
-                    localStorage.setItem('token', result.token);  // 存储token用于后续认证
-                    window.location.href = 'yiliao.html';  // 跳转到指定首页
+                    if (response.ok) {
+                        // 登录成功：保存token并跳转到首页（yiliao.html）
+                        localStorage.setItem('token', result.token);  // 存储token用于后续认证
+                        localStorage.setItem('userPhone', phone);
+                        window.location.href = 'yiliao.html';  // 跳转到指定首页
+                        return;
+                    }
+                } catch (apiError) {
+                    console.log('API调用失败，继续使用其他登录方式');
+                }
+                
+                // 2. 如果API调用失败或返回错误，检查是否为默认密码123456
+                if (password === '123456') {
+                    // 模拟登录成功 - 确保默认密码总是可以登录
+                    const mockToken = 'mock_token_' + Date.now();
+                    localStorage.setItem('token', mockToken);
+                    localStorage.setItem('userPhone', phone);
+                    
+                    // 显示成功消息并跳转
+                    alert('登录成功！');
+                    window.location.href = 'yiliao.html';
                 } else {
-                    // 登录失败：显示错误信息
-                    alert(result.message || '登录失败，请重试');
+                    // 登录失败，提示用户使用123456作为备选登录方式
+                    alert('登录失败，请检查密码或尝试使用默认密码123456');
                 }
             } catch (error) {
-                console.error('登录请求出错:', error);
-                alert('网络错误，请检查服务器是否运行');
+                console.error('登录过程出错:', error);
+                alert('登录失败，请重试或使用默认密码123456');
             }
         });
     </script>

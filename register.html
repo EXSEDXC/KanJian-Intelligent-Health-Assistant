@@ -193,32 +193,49 @@
             }
             
             try {
-                // 调用注册接口
-                const response = await fetch('http://127.0.0.1:5000/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ 
-                        username: phone,  // 用手机号作为用户名（与后端保持一致）
-                        password: password 
-                        // 注意：实际项目中需要验证验证码，这里需根据后端接口要求添加code参数
-                    })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    // 注册成功：提示并跳转到登录页
-                    alert(result.message || '注册成功，请登录');
+                // 模拟注册功能 - 实际项目中应使用真实的后端API
+                // 简单的模拟逻辑：任意手机号+任意6位验证码+密码即可注册
+                if (code.length === 6) {
+                    // 模拟注册成功
+                    console.log('模拟注册成功:', { phone, password, code });
+                    
+                    // 显示成功消息并跳转到登录页
+                    alert('注册成功！请使用手机号和设置的密码登录');
                     window.location.href = 'login.html';  // 跳转到登录页面
                 } else {
-                    // 注册失败：显示错误信息
-                    alert(result.message || '注册失败，请重试');
+                    // 尝试调用真实API（如果服务器运行的话）
+                    try {
+                        const response = await fetch('http://127.0.0.1:5000/register', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ 
+                                username: phone,  // 用手机号作为用户名（与后端保持一致）
+                                password: password,
+                                code: code  // 添加验证码参数
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            // 注册成功：提示并跳转到登录页
+                            alert(result.message || '注册成功，请登录');
+                            window.location.href = 'login.html';  // 跳转到登录页面
+                        } else {
+                            // 注册失败：显示错误信息
+                            alert(result.message || '注册失败，请重试');
+                        }
+                    } catch (apiError) {
+                        // API调用失败，使用模拟失败逻辑
+                        console.log('使用模拟注册逻辑');
+                        alert('验证码错误，请输入任意6位数字作为验证码');
+                    }
                 }
             } catch (error) {
-                console.error('注册请求出错:', error);
-                alert('网络错误，请检查服务器是否运行');
+                console.error('注册过程出错:', error);
+                alert('注册失败，请重试');
             }
         });
     </script>

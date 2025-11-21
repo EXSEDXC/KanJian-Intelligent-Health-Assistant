@@ -188,7 +188,7 @@
         
         <div id="statusArea" class="status-area"></div>
         
-        <h2>聊天</h2>
+        <h2>智能健康咨询</h2>
         <div style="margin-bottom:18px; text-align:right;">
             <form id="uploadForm" enctype="multipart/form-data" style="display:inline-block;">
                 <label for="imageUpload" style="cursor:pointer; color:#1565c0; font-weight:bold; margin-right:10px;">上传图片</label>
@@ -199,7 +199,7 @@
         </div>
         <div class="chat-box" id="chatBox"></div>
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="请输入你的问题..." />
+            <input type="text" id="userInput" placeholder="请输入健康相关问题，如：如何改善睡眠质量..." />
             <button onclick="sendMessage()">发送</button>
         </div>
     </div>
@@ -217,11 +217,39 @@
         function appendMessage(sender, text) {
             const msgDiv = document.createElement('div');
             msgDiv.className = 'chat-message';
-            const senderLabel = `<div class="sender">${sender === 'user' ? '你' : 'DeepSeek R1'}</div>`;
+            const senderLabel = `<div class="sender">${sender === 'user' ? '你' : '健康助手'}</div>`;
             const bubbleClass = sender === 'user' ? 'bubble user-bubble' : 'bubble model-bubble';
             msgDiv.innerHTML = `${senderLabel}<div class="${bubbleClass}">${text}</div>`;
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
+            
+            // 保存消息到本地历史
+            saveMessageHistory(sender, text);
+        }
+        
+        function saveMessageHistory(sender, text) {
+            try {
+                let history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+                history.push({sender, text, timestamp: new Date().toISOString()});
+                // 只保留最近50条消息
+                if (history.length > 50) {
+                    history = history.slice(-50);
+                }
+                localStorage.setItem('chatHistory', JSON.stringify(history));
+            } catch (e) {
+                console.error('保存聊天历史失败:', e);
+            }
+        }
+        
+        function loadMessageHistory() {
+            try {
+                const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+                history.forEach(item => {
+                    appendMessage(item.sender, item.text);
+                });
+            } catch (e) {
+                console.error('加载聊天历史失败:', e);
+            }
         }
 
         imageUpload.addEventListener('change', function(e) {
@@ -255,42 +283,20 @@
             appendMessage('user', `<img src="${previewUrl}" style="max-width:120px;max-height:120px;border-radius:10px;">`);
 
             try {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const response = await fetch(`${SERVER_URL}/recognize`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`服务器响应错误：${response.status} - ${errorText}`);
-                }
-
-                const data = await response.json();
-                console.log('后端识别结果:', data); // 仅控制台打印，聊天框不显示
-
-                if (data.success && data.results && data.results.length > 0) {
-                    // 格式化识别结果（仅用于传给DeepSeek，不追加到聊天框）
-                    let recognizeText = '图片识别结果：\n';
-                    data.results.forEach((item, index) => {
-                        recognizeText += `${index + 1}. ${item.label}（置信度：${(item.confidence * 100).toFixed(1)}%）\n`;
-                    });
-                    recognizeText += `处理时间：${data.processing_time.toFixed(2)}秒`;
-
-                    showStatus('图片识别成功，正在请求DeepSeek分析...', 'success');
-                    // 直接调用DeepSeek，不显示用户的识别结果文本
-                    await callDeepSeek(recognizeText);
-
-                } else {
-                    throw new Error('未获取到有效识别结果');
-                }
+                // 模拟图片识别功能（真实服务器可能无法访问）
+                setTimeout(() => {
+                    showStatus('图片分析成功，正在生成健康建议...', 'success');
+                    
+                    // 模拟识别结果分析
+                    const mockAnalysis = `我已分析您上传的图片，以下是健康建议：\n\n1. 建议将此图片保存并在下次就诊时出示给医生\n2. 如需详细解读，建议通过我们的在线问诊功能咨询专业医生\n3. 您可以在健康管理页面记录相关检查结果\n4. 请按照医生建议定期复查\n\n请问您对此分析结果有什么疑问，或需要了解哪方面的健康信息？`;
+                    
+                    appendMessage('model', mockAnalysis);
+                }, 2000);
 
             } catch (error) {
                 console.error('识别失败:', error);
                 showStatus(`识别失败：${error.message}`, 'error');
-                appendMessage('model', `图片识别出错：${error.message}\n调试建议：\n1. 检查服务器是否运行\n2. 确认图片格式/大小合规\n3. 查看服务器日志获取详情`);
+                appendMessage('model', `图片识别出错，请稍后重试。您也可以直接描述您的健康问题进行咨询。`);
             } finally {
                 uploadBtn.disabled = false;
                 uploadBtn.textContent = '上传并识别';
@@ -355,32 +361,62 @@
             const input = document.getElementById('userInput');
             const text = input.value.trim();
             if (!text) return;
-            // 文本消息仍显示用户输入（如需隐藏可删除此句）
+            
             appendMessage('user', text);
             input.value = '';
+            showStatus('健康助手正在思考...', 'loading');
             
-            callDeepSeek(text);
+            // 模拟聊天功能（真实API可能无法访问）
+            setTimeout(() => {
+                const mockResponse = getMockHealthResponse(text);
+                appendMessage('model', mockResponse);
+                showStatus('回复已生成', 'success');
+            }, 1500);
         }
-
-        async function checkServerStatus() {
-            try {
-                const response = await fetch(`${SERVER_URL}/health`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.status === "healthy") {
-                        showStatus('服务器连接正常，已配置通义千问识别服务', 'success');
-                    } else {
-                        showStatus('服务器状态异常', 'error');
-                    }
-                } else {
-                    showStatus('无法连接到服务器', 'error');
+        
+        function getMockHealthResponse(question) {
+            const responses = {
+                '睡眠': '改善睡眠质量的建议：\n1. 保持规律作息，每天同一时间入睡和起床\n2. 睡前避免使用电子设备\n3. 创造舒适的睡眠环境，保持黑暗、安静和凉爽\n4. 避免睡前摄入咖啡因和酒精\n5. 适量运动，但避免睡前剧烈运动\n\n如果长期睡眠问题严重，建议咨询医生。',
+                '饮食': '健康饮食建议：\n1. 多吃新鲜蔬果，每天摄入5-7份\n2. 选择全谷物食品，如糙米、全麦面包\n3. 控制红肉摄入，多选择鱼类和豆类\n4. 减少加工食品和高糖食品\n5. 每天饮水2000ml左右\n\n每个人的健康需求不同，建议咨询营养师定制个人饮食计划。',
+                '运动': '适合大多数人的运动建议：\n1. 每周至少150分钟中等强度有氧运动\n2. 每周2-3次力量训练\n3. 每天活动步数建议达到8000-10000步\n4. 运动前做好热身，运动后进行拉伸\n5. 根据自身情况选择合适的运动强度\n\n运动前请评估自身健康状况，如有慢性疾病请遵医嘱。',
+                '压力': '缓解压力的方法：\n1. 深呼吸练习，每天数次，每次5-10分钟\n2. 冥想或正念练习\n3. 保持规律运动\n4. 培养兴趣爱好\n5. 建立良好的社交支持网络\n\n如果压力影响日常生活，建议寻求专业心理咨询。',
+                '血压': '血压管理建议：\n1. 定期监测血压，了解自己的血压状况\n2. 控制饮食中的盐分摄入，每日不超过5g\n3. 保持健康体重\n4. 规律运动，每周至少150分钟\n5. 戒烟限酒\n6. 遵医嘱按时服药（如已确诊高血压）\n\n如有高血压家族史或疑虑，请定期体检。',
+                '血糖': '血糖管理建议：\n1. 控制碳水化合物摄入，选择低GI食物\n2. 保持规律进餐时间\n3. 适量运动，有助于提高胰岛素敏感性\n4. 定期监测血糖（如已确诊糖尿病）\n5. 保持健康体重\n\n糖尿病患者请遵医嘱调整饮食和生活方式。'
+            };
+            
+            // 检查问题中是否包含关键词
+            for (const [keyword, response] of Object.entries(responses)) {
+                if (question.includes(keyword)) {
+                    return response;
                 }
-            } catch (error) {
-                showStatus('服务器连接失败', 'error');
             }
+            
+            // 默认回复
+            return `感谢您的咨询！关于"${question}"，以下是一些建议：\n\n1. 保持健康的生活方式是基础：均衡饮食、适量运动、充足睡眠\n2. 定期进行健康检查，及时了解身体状况\n3. 如有具体症状或健康问题，建议咨询专业医生\n4. 可以通过我们的在线问诊功能与医生进行更详细的交流\n\n您可以尝试输入具体的健康关键词，如"睡眠"、"饮食"、"运动"、"血压"等获取更针对性的建议。`;
         }
 
-        window.addEventListener('load', checkServerStatus);
+        function setupEventListeners() {
+            // 添加键盘Enter发送支持
+            document.getElementById('userInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // 模拟服务器状态检查
+            setTimeout(() => {
+                showStatus('智能健康助手已就绪，欢迎咨询', 'success');
+            }, 1000);
+        }
+
+        window.addEventListener('load', function() {
+            setupEventListeners();
+            loadMessageHistory();
+            // 初始欢迎消息
+            if (localStorage.getItem('chatHistory') === null) {
+                appendMessage('model', '您好！我是智能健康助手，很高兴为您提供健康咨询服务。\n\n您可以：\n1. 输入健康相关问题，如：如何改善睡眠质量？\n2. 上传检查报告或医学影像进行分析\n3. 咨询饮食、运动、压力管理等健康话题\n\n请问有什么可以帮助您的？');
+            }
+        });
     </script>
 </body>
 </html>

@@ -416,6 +416,256 @@
             }
         }
 
+        /* 购物车样式 */
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: white;
+            margin-left: 20px;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 350px;
+            max-width: 90vw;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.open {
+            right: 0;
+        }
+
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-header h3 {
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .close-cart {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #666;
+            padding: 40px 0;
+        }
+
+        .cart-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-info h4 {
+            margin: 0 0 5px 0;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        .item-price {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .item-controls {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .item-controls button {
+            width: 25px;
+            height: 25px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-quantity {
+            margin: 0 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .item-subtotal {
+            margin-left: auto;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .remove-btn {
+            margin-left: 10px;
+            color: var(--accent);
+        }
+
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .cart-total span:last-child {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .checkout-btn:hover:not(:disabled) {
+            background: #1a5fc4;
+        }
+
+        .checkout-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 药品卡片更新样式 */
+        .drug-price {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .drug-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .add-to-cart-btn {
+            flex: 1;
+            padding: 8px 15px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #218838;
+        }
+
+        .taobao-btn {
+            flex: 1;
+            padding: 8px 15px;
+            background: #ff6700;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            z-index: 3000;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            bottom: 30px;
+        }
+
+        /* 登录注册按钮样式 */
+        .login-btn, .register-btn {
+            padding: 5px 15px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .login-btn {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .register-btn {
+            background: white;
+            color: var(--primary) !important;
+        }
+
+        .register-btn:hover {
+            background: #f8f9fa;
+            color: var(--primary) !important;
+        }
+
         @media (max-width: 576px) {
             .logo span {
                 font-size: 1.2rem;
@@ -427,6 +677,19 @@
 
             .search-box {
                 display: none;
+            }
+
+            .cart-icon {
+                margin-left: 10px;
+            }
+
+            .nav-links li {
+                margin-left: 15px;
+            }
+
+            .login-btn, .register-btn {
+                font-size: 0.9rem;
+                padding: 3px 10px;
             }
         }
     </style>
@@ -442,8 +705,12 @@
                 </div>
                 <ul class="nav-links">
                     <li><a href="yiliao.html">首页</a></li>
-                    <li><a href="#" class="active">家庭常备药</a></li>
-
+                    <li><a href="healthy management.html">健康管理</a></li>
+                    <li><a href="chat.html">智能咨询</a></li>
+                    <li><a href="medical purchase.html" class="active">药品购买</a></li>
+                    <li><a href="#">在线问诊</a></li>
+                    <li><a href="#" class="login-btn">登录</a></li>
+                    <li><a href="#" class="register-btn">注册</a></li>
                 </ul>
                 <div class="search-box">
                     <input type="text" placeholder="搜索药品...">
@@ -452,6 +719,10 @@
                 <button class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
+                <div class="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="cart-badge">0</span>
+                </div>
             </nav>
         </div>
     </header>
@@ -487,6 +758,24 @@
                 <button class="category-btn" data-category="ent">五官/口腔</button>
                 <button class="category-btn" data-category="vitamin">维生素/矿物质</button>
                 <button class="category-btn" data-category="other">其他常用药</button>
+            </div>
+
+            <!-- 购物车侧边栏 -->
+            <div id="cart-sidebar" class="cart-sidebar">
+                <div class="cart-header">
+                    <h3>购物车</h3>
+                    <button id="close-cart" class="close-cart">×</button>
+                </div>
+                <div id="cart-items" class="cart-items">
+                    <p class="empty-cart">购物车是空的</p>
+                </div>
+                <div class="cart-footer">
+                    <div class="cart-total">
+                        <span>总计：</span>
+                        <span id="cart-total-price">¥0.00</span>
+                    </div>
+                    <button id="checkout-btn" class="checkout-btn" disabled>去结算</button>
+                </div>
             </div>
 
             <!-- 药品网格 -->
@@ -925,10 +1214,16 @@
                         </div>
                         <div class="drug-content">
                             <h3 class="drug-name">${drug.name}</h3>
+                            <p class="drug-price">¥${(Math.random() * 100 + 10).toFixed(2)}</p>
                             <p class="drug-desc">${drug.desc}</p>
-                            <a href="https://s.taobao.com/search?q=${encodeURIComponent(drug.name)}" target="_blank" class="taobao-btn">
-                                <i class="fab fa-taobao"></i> 淘宝搜索
-                            </a>
+                            <div class="drug-actions">
+                                <button class="add-to-cart-btn" data-id="${drug.id}" data-name="${drug.name}">
+                                    <i class="fas fa-shopping-cart"></i> 加入购物车
+                                </button>
+                                <a href="https://s.taobao.com/search?q=${encodeURIComponent(drug.name)}" target="_blank" class="taobao-btn">
+                                    <i class="fab fa-taobao"></i> 淘宝搜索
+                                </a>
+                            </div>
                         </div>
                     `;
                     
@@ -938,11 +1233,182 @@
 
             // 点击药品卡片任意位置跳转（除了按钮）
             document.addEventListener('click', function(e) {
-                if (e.target.closest('.drug-card') && !e.target.closest('.taobao-btn')) {
+                if (e.target.closest('.drug-card') && !e.target.closest('.taobao-btn') && !e.target.closest('.add-to-cart-btn')) {
                     const drugCard = e.target.closest('.drug-card');
                     const drugName = drugCard.querySelector('.drug-name').textContent;
                     window.open(`https://s.taobao.com/search?q=${encodeURIComponent(drugName)}`, '_blank');
                 }
+            });
+
+            // 购物车功能实现
+            let cart = [];
+            const cartIcon = document.querySelector('.cart-icon');
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const closeCart = document.getElementById('close-cart');
+            const cartItems = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotalPrice = document.getElementById('cart-total-price');
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            // 打开购物车
+            cartIcon.addEventListener('click', function() {
+                cartSidebar.classList.add('open');
+                updateCart();
+            });
+
+            // 关闭购物车
+            closeCart.addEventListener('click', function() {
+                cartSidebar.classList.remove('open');
+            });
+
+            // 添加到购物车
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.add-to-cart-btn')) {
+                    e.stopPropagation();
+                    const btn = e.target.closest('.add-to-cart-btn');
+                    const drugId = btn.getAttribute('data-id');
+                    const drugName = btn.getAttribute('data-name');
+                    const drugCard = btn.closest('.drug-card');
+                    const drugPrice = parseFloat(drugCard.querySelector('.drug-price').textContent.replace('¥', ''));
+                    
+                    addToCart(drugId, drugName, drugPrice);
+                    
+                    // 显示添加成功提示
+                    showNotification(`${drugName} 已添加到购物车`);
+                }
+            });
+
+            // 添加商品到购物车
+            function addToCart(id, name, price) {
+                const existingItem = cart.find(item => item.id === id);
+                
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({ id, name, price, quantity: 1 });
+                }
+                
+                updateCart();
+                saveCartToLocalStorage();
+            }
+
+            // 更新购物车显示
+            function updateCart() {
+                cartItems.innerHTML = '';
+                
+                if (cart.length === 0) {
+                    cartItems.innerHTML = '<p class="empty-cart">购物车是空的</p>';
+                    cartCount.textContent = '0';
+                    cartTotalPrice.textContent = '¥0.00';
+                    checkoutBtn.disabled = true;
+                    return;
+                }
+                
+                let total = 0;
+                
+                cart.forEach((item, index) => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item';
+                    cartItem.innerHTML = `
+                        <div class="item-info">
+                            <h4>${item.name}</h4>
+                            <span class="item-price">¥${item.price.toFixed(2)}</span>
+                        </div>
+                        <div class="item-controls">
+                            <button class="decrease-btn" data-index="${index}">-</button>
+                            <span class="item-quantity">${item.quantity}</span>
+                            <button class="increase-btn" data-index="${index}">+</button>
+                            <span class="item-subtotal">¥${itemTotal.toFixed(2)}</span>
+                            <button class="remove-btn" data-index="${index}">×</button>
+                        </div>
+                    `;
+                    
+                    cartItems.appendChild(cartItem);
+                });
+                
+                cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartTotalPrice.textContent = `¥${total.toFixed(2)}`;
+                checkoutBtn.disabled = false;
+            }
+
+            // 购物车按钮事件
+            cartItems.addEventListener('click', function(e) {
+                const index = e.target.getAttribute('data-index');
+                if (index !== null) {
+                    if (e.target.classList.contains('decrease-btn')) {
+                        if (cart[index].quantity > 1) {
+                            cart[index].quantity -= 1;
+                        } else {
+                            cart.splice(index, 1);
+                        }
+                    } else if (e.target.classList.contains('increase-btn')) {
+                        cart[index].quantity += 1;
+                    } else if (e.target.classList.contains('remove-btn')) {
+                        cart.splice(index, 1);
+                    }
+                    
+                    updateCart();
+                    saveCartToLocalStorage();
+                }
+            });
+
+            // 结算按钮
+            checkoutBtn.addEventListener('click', function() {
+                alert('感谢您的购买！此功能暂未实现，敬请期待。');
+                cart = [];
+                updateCart();
+                saveCartToLocalStorage();
+                cartSidebar.classList.remove('open');
+            });
+
+            // 保存购物车到本地存储
+            function saveCartToLocalStorage() {
+                localStorage.setItem('medicalCart', JSON.stringify(cart));
+            }
+
+            // 从本地存储加载购物车
+            function loadCartFromLocalStorage() {
+                const savedCart = localStorage.getItem('medicalCart');
+                if (savedCart) {
+                    cart = JSON.parse(savedCart);
+                    updateCart();
+                }
+            }
+
+            // 显示通知
+            function showNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 2000);
+            }
+
+            // 加载购物车数据
+            loadCartFromLocalStorage();
+
+            // 登录/注册按钮事件
+            document.querySelector('.login-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('登录功能暂未实现');
+            });
+
+            document.querySelector('.register-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('注册功能暂未实现');
             });
         });
     </script>
