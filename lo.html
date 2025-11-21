@@ -1,1495 +1,1167 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智慧医疗 - 预约挂号</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- 百度地图API -->
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=wTNumWnyfLFFfWIb3ir27bVF9dEVqXZB"></script>
-    <style>
-        :root {
-            --primary: #2a7de1;
-            --secondary: #4fb0ae;
-            --accent: #ff6b6b;
-            --light: #f8f9fa;
-            --dark: #343a40;
-            --success: #28a745;
-            --border-radius: 10px;
-            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        /* 导航栏样式 */
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 15px 0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .logo i {
-            margin-right: 10px;
-            font-size: 2rem;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-        }
-
-        .nav-links li {
-            margin-left: 25px;
-            position: relative;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            padding: 5px 0;
-        }
-
-        .nav-links a:hover {
-            color: #ffeb3b;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: #ffeb3b;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .search-box {
-            display: flex;
-            max-width: 300px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50px;
-            overflow: hidden;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 8px 15px;
-            border: none;
-            background: transparent;
-            color: white;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .search-box input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .search-box button {
-            padding: 8px 15px;
-            background: transparent;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .menu-toggle {
-            display: none;
-            font-size: 1.5rem;
-            color: white;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        /* 内容区域样式 */
-        .content-section {
-            padding: 30px 0;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .section-title h2 {
-            font-size: 2.2rem;
-            color: var(--dark);
-            margin-bottom: 15px;
-            position: relative;
-            display: inline-block;
-        }
-
-        .section-title h2::after {
-            content: '';
-            position: absolute;
-            width: 50px;
-            height: 3px;
-            background: var(--primary);
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .section-title p {
-            color: #666;
-            max-width: 700px;
-            margin: 0 auto;
-            font-size: 1.1rem;
-        }
-
-        /* 位置权限提示 */
-        .location-notice {
-            background: #e3f2fd;
-            border-left: 4px solid var(--primary);
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .location-notice h3 {
-            color: var(--primary);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        .location-notice h3 i {
-            margin-right: 10px;
-        }
-
-        .location-notice p {
-            color: #666;
-            font-size: 0.95rem;
-        }
-
-        /* 预约挂号区域 */
-        .appointment-container {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .map-container {
-            background: white;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--box-shadow);
-            height: 600px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .map-header {
-            padding: 15px 20px;
-            background: var(--light);
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .map-header h3 {
-            color: var(--dark);
-        }
-
-        .map-controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        .map-control-btn {
-            padding: 8px 15px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .map-control-btn:hover {
-            background: var(--light);
-        }
-
-        .map-control-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .map-content {
-            flex: 1;
-            position: relative;
-        }
-
-        #hospital-map {
-            width: 100%;
-            height: 100%;
-        }
-
-        .location-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--box-shadow);
-            cursor: pointer;
-            z-index: 1000;
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-
-        /* 路线信息面板 */
-        .route-info {
-            background: white;
-            border-top: 1px solid #eee;
-            padding: 15px 20px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .route-info h4 {
-            color: var(--dark);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .route-details {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .route-item {
-            margin-bottom: 8px;
-            padding-left: 15px;
-            position: relative;
-        }
-
-        .route-item::before {
-            content: '•';
-            position: absolute;
-            left: 0;
-            color: var(--primary);
-        }
-
-        .hospitals-list {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .hospitals-header {
-            padding: 15px 20px;
-            background: var(--light);
-            border-bottom: 1px solid #eee;
-        }
-
-        .hospitals-header h3 {
-            color: var(--dark);
-            margin-bottom: 10px;
-        }
-
-        .hospital-search-box {
-            display: flex;
-            background: white;
-            border-radius: 5px;
-            overflow: hidden;
-            border: 1px solid #ddd;
-        }
-
-        .hospital-search-box input {
-            flex: 1;
-            padding: 10px 15px;
-            border: none;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .hospital-search-box button {
-            padding: 10px 15px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .hospital-search-box button:hover {
-            background: var(--secondary);
-        }
-
-        .filter-options {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 5px 10px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .filter-btn.active, .filter-btn:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .hospitals-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0;
-        }
-
-        .hospital-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .hospital-item:hover {
-            background: var(--light);
-        }
-
-        .hospital-item.active {
-            background: rgba(42, 125, 225, 0.1);
-            border-left: 3px solid var(--primary);
-        }
-
-        .hospital-name {
-            font-size: 1.1rem;
-            color: var(--dark);
-            margin-bottom: 5px;
-        }
-
-        .hospital-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .hospital-distance {
-            color: var(--primary);
-            font-weight: 500;
-        }
-
-        .hospital-address {
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 10px;
-        }
-
-        .hospital-rating {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            color: #ffc107;
-            font-size: 0.85rem;
-        }
-
-        .hospital-actions {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-book {
-            padding: 8px 15px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-book:hover {
-            background: var(--secondary);
-        }
-
-        .btn-navigate {
-            padding: 8px 15px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-navigate:hover {
-            background: #218838;
-        }
-
-        .btn-navigate i {
-            margin-right: 5px;
-        }
-
-        .btn-details {
-            padding: 8px 15px;
-            background: transparent;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            border-radius: 5px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-details:hover {
-            background: rgba(42, 125, 225, 0.1);
-        }
-
-        /* 位置选择器 */
-        .location-selector {
-            background: white;
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .location-selector h4 {
-            margin-bottom: 10px;
-            color: var(--dark);
-        }
-
-        .location-options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .location-option {
-            padding: 8px 15px;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 0.85rem;
-        }
-
-        .location-option.active, .location-option:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        /* 权限引导弹窗 */
-        .permission-guide {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .permission-guide.active {
-            display: flex;
-        }
-
-        .guide-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 500px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .guide-content h3 {
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
-
-        .guide-content p {
-            margin-bottom: 20px;
-            color: #666;
-        }
-
-        .guide-steps {
-            text-align: left;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .guide-steps p {
-            margin-bottom: 8px;
-        }
-
-        .guide-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .btn-primary {
-            padding: 10px 20px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .btn-primary:hover {
-            background: #1a6bc9;
-        }
-
-        .btn-secondary {
-            padding: 10px 20px;
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        /* 加载状态 */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            color: #666;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 992px) {
-            .appointment-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                width: 100%;
-                background: var(--primary);
-                flex-direction: column;
-                padding: 20px;
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-            }
-
-            .nav-links.active {
-                display: flex;
-            }
-
-            .nav-links li {
-                margin: 10px 0;
-            }
-
-            .menu-toggle {
-                display: block;
-            }
-
-            .search-box {
-                max-width: 200px;
-            }
-
-            .hospital-actions {
-                flex-wrap: wrap;
-            }
-
-            .map-controls {
-                flex-wrap: wrap;
-            }
-
-            .location-options {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .section-title h2 {
-                font-size: 1.8rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .logo span {
-                font-size: 1.2rem;
-            }
-
-            .search-box {
-                display: none;
-            }
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>预约挂号 - 附近医院（百度地图）</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root{--primary:#8099b7;--success:#28a745;--light:#f8f9fa;--dark:#343a40;--border-radius:10px;--box-shadow:0 6px 20px rgba(0,0,0,0.08);}
+/* styles omitted for brevity (unchanged) */
+*{box-sizing:border-box;margin:0;padding:0;font-family: "Segoe UI", Tahoma, Arial, sans-serif;}
+body{background:#f5f7fa;color:#222;font-size:16px;line-height:1.5;}
+.container{max-width:1200px;margin:18px auto;padding:0 14px;}
+header{background:linear-gradient(135deg,var(--primary),#4fb0ae);color:#fff;padding:12px;border-radius:8px;margin-bottom:12px;}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;}
+.controls{display:flex;gap:12px;align-items:center;margin-bottom:12px;}
+.location-input-group{flex:1;position:relative;}
+.manual-location{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;background:#fff;}
+.location-suggestions{position:absolute;left:0;right:0;top:100%;background:#fff;border-radius:8px;box-shadow:var(--box-shadow);max-height:260px;overflow:auto;z-index:220;display:none;}
+.location-suggestions.active{display:block;}
+.location-suggestion{padding:10px;border-bottom:1px solid #eee;cursor:pointer;}
+.location-suggestion:hover{background:#f0f5ff;color:var(--primary);}
+.location-buttons{display:flex;gap:8px;}
+.location-btn{padding:10px 14px;border-radius:8px;border:0;background:var(--primary);color:#fff;cursor:pointer;}
+.gps-location-btn{background:#fff;color:var(--primary);border:1px solid var(--primary);}
+.search-container{display:flex;gap:8px;margin-bottom:12px;}
+.search-input{flex:1;padding:10px;border-radius:8px;border:1px solid #ddd;}
+.search-btn{padding:10px 14px;border-radius:8px;border:0;background:var(--primary);color:#fff;cursor:pointer;}
+#map{width:100%;height:520px;border-radius:10px;box-shadow:var(--box-shadow);position:relative;margin-bottom:12px;}
+.map-inner-controls{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:8px;z-index:120;}
+.map-control-btn{width:40px;height:40px;border-radius:50%;background:#fff;border:0;display:flex;align-items:center;justify-content:center;box-shadow:var(--box-shadow);cursor:pointer;}
+.hospital-list-wrap{display:flex;gap:12px;margin-top:12px;}
+.hospital-list{flex:1;background:#fff;padding:12px;border-radius:10px;box-shadow:var(--box-shadow);max-height:380px;overflow:auto;}
+.hospital-item{padding:12px;border-radius:8px;background:#f7f9fb;margin-bottom:12px;cursor:pointer;}
+.hospital-item.active{border-left:4px solid var(--primary);background:#fff;box-shadow:var(--box-shadow);}
+.hospital-info{display:flex;justify-content:space-between;color:#666;font-size:14px;}
+.hospital-actions{margin-top:8px;display:flex;gap:8px;}
+.btn-light{background:#fff;color:var(--primary);border:1px solid #eee;padding:6px 10px;border-radius:6px;cursor:pointer;}
+.btn-success{background:var(--success);color:#fff;border:0;padding:6px 10px;border-radius:6px;cursor:pointer;}
+.route-panel{width:360px;background:#fff;padding:12px;border-radius:10px;box-shadow:var(--box-shadow);max-height:380px;overflow:auto;display:none;}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:none;align-items:center;justify-content:center;z-index:10000;}
+.modal{background:#fff;padding:16px;border-radius:8px;width:90%;max-width:720px;}
+.locating-overlay{position:fixed;left:12px;right:12px;top:84px;background:#fff;padding:12px;border-radius:8px;box-shadow:var(--box-shadow);z-index:11000;display:none;align-items:center;gap:12px;}
+.locating-overlay.visible{display:flex;}
+.debug{font-size:13px;color:#666;margin-top:8px;}
+.small{font-size:13px;color:#666;}
+@media (max-width:900px){ .route-panel{width:100%;} #map{height:420px;} .controls{flex-direction:column;align-items:stretch;} }
+</style>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo">
-                    <i class="fas fa-heartbeat"></i>
-                    <span>智慧医疗</span>
-                </div>
-                <ul class="nav-links">
-                    <li><a href="yiliao.html">首页</a></li>
-                </ul>
-                <div class="search-box">
-                    <input type="text" placeholder="搜索医院...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
-                <button class="menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </nav>
-        </div>
-    </header>
+  <header class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <a href="yiliao.html" class="btn-light" style="text-decoration:none;">
+          <i class="fas fa-home"></i> 首页
+        </a>
+        <div class="logo"><i class="fas fa-heartbeat"></i><span>智慧医疗 — 预约挂号</span></div>
+      </div>
+      <div><button id="refreshBtn" class="btn-light">刷新</button></div>
+    </div>
+  </header>
 
-    <!-- 内容区域 -->
-    <section class="content-section">
-        <div class="container">
-            <div class="section-title">
-                <h2>预约挂号</h2>
-                <p>选择附近的医院，快速预约专家门诊</p>
-            </div>
-
-            <!-- 位置权限提示 -->
-            <div class="location-notice">
-                <h3><i class="fas fa-info-circle"></i> 位置服务提示</h3>
-                <p>为了为您提供附近的医院信息，我们需要获取您的位置权限。您也可以手动选择所在区域。</p>
-            </div>
-
-            <!-- 预约挂号区域 -->
-            <div class="appointment-container">
-                <!-- 地图区域 -->
-                <div class="map-container">
-                    <div class="map-header">
-                        <h3 id="map-title">附近医院</h3>
-                        <div class="map-controls">
-                            <button class="map-control-btn active" id="show-hospitals">
-                                <i class="fas fa-hospital"></i> 显示医院
-                            </button>
-                            <button class="map-control-btn" id="show-route">
-                                <i class="fas fa-route"></i> 显示路线
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- 位置选择器 -->
-                    <div class="location-selector">
-                        <h4><i class="fas fa-map-marker-alt"></i> 选择您的位置</h4>
-                        <div class="location-options">
-                            <button class="location-option active" data-location="auto">
-                                <i class="fas fa-location-arrow"></i> 自动定位
-                            </button>
-                            <button class="location-option" data-location="beijing">
-                                <i class="fas fa-city"></i> 北京市中心
-                            </button>
-                            <button class="location-option" data-location="haidian">
-                                <i class="fas fa-university"></i> 海淀区
-                            </button>
-                            <button class="location-option" data-location="chaoyang">
-                                <i class="fas fa-building"></i> 朝阳区
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="map-content">
-                        <div id="hospital-map">
-                            <div class="loading">
-                                <div class="loading-spinner"></div>
-                                <span>地图加载中...</span>
-                            </div>
-                        </div>
-                        <button id="locate-me" class="location-btn" title="重新定位">
-                            <i class="fas fa-location-arrow"></i>
-                        </button>
-                    </div>
-                    <div class="route-info" id="route-info" style="display: none;">
-                        <h4><i class="fas fa-info-circle"></i> 路线信息</h4>
-                        <div class="route-details" id="route-details">
-                            <!-- 路线信息将在这里显示 -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 医院列表区域 -->
-                <div class="hospitals-list">
-                    <div class="hospitals-header">
-                        <h3>医院列表</h3>
-                        <div class="hospital-search-box">
-                            <input type="text" id="hospital-search" placeholder="搜索医院名称...">
-                            <button id="search-btn"><i class="fas fa-search"></i></button>
-                        </div>
-                        <div class="filter-options">
-                            <button class="filter-btn active" data-filter="all">全部</button>
-                            <button class="filter-btn" data-filter="三甲医院">三甲医院</button>
-                            <button class="filter-btn" data-filter="专科医院">专科医院</button>
-                            <button class="filter-btn" data-filter="社区医院">社区医院</button>
-                        </div>
-                    </div>
-                    <div class="hospitals-content" id="hospitals-list">
-                        <div class="loading">
-                            <div class="loading-spinner"></div>
-                            <span>加载医院信息...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 权限引导弹窗 -->
-    <div class="permission-guide" id="permissionGuide">
-        <div class="guide-content">
-            <h3>需要位置权限</h3>
-            <p>为了为您提供附近的医院信息，我们需要获取您的位置权限。</p>
-            <div class="guide-steps">
-                <p><strong>操作步骤：</strong></p>
-                <p>1. 点击浏览器地址栏左侧的🔒或📍图标</p>
-                <p>2. 找到"位置"或"Location"选项</p>
-                <p>3. 选择"允许"或"Allow"</p>
-                <p>4. 刷新页面后重试</p>
-            </div>
-            <div class="guide-actions">
-                <button class="btn-primary" id="closeGuide">我知道了</button>
-                <button class="btn-secondary" id="useDefaultLocation">使用默认位置</button>
-            </div>
-        </div>
+  <main class="container">
+    <div class="controls">
+      <div class="location-input-group">
+        <input id="manualLocation" class="manual-location" placeholder="输入地址（示例：北京市海淀区中关村东路XX号）" autocomplete="off" />
+        <div id="locationSuggestions" class="location-suggestions" role="listbox" aria-label="位置建议"></div>
+      </div>
+      <div class="location-buttons">
+        <button id="confirmLocation" class="location-btn"><i class="fas fa-map-marker-alt"></i> 确认地址</button>
+        <button id="gpsLocation" class="location-btn gps-location-btn"><i class="fas fa-location-arrow"></i> 我的位置</button>
+      </div>
     </div>
 
-    <script>
-        // 医院数据
-        const hospitals = [
-            {
-                id: 1,
-                name: "北京协和医院",
-                type: "三甲医院",
-                address: "北京市东城区帅府园1号",
-                distance: "1.2km",
-                rating: 4.9,
-                website: "https://www.pumch.cn/",
-                lat: 39.9042,
-                lng: 116.4074,
-                phone: "010-69151188",
-                departments: ["内科", "外科", "妇产科", "儿科"]
-            },
-            {
-                id: 2,
-                name: "北京大学第一医院",
-                type: "三甲医院",
-                address: "北京市西城区西什库大街8号",
-                distance: "2.5km",
-                rating: 4.8,
-                website: "https://www.bddyyy.com.cn/",
-                lat: 39.9232,
-                lng: 116.3719,
-                phone: "010-83572211",
-                departments: ["心血管内科", "神经内科", "骨科"]
-            },
-            {
-                id: 3,
-                name: "北京天坛医院",
-                type: "三甲医院",
-                address: "北京市丰台区南四环西路119号",
-                distance: "3.8km",
-                rating: 4.7,
-                website: "https://www.bjtth.org/",
-                lat: 39.8632,
-                lng: 116.2869,
-                phone: "010-59976699",
-                departments: ["神经外科", "神经内科", "急诊科"]
-            },
-            {
-                id: 4,
-                name: "北京儿童医院",
-                type: "专科医院",
-                address: "北京市西城区南礼士路56号",
-                distance: "4.2km",
-                rating: 4.8,
-                website: "https://www.bch.com.cn/",
-                lat: 39.9042,
-                lng: 116.3509,
-                phone: "010-59616161",
-                departments: ["儿科", "新生儿科", "儿童保健科"]
-            },
-            {
-                id: 5,
-                name: "朝阳社区卫生服务中心",
-                type: "社区医院",
-                address: "北京市朝阳区建国路88号",
-                distance: "0.8km",
-                rating: 4.5,
-                website: "#",
-                lat: 39.9086,
-                lng: 116.4536,
-                phone: "010-65889900",
-                departments: ["全科", "预防保健科", "康复科"]
+    <div class="search-container">
+      <input id="hospitalSearch" class="search-input" placeholder="搜索医院或科室（可选）" />
+      <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> 搜索</button>
+    </div>
+
+    <div id="map">
+      <div class="map-inner-controls">
+        <button id="zoomIn" class="map-control-btn" title="放大"><i class="fas fa-plus"></i></button>
+        <button id="zoomOut" class="map-control-btn" title="缩小"><i class="fas fa-minus"></i></button>
+        <button id="trafficToggle" class="map-control-btn" title="路况"><i class="fas fa-car-side"></i></button>
+      </div>
+    </div>
+
+    <div class="hospital-list-wrap">
+      <div id="hospital-results" class="hospital-list">
+        <h3><i class="fas fa-hospital"></i> 附近医院（近 → 远）</h3>
+        <p class="small">等待定位或手动确认地址后显示。</p>
+      </div>
+      <div id="routePanel" class="route-panel" aria-hidden="true">
+        <h4>路线详情 <span id="routeModeLabel" class="small"></span></h4>
+        <div id="routeOptions"></div>
+        <div id="routeSteps"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+          <button id="downloadRouteBtn" class="btn-light"><i class="fas fa-download"></i> 下载</button>
+          <button id="clearRouteBtn" class="btn-light">清除路线</button>
+          <button id="hideRoutePanel" class="btn-light">关闭</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true"><div id="modalContent"></div></div>
+  </div>
+
+  <div id="locatingOverlay" class="locating-overlay" aria-hidden="true">
+    <i class="fas fa-spinner fa-spin"></i>
+    <div id="locatingText">正在定位，请允许浏览器位置权限...</div>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <button id="locRetryBtn" class="btn-light">重试</button>
+      <button id="useDefaultBtn" class="btn-light">使用默认城市</button>
+    </div>
+  </div>
+
+  <div class="debug" style="position:fixed;left:12px;bottom:12px;background:#fff;padding:8px;border-radius:8px;box-shadow:var(--box-shadow);z-index:12000;">
+    <div><strong>调试</strong></div>
+    <div id="dbgMsg">就绪</div>
+    <div style="margin-top:6px;"><button id="runRepairBtn" class="btn-light">修复界面</button></div>
+  </div>
+
+  <!-- Baidu Map API -->
+  <script src="https://api.map.baidu.com/api?v=3.0&ak=wTNumWnyfLFFfWIb3ir27bVF9dEVqXZB"></script>
+  <script>
+  (function(){
+    // DOM
+    const manualInput = document.getElementById('manualLocation');
+    const suggestionsBox = document.getElementById('locationSuggestions');
+    const confirmBtn = document.getElementById('confirmLocation');
+    const gpsBtn = document.getElementById('gpsLocation');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const searchBtn = document.getElementById('searchBtn');
+    const hospitalResults = document.getElementById('hospital-results');
+    const zoomInBtn = document.getElementById('zoomIn');
+    const zoomOutBtn = document.getElementById('zoomOut');
+    const trafficToggleBtn = document.getElementById('trafficToggle');
+    const locatingOverlay = document.getElementById('locatingOverlay');
+    const locatingText = document.getElementById('locatingText');
+    const routePanel = document.getElementById('routePanel');
+    const routeOptions = document.getElementById('routeOptions');
+    const routeSteps = document.getElementById('routeSteps');
+    const clearRouteBtn = document.getElementById('clearRouteBtn');
+    const hideRoutePanelBtn = document.getElementById('hideRoutePanel');
+    const downloadRouteBtn = document.getElementById('downloadRouteBtn');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalContent = document.getElementById('modalContent');
+    const dbgMsg = document.getElementById('dbgMsg');
+    const runRepairBtn = document.getElementById('runRepairBtn');
+    const locRetryBtn = document.getElementById('locRetryBtn');
+    const useDefaultBtn = document.getElementById('useDefaultBtn');
+
+    // Map & state
+    let map, geolocation, convertor, localSearch;
+    let currentPoint = null;
+    let userMarker = null;
+    let hospitalMarkers = [];
+    let routeOverlays = [];
+    let currentRouteService = null;
+    let lastRenderedPlanData = null;
+    let lastRouteMeta = null;
+    let trafficLayer = null;
+    let currentCity = ''; // <-- store current city name to assist geocoding
+
+    // Utilities
+    function logDbg(msg, isErr=false){ console.debug(msg); dbgMsg.textContent = msg; dbgMsg.style.color = isErr ? '#c00' : '#333'; }
+    function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
+    function debounce(fn, wait){ let t=null; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), wait); }; }
+
+    // New: sanitizeInstruction
+    // - Allows only these tags: b, strong, em, i, u, br
+    // - Removes script/style blocks and strips other tags/attributes
+    function sanitizeInstruction(input){
+      if (!input && input !== 0) return '';
+      let html = String(input);
+
+      // remove script/style blocks
+      html = html.replace(/<\s*(script|style)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '');
+
+      // preserve allowed tags by placeholder
+      const allowed = ['b','strong','em','i','u','br'];
+      allowed.forEach(tag=>{
+        const openRe = new RegExp('<\\s*'+tag+'[^>]*>', 'gi');
+        const closeRe = new RegExp('<\\s*\\/\\s*'+tag+'[^>]*>', 'gi');
+        html = html.replace(openRe, '[[['+tag+']]]');
+        html = html.replace(closeRe, '[[[/' + tag + ']]]');
+      });
+
+      // strip any remaining tags (including attributes on other tags)
+      html = html.replace(/<[^>]+>/g, '');
+
+      // escape special chars so we don't accidentally reintroduce tags
+      html = html.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+      // restore allowed tags from placeholders
+      allowed.forEach(tag=>{
+        const openPh = new RegExp('\\[\\[\\['+tag+'\\]\\]\\]', 'g');
+        const closePh = new RegExp('\\[\\[\\[/' + tag + '\\]\\]\\]', 'g');
+        html = html.replace(openPh, '<'+tag+'>');
+        html = html.replace(closePh, '</'+tag+'>');
+      });
+
+      // Collapse multiple spaces
+      html = html.replace(/\s+/g,' ').trim();
+      return html;
+    }
+
+    // Distance Haversine
+    function computeDistanceMeters(p1, p2){
+      if (!p1 || !p2) return Infinity;
+      const R = 6371000;
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(p2.lat - p1.lat);
+      const dLon = toRad(p2.lng - p1.lng);
+      const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(toRad(p1.lat))*Math.cos(toRad(p2.lat))*Math.sin(dLon/2)*Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // Modal helpers
+    function showModal(html){
+      modalContent.innerHTML = html;
+      modalBackdrop.style.display = 'flex';
+      modalBackdrop.style.pointerEvents = 'auto';
+      modalBackdrop.setAttribute('aria-hidden','false');
+    }
+    function hideModal(){
+      modalBackdrop.style.display = 'none';
+      modalBackdrop.style.pointerEvents = 'none';
+      modalBackdrop.setAttribute('aria-hidden','true');
+      modalContent.innerHTML = '';
+    }
+
+    // Locating overlay
+    function showLocating(text){ locatingText.textContent = text || '定位中...'; locatingOverlay.classList.add('visible'); locatingOverlay.style.display = 'flex'; locatingOverlay.setAttribute('aria-hidden','false'); }
+    function hideLocating(){ locatingOverlay.classList.remove('visible'); locatingOverlay.style.display = 'none'; locatingOverlay.setAttribute('aria-hidden','true'); }
+
+    // Repair UI
+    function runRepair(){ try{ hideModal(); hideLocating(); document.querySelectorAll('button[disabled]').forEach(b=>{ try{ b.disabled=false; b.removeAttribute('disabled'); }catch(e){} }); document.body.style.pointerEvents='auto'; logDbg('已尝试修复界面'); }catch(e){ console.error(e); logDbg('修复失败（查看控制台）', true); } }
+
+    // Safe bind
+    function safeBind(selector, event, handler){
+      const el = document.querySelector(selector);
+      if (el) el.addEventListener(event, handler);
+      else {
+        let tries = 0;
+        const tid = setInterval(()=>{ tries++; const e = document.querySelector(selector); if (e){ clearInterval(tid); e.addEventListener(event, handler); } if (tries>8) clearInterval(tid); }, 300);
+      }
+    }
+
+    // LocalSearch wrapper
+    function performLocalSearch(keyword, cb){
+      try {
+        if (!localSearch) localSearch = new BMap.LocalSearch(map, { renderOptions:{map:null,panel:null} });
+        localSearch.clearResults(); localSearch.search(keyword);
+        setTimeout(()=> {
+          try {
+            let pois = [];
+            if (localSearch.getResults) {
+              const results = localSearch.getResults();
+              if (results && typeof results.getPoi === 'function') {
+                const n = results.getCurrentNumPois ? results.getCurrentNumPois() : 0;
+                for (let i=0;i<n;i++){ try{ const p = results.getPoi(i); if (p) pois.push(p); }catch(e){} }
+              }
             }
-        ];
+            if (!pois.length && typeof localSearch.getCurrentNumPois === 'function') {
+              const n = localSearch.getCurrentNumPois();
+              for (let i=0;i<n;i++){ try{ const p = localSearch.getPoi(i); if (p) pois.push(p); }catch(e){} }
+            }
+            if (!pois.length && Array.isArray(localSearch._results)) pois = localSearch._results.slice(0,8);
+            console.debug('LocalSearch(',keyword,') ->', pois);
+            cb(pois || []);
+          } catch(err){ console.error('performLocalSearch extract err', err); cb([]); }
+        }, 300);
+      } catch(e){ console.error('performLocalSearch err', e); cb([]); }
+    }
 
-        // 位置配置
-        const locationConfig = {
-            'auto': { name: '自动定位', lat: null, lng: null },
-            'beijing': { name: '北京市中心', lat: 39.9042, lng: 116.4074 },
-            'haidian': { name: '海淀区', lat: 39.9599, lng: 116.2980 },
-            'chaoyang': { name: '朝阳区', lat: 39.9219, lng: 116.4431 }
-        };
+    // Suggestion list rendering
+    function renderSuggestionList(pois){
+      suggestionsBox.innerHTML = '';
+      if (!pois || !pois.length) { suggestionsBox.classList.remove('active'); return; }
+      pois.slice(0,8).forEach(poi=>{
+        const div = document.createElement('div'); div.className='location-suggestion';
+        const title = poi.title || poi.name || '';
+        const addr = poi.address || poi.snippet || '';
+        div.innerHTML = `<strong>${escapeHtml(title)}</strong><div style="font-size:12px;color:#666;">${escapeHtml(addr)}</div>`;
+        div.tabIndex = 0;
+        div.addEventListener('click', ()=>applyPoi(poi));
+        div.addEventListener('keydown', e=>{ if (e.key === 'Enter') applyPoi(poi); });
+        suggestionsBox.appendChild(div);
+      });
+      suggestionsBox.classList.add('active');
+    }
 
-        // 全局变量
-        let map, userLocation, userMarker;
-        let hospitalMarkers = [];
-        let currentRoute = null;
-        let selectedHospitalForRoute = null;
-        let isRouteMode = false;
-        let currentLocationType = 'auto';
+    // Apply POI to map (prefer poi.point to avoid district center fallback)
+    function applyPoi(poi){
+      if (!poi) return;
+      let pt = null;
+      if (poi.point && typeof poi.point.lng !== 'undefined') pt = poi.point;
+      else if (poi.location && typeof poi.location.lng !== 'undefined') pt = new BMap.Point(poi.location.lng, poi.location.lat);
+      else if (poi.geometry && poi.geometry.location) pt = new BMap.Point(poi.geometry.location.lng, poi.geometry.location.lat);
+      if (pt) setCurrentPoint(pt);
+      else {
+        const geoc = new BMap.Geocoder();
+        geoc.getPoint((poi.title||poi.name||''), function(p){ if (p) setCurrentPoint(p); else alert('无法解析该地址为精确位置'); }, currentCity || null);
+      }
+      manualInput.value = (poi.title || poi.name || '') + (poi.address ? ' ' + poi.address : '');
+      suggestionsBox.classList.remove('active');
+    }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const navLinks = document.querySelector('.nav-links');
-            const hospitalsContainer = document.getElementById('hospitals-list');
-            const searchInput = document.getElementById('hospital-search');
-            const searchBtn = document.getElementById('search-btn');
-            const filterBtns = document.querySelectorAll('.filter-btn');
-            const locateButton = document.getElementById('locate-me');
-            const permissionGuide = document.getElementById('permissionGuide');
-            const closeGuide = document.getElementById('closeGuide');
-            const useDefaultLocationBtn = document.getElementById('useDefaultLocation');
-            const showHospitalsBtn = document.getElementById('show-hospitals');
-            const showRouteBtn = document.getElementById('show-route');
-            const routeInfo = document.getElementById('route-info');
-            const routeDetails = document.getElementById('route-details');
-            const mapTitle = document.getElementById('map-title');
-            const locationOptions = document.querySelectorAll('.location-option');
+    // Set current point, marker, reverse fill and trigger nearby hospital search
+    function setCurrentPoint(pt){
+      currentPoint = pt;
+      map.centerAndZoom(pt, 17);
+      if (userMarker) map.removeOverlay(userMarker);
+      userMarker = new BMap.Marker(pt); map.addOverlay(userMarker); userMarker.setAnimation(BMAP_ANIMATION_BOUNCE);
+      const geoc = new BMap.Geocoder();
+      geoc.getLocation(pt, function(rs){
+        if (rs && rs.addressComponents){
+          const c = rs.addressComponents;
+          manualInput.value = (c.province||'') + (c.city||'') + (c.district||'') + (c.street||'') + (c.streetNumber||'');
+          // store current city for better geocoding of house numbers later
+          currentCity = c.city || c.province || '';
+        }
+      });
+      // now fetch nearby hospitals within 5km and sort by distance
+      searchNearbyHospitals(pt);
+    }
 
-            // 菜单切换
-            menuToggle.addEventListener('click', function() {
-                navLinks.classList.toggle('active');
+    // Debounced input handler
+    const debouncedSuggest = debounce(function(val){ if (!val || val.length < 2) { suggestionsBox.classList.remove('active'); return; } performLocalSearch(val, function(pois){ if (pois && pois.length) renderSuggestionList(pois); else suggestionsBox.classList.remove('active'); }); }, 250);
+    manualInput.addEventListener('input', function(){ debouncedSuggest(this.value.trim()); });
+    document.addEventListener('click', function(e){ if (!e.target.closest('.location-input-group')) suggestionsBox.classList.remove('active'); });
+
+    // Confirm click — improved to geocode full address (including 门牌号) using city context first
+    confirmBtn.addEventListener('click', function(){
+      const text = manualInput.value.trim();
+      if (!text){ alert('请输入地址'); return; }
+
+      // If suggestion list is visible and user picked one, use it
+      if (suggestionsBox.classList.contains('active') && suggestionsBox.firstChild){
+        suggestionsBox.firstChild.click(); return;
+      }
+
+      // Try precise geocoding with Geocoder.getPoint using city as scope (helps resolve 门牌号)
+      const geoc = new BMap.Geocoder();
+      const cityForQuery = currentCity || ''; // may be empty
+      geoc.getPoint(text, function(pt){
+        if (pt){
+          // success: exact point found
+          setCurrentPoint(pt);
+        } else {
+          // If not found, try adding currentCity prefix (helps when user writes "中关村东路XX号" without city)
+          if (cityForQuery && text.indexOf(cityForQuery) === -1){
+            geoc.getPoint(cityForQuery + text, function(pt2){
+              if (pt2) setCurrentPoint(pt2);
+              else {
+                // fallback: try LocalSearch to get POI best match
+                performLocalSearch(text, function(pois){
+                  if (pois && pois.length) applyPoi(pois[0]);
+                  else {
+                    // final fallback: use geocoder without city then alert
+                    geoc.getPoint(text, function(pt3){
+                      if (pt3) setCurrentPoint(pt3);
+                      else alert('无法解析地址为精确门牌位置，请尝试加上城市/区/街道或从建议中选择。');
+                    }, null);
+                  }
+                });
+              }
+            }, null);
+          } else {
+            // no city or already included, fallback to LocalSearch
+            performLocalSearch(text, function(pois){
+              if (pois && pois.length) applyPoi(pois[0]);
+              else {
+                alert('无法解析地址为精确门牌位置，请尝试更详细的描述或选择建议。');
+              }
             });
+          }
+        }
+      }, cityForQuery || null);
+    });
 
-            // 初始化地图
-            function initMap() {
-                try {
-                    // 默认中心点设为北京
-                    const defaultPoint = new BMap.Point(116.4074, 39.9042);
-                    
-                    // 初始化地图
-                    map = new BMap.Map("hospital-map");
-                    map.centerAndZoom(defaultPoint, 12);
-                    map.enableScrollWheelZoom(true);
-                    
-                    // 添加地图控件
-                    map.addControl(new BMap.NavigationControl());
-                    map.addControl(new BMap.ScaleControl());
-                    map.addControl(new BMap.OverviewMapControl());
-                    
-                    // 移除加载状态
-                    document.querySelector('#hospital-map .loading').style.display = 'none';
-                    
-                    // 尝试获取用户位置
-                    getUserLocation();
-                    
-                    console.log('百度地图加载成功！');
-                    
-                } catch (error) {
-                    console.error('百度地图初始化失败:', error);
-                    document.querySelector('#hospital-map .loading').innerHTML = 
-                        '<div style="text-align: center; color: #ff6b6b; padding: 20px;">' +
-                        '<i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 10px;"></i>' +
-                        '<p>地图加载失败，请检查网络连接和API密钥</p>' +
-                        '</div>';
-                }
-            }
+    // GPS click
+    gpsBtn.addEventListener('click', function(){
+      gpsBtn.disabled = true; gpsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 定位中...';
+      showLocating('正在定位，请允许浏览器位置权限...');
+      if (navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(function(pos){
+          convertWgs84ToBaidu(pos.coords.longitude, pos.coords.latitude, function(bdPt){ setCurrentPoint(bdPt); gpsBtn.disabled = false; gpsBtn.innerHTML = '<i class="fas fa-location-arrow"></i> 我的位置'; hideLocating(); }, function(){ fallbackBMapGeo(); });
+        }, function(err){ console.debug('navigator geolocation failed', err); fallbackBMapGeo(); }, { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
+      } else fallbackBMapGeo();
+    });
 
-            // 获取用户位置
-            function getUserLocation() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        function(position) {
-                            const lat = position.coords.latitude;
-                            const lng = position.coords.longitude;
-                            userLocation = new BMap.Point(lng, lat);
-                            setUserLocationMarker();
-                            updateHospitalDistances();
-                        },
-                        function(error) {
-                            console.log('无法获取精确位置，使用默认位置');
-                            // 使用默认位置（北京市中心）
-                            userLocation = new BMap.Point(116.4074, 39.9042);
-                            setUserLocationMarker();
-                            updateHospitalDistances();
-                        },
-                        {
-                            enableHighAccuracy: false, // 降低精度要求
-                            timeout: 5000, // 缩短超时时间
-                            maximumAge: 300000 // 5分钟缓存
-                        }
-                    );
-                } else {
-                    // 浏览器不支持定位，使用默认位置
-                    userLocation = new BMap.Point(116.4074, 39.9042);
-                    setUserLocationMarker();
-                    updateHospitalDistances();
-                }
-            }
+    function fallbackBMapGeo(){
+      if (!geolocation) geolocation = new BMap.Geolocation();
+      geolocation.getCurrentPosition(function(r){
+        gpsBtn.disabled = false; gpsBtn.innerHTML = '<i class="fas fa-location-arrow"></i> 我的位置';
+        hideLocating();
+        if (this.getStatus && this.getStatus() === BMAP_STATUS_SUCCESS) setCurrentPoint(r.point);
+        else showPermissionModal();
+      }, { enableHighAccuracy:true, timeout:10000 });
+    }
 
-            // 设置用户位置标记
-            function setUserLocationMarker() {
-                if (userMarker) {
-                    map.removeOverlay(userMarker);
-                }
-                
-                userMarker = new BMap.Marker(userLocation);
-                map.addOverlay(userMarker);
-                
-                const infoWindow = new BMap.InfoWindow("您的位置");
-                userMarker.openInfoWindow(infoWindow);
-                
-                map.panTo(userLocation);
-                map.setZoom(14);
-                
-                // 添加医院标记
-                addHospitalMarkers(hospitals);
-            }
-
-            // 位置选择器
-            locationOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    locationOptions.forEach(opt => opt.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const locationType = this.getAttribute('data-location');
-                    currentLocationType = locationType;
-                    
-                    if (locationType === 'auto') {
-                        getUserLocation();
-                    } else {
-                        const config = locationConfig[locationType];
-                        userLocation = new BMap.Point(config.lng, config.lat);
-                        setUserLocationMarker();
-                        updateHospitalDistances();
-                    }
-                });
-            });
-
-            // 重新定位按钮
-            locateButton.addEventListener('click', function() {
-                if (currentLocationType === 'auto') {
-                    getUserLocation();
-                } else {
-                    const config = locationConfig[currentLocationType];
-                    userLocation = new BMap.Point(config.lng, config.lat);
-                    setUserLocationMarker();
-                    updateHospitalDistances();
-                }
-            });
-
-            // 添加医院标记
-            function addHospitalMarkers(hospitalList) {
-                // 清除现有标记
-                hospitalMarkers.forEach(marker => {
-                    map.removeOverlay(marker);
-                });
-                hospitalMarkers = [];
-                
-                hospitalList.forEach(hospital => {
-                    const point = new BMap.Point(hospital.lng, hospital.lat);
-                    const marker = new BMap.Marker(point);
-                    
-                    // 创建信息窗口内容
-                    const infoWindowContent = `
-                        <div style="min-width: 280px; padding: 15px;">
-                            <h3 style="margin: 0 0 10px; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
-                                ${hospital.name}
-                            </h3>
-                            <p style="margin: 5px 0; font-size: 14px; color: #666;">
-                                <i class="fas fa-hospital" style="color: var(--primary); margin-right: 5px;"></i>
-                                ${hospital.type}
-                            </p>
-                            <p style="margin: 5px 0; font-size: 14px; color: #666;">
-                                <i class="fas fa-map-marker-alt" style="color: #ffc107; margin-right: 5px;"></i>
-                                ${hospital.address}
-                            </p>
-                            <p style="margin: 5px 0; font-size: 14px; color: #666;">
-                                <i class="fas fa-phone" style="color: #28a745; margin-right: 5px;"></i>
-                                ${hospital.phone}
-                            </p>
-                            <div style="margin: 10px 0; display: flex; justify-content: space-between; align-items: center;">
-                                <span style="color: #ffc107;">
-                                    ${'★'.repeat(Math.floor(hospital.rating))}${hospital.rating % 1 !== 0 ? '½' : ''}
-                                    ${hospital.rating}
-                                </span>
-                                <span style="color: var(--primary); font-weight: bold;">${hospital.distance}</span>
-                            </div>
-                            <div style="margin: 10px 0;">
-                                <strong>特色科室:</strong>
-                                <div style="margin-top: 5px;">
-                                    ${hospital.departments.slice(0, 3).map(dept => 
-                                        `<span style="display: inline-block; background: #f0f2f5; padding: 2px 8px; margin: 2px; border-radius: 12px; font-size: 12px;">${dept}</span>`
-                                    ).join('')}
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                                <a href="${hospital.website}" target="_blank" 
-                                   style="flex: 1; text-align: center; padding: 10px; background: var(--primary); color: white; text-decoration: none; border-radius: 5px; transition: all 0.3s;">
-                                    <i class="fas fa-calendar-check" style="margin-right: 5px;"></i>立即挂号
-                                </a>
-                                <button onclick="startNavigation(${hospital.id})" 
-                                        style="flex: 1; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; transition: all 0.3s;">
-                                    <i class="fas fa-route" style="margin-right: 5px;"></i>导航
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // 创建信息窗口
-                    const infoWindow = new BMap.InfoWindow(infoWindowContent);
-                    
-                    // 添加点击事件
-                    marker.addEventListener('click', function() {
-                        this.openInfoWindow(infoWindow);
-                        highlightHospitalInList(hospital.id);
-                    });
-                    
-                    map.addOverlay(marker);
-                    hospitalMarkers.push(marker);
-                });
-            }
-
-            // 高亮医院列表项
-            function highlightHospitalInList(hospitalId) {
-                document.querySelectorAll('.hospital-item').forEach(item => {
-                    item.classList.remove('active');
-                    if (parseInt(item.dataset.id) === hospitalId) {
-                        item.classList.add('active');
-                        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
-                });
-            }
-
-            // 渲染医院列表
-            function renderHospitals(hospitalList) {
-                hospitalsContainer.innerHTML = '';
-                
-                if (hospitalList.length === 0) {
-                    hospitalsContainer.innerHTML = 
-                        '<div style="text-align: center; padding: 40px 20px; color: #666;">' +
-                        '<i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>' +
-                        '<p>未找到符合条件的医院</p>' +
-                        '</div>';
-                    return;
-                }
-                
-                hospitalList.forEach(hospital => {
-                    const hospitalItem = document.createElement('div');
-                    hospitalItem.className = 'hospital-item';
-                    hospitalItem.dataset.id = hospital.id;
-                    
-                    // 生成星级评分
-                    let starsHtml = '';
-                    const fullStars = Math.floor(hospital.rating);
-                    const hasHalfStar = hospital.rating % 1 !== 0;
-                    
-                    for (let i = 0; i < fullStars; i++) {
-                        starsHtml += '<i class="fas fa-star"></i>';
-                    }
-                    
-                    if (hasHalfStar) {
-                        starsHtml += '<i class="fas fa-star-half-alt"></i>';
-                    }
-                    
-                    const emptyStars = 5 - Math.ceil(hospital.rating);
-                    for (let i = 0; i < emptyStars; i++) {
-                        starsHtml += '<i class="far fa-star"></i>';
-                    }
-                    
-                    hospitalItem.innerHTML = `
-                        <div class="hospital-name">${hospital.name}</div>
-                        <div class="hospital-info">
-                            <span><i class="fas fa-hospital" style="color: #666; margin-right: 5px;"></i>${hospital.type}</span>
-                            <span class="hospital-distance"><i class="fas fa-location-arrow" style="margin-right: 5px;"></i>${hospital.distance}</span>
-                        </div>
-                        <div class="hospital-address"><i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i>${hospital.address}</div>
-                        <div class="hospital-rating">
-                            ${starsHtml} <span>${hospital.rating}</span>
-                        </div>
-                        <div class="hospital-actions">
-                            <a href="${hospital.website}" target="_blank" class="btn-book">
-                                <i class="fas fa-calendar-check" style="margin-right: 5px;"></i>立即挂号
-                            </a>
-                            <button class="btn-navigate" onclick="startNavigation(${hospital.id})">
-                                <i class="fas fa-route" style="margin-right: 5px;"></i>导航
-                            </button>
-                            <button class="btn-details" data-id="${hospital.id}">
-                                <i class="fas fa-info-circle" style="margin-right: 5px;"></i>详情
-                            </button>
-                        </div>
-                    `;
-                    
-                    hospitalsContainer.appendChild(hospitalItem);
-                    
-                    // 添加点击事件
-                    hospitalItem.addEventListener('click', function() {
-                        // 移除所有active类
-                        document.querySelectorAll('.hospital-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        // 添加active类到当前项
-                        this.classList.add('active');
-                        
-                        // 在地图上定位到该医院
-                        const selectedHospital = hospitals.find(h => h.id === hospital.id);
-                        if (selectedHospital) {
-                            const point = new BMap.Point(selectedHospital.lng, selectedHospital.lat);
-                            map.panTo(point);
-                            map.setZoom(15);
-                        }
-                    });
-
-                    // 添加详情按钮事件
-                    const detailsBtn = hospitalItem.querySelector('.btn-details');
-                    detailsBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const hospitalId = this.getAttribute('data-id');
-                        const hospital = hospitals.find(h => h.id === parseInt(hospitalId));
-                        if (hospital) {
-                            showHospitalDetails(hospital);
-                        }
-                    });
-                });
-            }
-
-            // 显示医院详情
-            function showHospitalDetails(hospital) {
-                const detailsHtml = `
-                    <div style="padding: 20px; max-width: 500px;">
-                        <h3 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 10px;">
-                            ${hospital.name}
-                        </h3>
-                        <div style="margin-bottom: 15px;">
-                            <p><strong>医院类型:</strong> ${hospital.type}</p>
-                            <p><strong>医院地址:</strong> ${hospital.address}</p>
-                            <p><strong>联系电话:</strong> ${hospital.phone}</p>
-                            <p><strong>综合评分:</strong> ${hospital.rating} / 5.0</p>
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <strong>特色科室:</strong>
-                            <div style="margin-top: 8px;">
-                                ${hospital.departments.map(dept => 
-                                    `<span style="display: inline-block; background: #e9ecef; padding: 4px 12px; margin: 4px; border-radius: 15px; font-size: 13px;">${dept}</span>`
-                                ).join('')}
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-top: 20px;">
-                            <a href="${hospital.website}" target="_blank" class="btn-book" style="flex: 1; text-align: center;">
-                                <i class="fas fa-calendar-check" style="margin-right: 5px;"></i>立即挂号
-                            </a>
-                            <button onclick="startNavigation(${hospital.id})" class="btn-navigate" style="flex: 1; text-align: center;">
-                                <i class="fas fa-route" style="margin-right: 5px;"></i>导航
-                            </button>
-                            <button onclick="this.closest('.BMap_pop').parentNode.remove()" style="flex: 1; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                关闭
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-                const infoWindow = new BMap.InfoWindow(detailsHtml);
-                const point = new BMap.Point(hospital.lng, hospital.lat);
-                map.openInfoWindow(infoWindow, point);
-            }
-
-            // 开始导航
-            window.startNavigation = function(hospitalId) {
-                if (!userLocation) {
-                    alert('请先选择您的位置');
-                    return;
-                }
-                
-                selectedHospitalForRoute = hospitals.find(h => h.id === hospitalId);
-                if (selectedHospitalForRoute) {
-                    calculateRoute(selectedHospitalForRoute);
-                    switchToRouteMode();
-                }
-            };
-
-            // 计算路线
-            function calculateRoute(hospital) {
-                // 清除现有路线
-                if (currentRoute) {
-                    map.removeOverlay(currentRoute);
-                }
-                
-                const startPoint = userLocation;
-                const endPoint = new BMap.Point(hospital.lng, hospital.lat);
-                
-                // 创建驾车路线规划
-                const driving = new BMap.DrivingRoute(map, {
-                    renderOptions: {
-                        map: map,
-                        autoViewport: true
-                    },
-                    onSearchComplete: function(results) {
-                        if (driving.getStatus() == BMAP_STATUS_SUCCESS) {
-                            const plan = results.getPlan(0);
-                            displayRouteInfo(plan, hospital);
-                        } else {
-                            alert('路线规划失败，请重试');
-                        }
-                    }
-                });
-                
-                driving.search(startPoint, endPoint);
-            }
-
-            // 显示路线信息
-            function displayRouteInfo(plan, hospital) {
-                const distance = (plan.getDistance(false) / 1000).toFixed(1);
-                const duration = Math.ceil(plan.getDuration(false) / 60);
-                
-                routeDetails.innerHTML = `
-                    <div class="route-item"><strong>目的地：</strong>${hospital.name}</div>
-                    <div class="route-item"><strong>总距离：</strong>${distance} 公里</div>
-                    <div class="route-item"><strong>预计时间：</strong>${duration} 分钟</div>
-                    <div class="route-item"><strong>路线详情：</strong></div>
-                `;
-                
-                // 添加具体路线步骤
-                const steps = plan.getRoute(0).getSteps();
-                steps.forEach((step, index) => {
-                    const stepElement = document.createElement('div');
-                    stepElement.className = 'route-item';
-                    stepElement.innerHTML = `<strong>${index + 1}.</strong> ${step.getDescription(true)}`;
-                    routeDetails.appendChild(stepElement);
-                });
-            }
-
-            // 切换到路线模式
-            function switchToRouteMode() {
-                isRouteMode = true;
-                showHospitalsBtn.classList.remove('active');
-                showRouteBtn.classList.add('active');
-                routeInfo.style.display = 'block';
-                mapTitle.textContent = '导航路线';
-                
-                // 隐藏医院标记
-                hospitalMarkers.forEach(marker => {
-                    marker.hide();
-                });
-            }
-
-            // 切换到医院模式
-            function switchToHospitalMode() {
-                isRouteMode = false;
-                showRouteBtn.classList.remove('active');
-                showHospitalsBtn.classList.add('active');
-                routeInfo.style.display = 'none';
-                mapTitle.textContent = '附近医院';
-                
-                // 清除路线
-                if (currentRoute) {
-                    map.removeOverlay(currentRoute);
-                    currentRoute = null;
-                }
-                
-                // 显示医院标记
-                hospitalMarkers.forEach(marker => {
-                    marker.show();
-                });
-                
-                // 重新定位到用户位置
-                if (userLocation) {
-                    map.panTo(userLocation);
-                    map.setZoom(14);
-                }
-            }
-
-            // 地图模式切换
-            showHospitalsBtn.addEventListener('click', switchToHospitalMode);
-            showRouteBtn.addEventListener('click', function() {
-                if (selectedHospitalForRoute && userLocation) {
-                    switchToRouteMode();
-                } else {
-                    alert('请先选择医院并获取您的位置信息');
-                }
-            });
-
-            // 更新医院距离
-            function updateHospitalDistances() {
-                hospitals.forEach(hospital => {
-                    const hospitalPoint = new BMap.Point(hospital.lng, hospital.lat);
-                    const distance = map.getDistance(userLocation, hospitalPoint);
-                    hospital.distance = (distance / 1000).toFixed(1) + 'km';
-                });
-                
-                hospitals.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-                renderHospitals(hospitals);
-                addHospitalMarkers(hospitals);
-            }
-
-            // 搜索功能
-            function performSearch() {
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                let filteredHospitals = hospitals;
-                
-                if (searchTerm) {
-                    filteredHospitals = hospitals.filter(hospital => 
-                        hospital.name.toLowerCase().includes(searchTerm) || 
-                        hospital.type.toLowerCase().includes(searchTerm) ||
-                        hospital.departments.some(dept => dept.toLowerCase().includes(searchTerm))
-                    );
-                }
-                
-                // 应用当前筛选
-                const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-filter');
-                if (activeFilter !== 'all') {
-                    filteredHospitals = filteredHospitals.filter(hospital => 
-                        hospital.type === activeFilter
-                    );
-                }
-                
-                renderHospitals(filteredHospitals);
-                addHospitalMarkers(filteredHospitals);
-            }
-            
-            searchInput.addEventListener('input', performSearch);
-            searchBtn.addEventListener('click', performSearch);
-            
-            // 筛选功能
-            filterBtns.forEach(button => {
-                button.addEventListener('click', function() {
-                    // 移除所有active类
-                    filterBtns.forEach(btn => btn.classList.remove('active'));
-                    // 添加active类到当前按钮
-                    this.classList.add('active');
-                    
-                    performSearch();
-                });
-            });
-
-            // 关闭权限引导
-            closeGuide.addEventListener('click', function() {
-                permissionGuide.classList.remove('active');
-            });
-
-            // 使用默认位置
-            useDefaultLocationBtn.addEventListener('click', function() {
-                permissionGuide.classList.remove('active');
-                userLocation = new BMap.Point(116.4074, 39.9042);
-                setUserLocationMarker();
-                updateHospitalDistances();
-            });
-
-            // 初始化医院列表
-            renderHospitals(hospitals);
-            
-            // 初始化地图
-            initMap();
+    // Convert WGS84->BD-09
+    function convertWgs84ToBaidu(lng, lat, successCb, errorCb){
+      try {
+        const gp = new BMap.Point(lng, lat);
+        if (!convertor) convertor = new BMap.Convertor();
+        convertor.translate([gp], 1, 5, function(data){
+          if (data && data.status === 0 && data.points && data.points.length) successCb(new BMap.Point(data.points[0].lng, data.points[0].lat));
+          else errorCb && errorCb(data);
         });
-    </script>
+      } catch(e){ if (errorCb) errorCb(e); }
+    }
+
+    // Show permission guidance
+    function showPermissionModal(){
+      const html = `<h3>无法定位</h3><p>请检查浏览器定位权限或网络。您可以重试或使用默认城市（北京），也可以手动输入地址。</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;"><button id="permRetry" class="btn-light">重试</button><button id="permDefault" class="btn-light">使用默认城市</button></div>`;
+      showModal(html);
+      document.getElementById('permRetry').addEventListener('click', function(){ hideModal(); autoLocateOnLoad(); });
+      document.getElementById('permDefault').addEventListener('click', function(){ hideModal(); useDefaultCity(); });
+    }
+
+    function useDefaultCity(){ const pt = new BMap.Point(116.404,39.915); setCurrentPoint(pt); manualInput.value = '北京市'; hideLocating(); }
+
+    // Search nearby hospitals using LocalSearch.searchNearby -> compute distances -> sort -> render
+    function searchNearbyHospitals(pt){
+      try {
+        if (!pt) return;
+        clearHospitalMarkers();
+        logDbg('搜索附近医院...');
+        
+        const local = new BMap.LocalSearch(map, {
+          renderOptions: { map: null, panel: null },
+          pageCapacity: 50,
+          onSearchComplete: function(results){
+            try {
+              // collect pois robustly
+              let pois = [];
+              
+              // 方法1：通过searchInstance获取
+              if (typeof local.getCurrentNumPois === 'function') {
+                const n = local.getCurrentNumPois();
+                for (let i=0;i<n;i++){
+                  try { 
+                    const p = local.getPoi(i); 
+                    if (p && p.point) pois.push(p); 
+                  } catch(e){}
+                }
+              }
+              
+              // 方法2: 通过results对象获取
+              if (!pois.length && results && typeof results.getPoi === 'function') {
+                const num = results.getCurrentNumPois ? results.getCurrentNumPois() : 0;
+                for (let i=0;i<num;i++){ 
+                  try { 
+                    const p = results.getPoi(i); 
+                    if (p && p.point) pois.push(p); 
+                  }catch(e){} 
+                }
+              }
+              
+              // 方法3：检查私有属性
+              if (!pois.length && local._results && Array.isArray(local._results)) {
+                pois = local._results.filter(p => p && p.point);
+              }
+              
+              if (!pois.length) {
+                hospitalResults.innerHTML = '<h3><i class="fas fa-hospital"></i> 附近医院（近 → 远）</h3><p class="small">暂未发现附近医院，请尝试更换位置或手动搜索。</p>';
+                logDbg('未找到附近医院', false);
+                return;
+              }
+              
+              // 过滤掉距离超过20公里的结果
+              const validPois = pois.filter(p => {
+                const dist = computeDistanceMeters(pt, p.point);
+                return dist <= 20000;
+              });
+              
+              // enrich with distance
+              const enriched = validPois.map(p => ({ poi: p, distance: computeDistanceMeters(pt, p.point) }));
+              // sort by distance asc
+              enriched.sort((a,b)=>a.distance - b.distance);
+              renderHospitalListFromEnriched(enriched);
+              logDbg('找到 ' + enriched.length + ' 家附近医院');
+            } catch(e){ console.error('searchNearbyHospitals onSearchComplete error', e); logDbg('搜索附近医院出错', true); }
+          }
+        });
+        // 搜索5公里范围内的医院
+        local.searchNearby('医院', pt, 5000);
+      } catch(e){ console.error('searchNearbyHospitals outer error', e); logDbg('附近医院搜索失败', true); }
+    }
+
+    // Render hospital list with markers
+    function renderHospitalListFromEnriched(enriched){
+      try {
+        clearHospitalMarkers();
+        const container = hospitalResults;
+        container.innerHTML = '<h3><i class="fas fa-hospital"></i> 附近医院（近 → 远）</h3>';
+        if (!enriched || !enriched.length){ container.innerHTML += '<p class="small">未找到附近医院。</p>'; return; }
+        enriched.forEach((e, idx) => {
+          const p = e.poi;
+          const d = e.distance;
+          const distKm = (d/1000).toFixed(2);
+          const item = document.createElement('div'); item.className = 'hospital-item';
+          item.innerHTML = `<h4>${escapeHtml(p.title || p.name)}</h4><div class="hospital-info"><div class="small">${escapeHtml(p.address || '')}</div><div style="color:var(--primary);font-weight:600">${distKm} 公里</div></div><div class="hospital-actions"><button class="btn-light view-hospital-btn">前往挂号</button><button class="btn-success navigate-btn">导航</button></div>`;
+          // click center
+          item.addEventListener('click', function(){ document.querySelectorAll('.hospital-item').forEach(it=>it.classList.remove('active')); item.classList.add('active'); if (p.point) map.panTo(p.point); });
+          // actions
+          item.querySelector('.view-hospital-btn').addEventListener('click', function(ev){ ev.stopPropagation(); window.open('https://www.12320.gov.cn/', '_blank'); });
+          item.querySelector('.navigate-btn').addEventListener('click', function(ev){ ev.stopPropagation(); if (p.point) openNavigationModeModal(p.title || p.name || '目标医院', p.point.lng, p.point.lat); });
+
+          container.appendChild(item);
+
+          // add marker
+          try {
+            const marker = new BMap.Marker(p.point);
+            marker.hospitalName = p.title || p.name;
+            const infoHtml = `<div style="padding:8px;"><strong>${escapeHtml(p.title||p.name)}</strong><div style="color:#666;font-size:13px">${escapeHtml(p.address||'')}</div><div style="color:var(--primary);margin-top:6px">距离：${distKm} 公里</div><div style="margin-top:8px"><button onclick="window.open('https://www.12320.gov.cn/','_blank')" class="btn-light" style="margin-right:6px">挂号</button><button onclick="window.openNavigationFromMarker && window.openNavigationFromMarker(${p.point.lng}, ${p.point.lat}, '${escapeHtml(p.title||p.name)}')" class="btn-success">导航</button></div></div>`;
+            const infoWin = new BMap.InfoWindow(infoHtml);
+            marker.infoWindow = infoWin;
+            marker.addEventListener('click', function(){ this.openInfoWindow(infoWin); });
+            map.addOverlay(marker);
+            hospitalMarkers.push(marker);
+          } catch(err){ console.debug('marker add error', err); }
+        });
+      } catch(e){ console.error('renderHospitalListFromEnriched error', e); }
+    }
+
+    // Clear hospital markers
+    function clearHospitalMarkers(){ try { hospitalMarkers.forEach(m=>map.removeOverlay(m)); }catch(e){} hospitalMarkers = []; hospitalResults.innerHTML = '<h3><i class="fas fa-hospital"></i> 附近医院（近 → 远）</h3>'; }
+
+    // Navigation: modal -> choose mode -> call route service
+    function openNavigationModeModal(hospitalName, lng, lat){
+      const html = `<h3>选择导航方式</h3><div style="margin-top:10px;"><label><input type="radio" name="routeMode" value="driving" checked> 驾车</label><br/><label><input type="radio" name="routeMode" value="walking"> 步行</label><br/><label><input type="radio" name="routeMode" value="transit"> 公交</label><br/><label><input type="radio" name="routeMode" value="riding"> 骑行</label><div style="text-align:right;margin-top:12px;"><button id="navCancel" class="btn-light">取消</button><button id="navConfirm" class="location-btn" style="margin-left:8px">开始导航</button></div></div>`;
+      showModal(html);
+      document.getElementById('navCancel').addEventListener('click', hideModal);
+      document.getElementById('navConfirm').addEventListener('click', function(){
+        const mode = document.querySelector('input[name="routeMode"]:checked').value;
+        hideModal();
+        startNavigation(hospitalName, lng, lat, mode);
+      });
+    }
+
+    function startNavigation(hospitalName, lng, lat, mode){
+      if (!currentPoint) return alert('请先定位或手动确认地址');
+      clearRouteFromMap();
+      document.getElementById('routeModeLabel').textContent = mode === 'driving' ? '驾车' : mode === 'walking' ? '步行' : mode === 'transit' ? '公交' : '骑行';
+      routePanel.style.display = 'block';
+      routePanel.setAttribute('aria-hidden','false');
+      routeOptions.innerHTML = ''; routeSteps.innerHTML = '<p>正在规划路线…</p>';
+      const start = currentPoint; const end = new BMap.Point(lng, lat);
+      try {
+        let svc;
+        if (mode === 'driving') { svc = new BMap.DrivingRoute(map, { renderOptions:{map:map, autoViewport:true}, onSearchComplete: res=>handleRouteResults(res, svc, 'driving', hospitalName) }); svc.search(start, end); }
+        else if (mode === 'walking') { svc = new BMap.WalkingRoute(map, { renderOptions:{map:map, autoViewport:true}, onSearchComplete: res=>handleRouteResults(res, svc, 'walking', hospitalName) }); svc.search(start, end); }
+        else if (mode === 'transit') { svc = new BMap.TransitRoute(map, { renderOptions:{map:map, autoViewport:true}, onSearchComplete: res=>handleRouteResults(res, svc, 'transit', hospitalName) }); svc.search(start, end); }
+        else if (mode === 'riding' && typeof BMap.RidingRoute === 'function') { svc = new BMap.RidingRoute(map, { renderOptions:{map:map, autoViewport:true}, onSearchComplete: res=>handleRouteResults(res, svc, 'riding', hospitalName) }); svc.search(start, end); }
+        else { // fallback draw simple line
+          const poly = new BMap.Polyline([start, end], { strokeColor:'#1E90FF', strokeWeight:6, strokeOpacity:0.8 }); map.addOverlay(poly); routeOverlays.push(poly); routeSteps.innerHTML = `<p>已绘制示例路线到 ${escapeHtml(hospitalName)}（${mode}）</p>`; lastRenderedPlanData = { steps:[{instruction:'示例路线'}], path:[{lng:start.lng,lat:start.lat},{lng:end.lng,lat:end.lat}] }; lastRouteMeta = { hospitalName, mode, timestamp: new Date().toISOString() };
+        }
+        currentRouteService = svc;
+        // For some SDK versions the onSearchComplete result param may be undefined.
+        // Attempt a fallback: after a short delay try to read svc.getResults()
+        if (svc && typeof svc.getResults === 'function') {
+          setTimeout(()=> {
+            try {
+              const res = svc.getResults && svc.getResults();
+              if (res) {
+                console.debug('Fallback getResults() used for route service');
+                handleRouteResults(res, svc, mode, hospitalName);
+              }
+            } catch(e){ console.debug('svc.getResults() fallback error', e); }
+          }, 800);
+        }
+      } catch(e){ console.error('startNavigation error', e); alert('无法启动路线规划（查看控制台）'); }
+    }
+
+    //
+    // --- 重写的通用 route 解析器（兼容多种 SDK 返回结构） ---
+    //
+    function handleRouteResults(results, service, mode, hospitalName){
+      console.debug('handleRouteResults called', { results, service, mode, hospitalName });
+      try {
+        // If results is undefined/null try the service.getResults() fallback
+        if (!results && service && typeof service.getResults === 'function') {
+          try { results = service.getResults(); console.debug('handleRouteResults: used service.getResults()', results); } catch(e){ console.warn('service.getResults() failed', e); }
+        }
+
+        // Clear previous overlays
+        routeOverlays.forEach(o => { try{ map.removeOverlay(o); }catch(e){} });
+        routeOverlays = [];
+        routeOptions.innerHTML = ''; routeSteps.innerHTML = '';
+
+        if (!results) {
+          routeSteps.innerHTML = '<p>未能获取路线结果（results 为 null），请查看控制台。</p>';
+          console.warn('handleRouteResults: no results available', { service });
+          return;
+        }
+
+        // Normalize plans array from various possible structures
+        let plans = [];
+
+        // 1) results.getPlan(i) iteration (some SDKs)
+        try {
+          if (typeof results.getPlan === 'function') {
+            let ix = 0;
+            while (true) {
+              try {
+                const p = results.getPlan(ix);
+                if (!p) break;
+                plans.push(p);
+                ix++;
+              } catch (e) { break; }
+            }
+            if (!plans.length && typeof results.getPlans === 'function') {
+              plans = results.getPlans() || [];
+            }
+          }
+        } catch(e) { console.debug('plan extraction via getPlan failed', e); }
+
+        // 2) results.getRoute available -> treat results as plan-like
+        if (!plans.length && typeof results.getRoute === 'function') {
+          plans = [results];
+        }
+
+        // 3) results.getPlans() returns array
+        if (!plans.length && typeof results.getPlans === 'function') {
+          try { const ps = results.getPlans(); if (ps && ps.length) plans = ps; } catch(e) { console.debug('getPlans failed', e); }
+        }
+
+        // 4) results.plans or results.routes or results.plan etc.
+        if (!plans.length && Array.isArray(results.plans)) plans = results.plans;
+        if (!plans.length && Array.isArray(results.routes)) plans = results.routes;
+        if (!plans.length && results.plan) plans = [results.plan];
+
+        // 5) as last resort, if results appears to be a single plan-like object, use it
+        if (!plans.length && (typeof results === 'object')) plans = [results];
+
+        if (!plans.length) {
+          routeSteps.innerHTML = '<p>未能解析到有效路线方案。</p>';
+          console.warn('handleRouteResults: plans array empty after attempts', { results });
+          return;
+        }
+
+        // Render plan selector + call renderPlan for default
+        plans.forEach((plan, idx) => {
+          const div = document.createElement('div');
+          div.style.display='flex'; div.style.justifyContent='space-between'; div.style.alignItems='center'; div.style.padding='6px 0'; div.style.borderBottom='1px solid #eee';
+          const left = document.createElement('div');
+          left.innerHTML = `<strong>方案 ${idx+1}</strong><div style="font-size:13px;color:#666">${getPlanSummary(plan)}</div>`;
+          const right = document.createElement('div');
+          const rbtn = document.createElement('input'); rbtn.type='radio'; rbtn.name='planSelect'; rbtn.value=idx; if (idx===0) rbtn.checked=true;
+          const viewBtn = document.createElement('button'); viewBtn.className='btn-light'; viewBtn.style.marginLeft='8px'; viewBtn.textContent='查看';
+          right.appendChild(rbtn); right.appendChild(viewBtn);
+          div.appendChild(left); div.appendChild(right);
+          routeOptions.appendChild(div);
+          rbtn.addEventListener('change', ()=>renderPlan(plan, idx, mode, hospitalName));
+          viewBtn.addEventListener('click', ()=>renderPlan(plan, idx, mode, hospitalName));
+        });
+
+        // render the first plan by default
+        renderPlan(plans[0], 0, mode, hospitalName);
+
+      } catch (err) {
+        console.error('handleRouteResults error', err);
+        routeSteps.innerHTML = '<p>解析路线结果时出错（查看控制台）。</p>';
+      }
+    }
+
+    // Helper to get a short summary (distance/time) from various plan structures
+    function getPlanSummary(plan){
+      try {
+        if (!plan) return '';
+        // common SDK methods
+        if (typeof plan.getDistance === 'function') {
+          const d = (typeof plan.getDistance === 'function' ? (plan.getDistance(false) || plan.getDistance()) : null);
+          const dur = typeof plan.getDuration === 'function' ? (plan.getDuration(false) || plan.getDuration()) : null;
+          return (d ? (d/1000).toFixed(2)+' km' : '') + (dur ? ' · ' + Math.ceil(dur/60) + ' 分钟' : '');
+        }
+        // plain properties
+        if (plan.distance || plan.duration) {
+          return (plan.distance ? (plan.distance/1000).toFixed(2)+' km' : '') + (plan.duration ? ' · ' + Math.ceil(plan.duration/60) + ' 分钟' : '');
+        }
+      } catch(e){}
+      return '查看详情';
+    }
+
+    //
+    // Enhanced renderPlan: extract path and detailed steps robustly
+    //
+    function renderPlan(plan, planIndex, mode, hospitalName){
+      try {
+        // clear previous overlays
+        routeOverlays.forEach(o=>{ try{ map.removeOverlay(o); }catch(e){} });
+        routeOverlays = [];
+        routeSteps.innerHTML = '';
+
+        // Extract full path (polyline) from many possible locations
+        let path = null;
+        try {
+          if (typeof plan.getPath === 'function') path = plan.getPath();
+          else if (typeof plan.getPolyline === 'function') path = plan.getPolyline();
+          else if (plan.path) path = plan.path;
+          else if (plan.points) path = plan.points;
+        } catch(e) { console.debug('path extraction error', e); }
+
+        if (Array.isArray(path) && path.length) {
+          // normalize to BMap.Point array if items have x/y instead of lng/lat
+          const pts = path.map(p => {
+            if (p instanceof BMap.Point) return p;
+            if (typeof p.lng !== 'undefined' && typeof p.lat !== 'undefined') return new BMap.Point(p.lng, p.lat);
+            if (typeof p.x !== 'undefined' && typeof p.y !== 'undefined') return new BMap.Point(p.x, p.y);
+            return null;
+          }).filter(Boolean);
+          if (pts.length) {
+            const poly = new BMap.Polyline(pts, { strokeColor:'#1E90FF', strokeWeight:6, strokeOpacity:0.8 });
+            map.addOverlay(poly); routeOverlays.push(poly);
+          }
+        }
+
+        // Try to extract "route" object which may contain steps
+        let routeObj = null;
+        try {
+          if (typeof plan.getRoute === 'function') {
+            try { routeObj = plan.getRoute(0) || plan.getRoute(); } catch(e) { routeObj = plan.getRoute && plan.getRoute(); }
+          }
+          if (!routeObj && typeof plan.getRoutes === 'function') {
+            const rts = plan.getRoutes(); if (Array.isArray(rts) && rts.length) routeObj = rts[0];
+          }
+        } catch(e) { console.debug('routeObj extraction failed', e); }
+
+        // Extract steps from many possible locations
+        let steps = null;
+        try {
+          if (routeObj && typeof routeObj.getSteps === 'function') steps = routeObj.getSteps();
+          else if (typeof plan.getSteps === 'function') steps = plan.getSteps();
+          else if (plan.steps) steps = plan.steps;
+          else if (typeof plan.getNumSteps === 'function' && typeof plan.getStep === 'function') { const a=[]; const sn = plan.getNumSteps(); for (let i=0;i<sn;i++){ try{ a.push(plan.getStep(i)); }catch(e){} } steps = a; }
+          else if (routeObj && typeof routeObj.getNumSteps === 'function' && typeof routeObj.getStep === 'function') { const a=[]; const sn = routeObj.getNumSteps(); for (let i=0;i<sn;i++){ try{ a.push(routeObj.getStep(i)); }catch(e){} } steps = a; }
+        } catch(e){ console.debug('steps extraction error', e); }
+
+        const exportedSteps = [];
+
+        if (Array.isArray(steps) && steps.length) {
+          // Render each step; try many fields/methods for data
+          steps.forEach((s, idx) => {
+            // instruction
+            let instrRaw = '';
+            try {
+              instrRaw = s.instruction || s.desc || (s.getDescription && s.getDescription && s.getDescription()) || s.name || s.title || '';
+            } catch(e){ instrRaw = ''; }
+            instrRaw = instrRaw || '';
+
+            // produce a sanitized HTML version for UI (allowing basic <b>/<strong>/<em>)
+            const instrHtml = sanitizeInstruction(instrRaw);
+
+            // plain text version for export (strip tags)
+            const instrText = String(instrRaw).replace(/<[^>]+>/g, '').replace(/\s+/g,' ').trim();
+
+            // distance/time
+            let distVal = null;
+            try { distVal = s.distance || (s.getDistance && s.getDistance && s.getDistance()) || s.length || null; } catch(e){ distVal = null; }
+            const distText = (distVal || distVal === 0) ? ((parseFloat(distVal) >= 1000) ? (parseFloat(distVal)/1000).toFixed(2)+' 公里' : Math.round(parseFloat(distVal)) + ' 米') : '';
+
+            // road name
+            let roadName = '';
+            try { roadName = s.road || s.roadName || s.name || (s.getName && s.getName && s.getName()) || ''; } catch(e){ roadName = ''; }
+
+            // step-specific path if available
+            let stepPath = null;
+            try {
+              if (s.path) stepPath = s.path;
+              else if (typeof s.getPath === 'function') stepPath = s.getPath();
+              else if (s.points) stepPath = s.points;
+              else if (s.polyline) stepPath = s.polyline;
+            } catch(e){ stepPath = null; }
+
+            // Normalize step path into array of BMap.Point (if possible)
+            let stepPts = null;
+            if (Array.isArray(stepPath) && stepPath.length) {
+              stepPts = stepPath.map(p => {
+                if (p instanceof BMap.Point) return p;
+                if (typeof p.lng !== 'undefined' && typeof p.lat !== 'undefined') return new BMap.Point(p.lng, p.lat);
+                if (typeof p.x !== 'undefined' && typeof p.y !== 'undefined') return new BMap.Point(p.x, p.y);
+                return null;
+              }).filter(Boolean);
+            }
+
+            exportedSteps.push({ instruction: instrText, distance: distVal || null, road: roadName || null, path: stepPts ? stepPts.map(pt=>({lng:pt.lng,lat:pt.lat})) : null });
+
+            // Build UI element (use sanitized HTML)
+            const div = document.createElement('div'); div.className='step';
+            let metaHtml = '';
+            if (roadName) metaHtml += `<div class="small">道路：${escapeHtml(roadName)}</div>`;
+            if (distText) metaHtml += `<div class="small">距离：${escapeHtml(distText)}</div>`;
+            // instrHtml is safe and only contains limited tags
+            div.innerHTML = `<div><strong>步骤 ${idx+1}</strong>： ${instrHtml}</div>` + metaHtml;
+
+            // click -> highlight this step if we have path
+            div.addEventListener('click', function(){
+              try {
+                // clear old overlays
+                routeOverlays.forEach(o=>{ try{ map.removeOverlay(o); }catch(e){} });
+                routeOverlays = [];
+                if (stepPts && stepPts.length) {
+                  const high = new BMap.Polyline(stepPts, { strokeColor:'#FF6B6B', strokeWeight:8, strokeOpacity:0.95 });
+                  map.addOverlay(high); routeOverlays.push(high);
+                  map.panTo(stepPts[Math.floor(stepPts.length/2)]);
+                } else if (Array.isArray(path) && path.length) {
+                  const samplePt = path[Math.floor(path.length/2)];
+                  if (samplePt instanceof BMap.Point) map.panTo(samplePt);
+                  else if (samplePt && typeof samplePt.lng !== 'undefined') map.panTo(new BMap.Point(samplePt.lng, samplePt.lat));
+                }
+              } catch(err) { console.warn('highlight step error', err); }
+            });
+
+            routeSteps.appendChild(div);
+          });
+        } else {
+          // No structured steps - attempt to show polyline summary or fallback message
+          if (Array.isArray(path) && path.length) {
+            routeSteps.innerHTML = '<p>已在地图上绘制路线（SDK 未返回逐步数据）。</p>';
+          } else {
+            routeSteps.innerHTML = '<p>无法读取逐步路段（SDK 返回结构不同）。</p>';
+          }
+        }
+
+        // Save exportable route data
+        lastRenderedPlanData = { planIndex: planIndex||0, summary: getPlanSummary(plan), steps: exportedSteps, path: Array.isArray(path) ? path.map(p=>({lng:p.lng||p.x, lat:p.lat||p.y})) : null };
+        lastRouteMeta = { hospitalName: hospitalName||'', mode: mode||'', timestamp: new Date().toISOString() };
+
+      } catch(e) {
+        console.error('renderPlan error', e);
+        routeSteps.innerHTML = '<p>渲染路线详情时发生错误（查看控制台）。</p>';
+        lastRenderedPlanData = null;
+        lastRouteMeta = null;
+      }
+    }
+
+    function clearRouteFromMap(){ try { if (currentRouteService && typeof currentRouteService.clearResults === 'function') currentRouteService.clearResults(); } catch(e){} routeOverlays.forEach(o=>map.removeOverlay(o)); routeOverlays=[]; lastRenderedPlanData=null; lastRouteMeta=null; routeOptions.innerHTML=''; routeSteps.innerHTML=''; routePanel.style.display='none'; routePanel.setAttribute('aria-hidden','true'); logDbg('已清除路线'); }
+
+    function downloadRoute(){ if (!lastRenderedPlanData || !lastRouteMeta) { alert('当前没有可导出的路线'); return; } const out = { meta:lastRouteMeta, plan:lastRenderedPlanData }; const blob = new Blob([JSON.stringify(out, null, 2)], { type:'application/json' }); const ts = new Date().toISOString().replace(/[:.]/g,'-'); const nameSafe = (lastRouteMeta.hospitalName||'unknown').replace(/[^\w\-]/g,'_').slice(0,60); const filename = `route_${nameSafe}_${lastRouteMeta.mode||'mode'}_${ts}.json`; if (window.navigator && window.navigator.msSaveOrOpenBlob) window.navigator.msSaveOrOpenBlob(blob, filename); else { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1200); } }
+
+    function showPermissionModal(){ const html = `<h3>无法获取位置</h3><p>请检查浏览器定位权限或网络。您可以重试或使用默认城市（北京）。</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;"><button id="permRetry" class="btn-light">重试</button><button id="permDefault" class="btn-light">使用默认城市</button></div>`; showModal(html); document.getElementById('permRetry').addEventListener('click', function(){ hideModal(); autoLocateOnLoad(); }); document.getElementById('permDefault').addEventListener('click', function(){ hideModal(); useDefaultCity(); }); }
+
+    function autoLocateOnLoad(){ showLocating('页面加载：正在自动定位...'); try { if (navigator.permissions && navigator.permissions.query) { navigator.permissions.query({name:'geolocation'}).then(status => { if (status.state === 'denied'){ hideLocating(); showPermissionModal(); return; } attemptNavigatorGeo(); }).catch(err => { attemptNavigatorGeo(); }); } else attemptNavigatorGeo(); } catch(e){ attemptNavigatorGeo(); } }
+
+    function attemptNavigatorGeo(){ if (navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(pos){ convertWgs84ToBaidu(pos.coords.longitude, pos.coords.latitude, function(bdPt){ setCurrentPoint(bdPt); hideLocating(); }, function(){ fallbackBMapGeo(); }); }, function(err){ console.debug('navigator.geolocation failed', err); fallbackBMapGeo(); }, { enableHighAccuracy:true, timeout:10000, maximumAge:0 }); } else fallbackBMapGeo(); }
+
+    function fallbackBMapGeo(){ if (!geolocation) geolocation = new BMap.Geolocation(); geolocation.getCurrentPosition(function(r){ hideLocating(); if (this.getStatus && this.getStatus() === BMAP_STATUS_SUCCESS) setCurrentPoint(r.point); else showPermissionModal(); }, { enableHighAccuracy:true, timeout:10000 }); }
+
+    function convertWgs84ToBaidu(lng, lat, success, failure){ try { if (!convertor) convertor = new BMap.Convertor(); const pt = new BMap.Point(lng, lat); convertor.translate([pt], 1, 5, function(data){ if (data && data.status === 0 && data.points && data.points.length) success(new BMap.Point(data.points[0].lng, data.points[0].lat)); else failure && failure(data); }); } catch(e){ if (failure) failure(e); } }
+
+    // initial map and binds
+    function initMap(){
+      try {
+        map = new BMap.Map('map'); const defaultPt = new BMap.Point(116.404,39.915); map.centerAndZoom(defaultPt, 12); map.addControl(new BMap.NavigationControl()); geolocation = new BMap.Geolocation(); convertor = new BMap.Convertor();
+        autoLocateOnLoad();
+        // binds
+        safeBind('#refreshBtn','click', ()=>location.reload());
+        safeBind('#zoomIn','click', ()=>map.zoomIn());
+        safeBind('#zoomOut','click', ()=>map.zoomOut());
+        safeBind('#confirmLocation','click', ()=>confirmBtn.click());
+        safeBind('#searchBtn','click', ()=>{ const kw=document.getElementById('hospitalSearch').value.trim(); if(kw) searchHospitalsByKeyword(kw); else alert('请输入搜索关键词'); });
+        safeBind('#clearRouteBtn','click', clearRouteFromMap);
+        safeBind('#hideRoutePanel','click', ()=>{ routePanel.style.display='none'; routePanel.setAttribute('aria-hidden','true'); });
+        safeBind('#downloadRouteBtn','click', downloadRoute);
+        safeBind('#runRepairBtn','click', runRepair);
+        safeBind('#locRetryBtn','click', autoLocateOnLoad);
+        safeBind('#useDefaultBtn','click', useDefaultCity);
+        logDbg('地图初始化完成');
+      } catch(e){ console.error('initMap', e); logDbg('地图初始化失败（查看控制台）', true); }
+    }
+
+    function searchHospitalsByKeyword(keyword){
+      if (!keyword || !keyword.trim()) return alert('请输入搜索关键词');
+      if (!currentPoint) return alert('请先定位或确认地址');
+      
+      logDbg('正在搜索: ' + keyword);
+      clearHospitalMarkers();
+      hospitalResults.innerHTML = '<h3><i class="fas fa-hospital"></i> 搜索中...</h3>';
+      
+      let searchAttempts = 0;
+      const maxAttempts = 3;
+      
+      function performSearch(searchKeyword, searchRadius, isRetry = false) {
+        try {
+          const searchInstance = new BMap.LocalSearch(map, {
+            renderOptions: { map: null, panel: null },
+            pageCapacity: 50,
+            onSearchComplete: function(results){
+              try {
+                let pois = [];
+                
+                // 方法1: 直接获取POI列表
+                if (typeof searchInstance.getCurrentNumPois === 'function') {
+                  const numPois = searchInstance.getCurrentNumPois();
+                  for (let i = 0; i < numPois; i++) {
+                    try {
+                      const poi = searchInstance.getPoi(i);
+                      if (poi && poi.point) {
+                        pois.push(poi);
+                      }
+                    } catch(e){}
+                  }
+                }
+                
+                // 方法2: 从results对象获取
+                if (!pois.length && results && typeof results.getPoi === 'function') {
+                  const numPois = results.getCurrentNumPois ? results.getCurrentNumPois() : 0;
+                  for (let i = 0; i < numPois; i++) {
+                    try {
+                      const poi = results.getPoi(i);
+                      if (poi && poi.point) {
+                        pois.push(poi);
+                      }
+                    } catch(e){}
+                  }
+                }
+                
+                // 方法3: 检查私有_results属性（某些SDK版本）
+                if (!pois.length && searchInstance._results && Array.isArray(searchInstance._results)) {
+                  pois = searchInstance._results.filter(p => p && p.point);
+                }
+                
+                if (pois.length === 0) {
+                  searchAttempts++;
+                  // 逐步扩大搜索半径或改变搜索策略
+                  if (searchAttempts < maxAttempts) {
+                    logDbg('搜索"' + searchKeyword + '"无结果，扩大搜索范围...');
+                    let nextKeyword = searchKeyword;
+                    let nextRadius = searchRadius;
+                    
+                    if (searchAttempts === 1) {
+                      // 第二次：只搜索医院
+                      nextKeyword = '医院';
+                      nextRadius = searchRadius * 2;
+                    } else if (searchAttempts === 2) {
+                      // 第三次：搜索医疗相关
+                      nextKeyword = '医疗';
+                      nextRadius = searchRadius * 3;
+                    }
+                    
+                    setTimeout(() => performSearch(nextKeyword, nextRadius, true), 500);
+                  } else {
+                    hospitalResults.innerHTML = '<h3><i class="fas fa-hospital"></i> 搜索结果</h3><p class="small">很抱歉，未找到"' + escapeHtml(keyword) + '"相关的医院。请尝试：<br/>1. 更换关键词（如医院名称）<br/>2. 重新定位<br/>3. 浏览"附近医院"列表</p>';
+                    logDbg('搜索"' + keyword + '"最终未找到结果');
+                  }
+                  return;
+                }
+                
+                // 过滤：优先保留确实是医院/医疗机构的POI
+                const hospitalPois = pois.filter(p => {
+                  const name = (p.title || p.name || '').toLowerCase();
+                  const addr = (p.address || '').toLowerCase();
+                  const fullText = name + addr;
+                  // 排除明显不是医院的结果
+                  if (fullText.indexOf('医') > -1 || fullText.indexOf('医院') > -1 || fullText.indexOf('诊') > -1) {
+                    return true;
+                  }
+                  return false;
+                });
+                
+                // 如果过滤后没有结果，使用全部结果
+                const finalPois = hospitalPois.length > 0 ? hospitalPois : pois;
+                
+                // 按距离当前位置排序
+                const enriched = finalPois.map(p => ({
+                  poi: p,
+                  distance: computeDistanceMeters(currentPoint, p.point)
+                })).sort((a, b) => a.distance - b.distance);
+                
+                renderHospitalListFromEnriched(enriched);
+                logDbg('找到 ' + enriched.length + ' 家医院' + (isRetry ? '（通过扩大搜索范围）' : ''));
+                
+              } catch(e) {
+                console.error('searchHospitalsByKeyword 解析错误', e);
+                hospitalResults.innerHTML = '<h3><i class="fas fa-hospital"></i> 搜索结果</h3><p class="small">解析搜索结果出错，请重试。</p>';
+                logDbg('搜索出错: ' + e.message, true);
+              }
+            }
+          });
+          
+          // 执行搜索 - 使用searchNearby提高精确度
+          if (searchRadius && searchRadius > 0) {
+            logDbg('在 ' + (searchRadius/1000).toFixed(1) + ' 公里范围内搜索: ' + searchKeyword);
+            searchInstance.searchNearby(searchKeyword, currentPoint, searchRadius);
+          } else {
+            logDbg('全城搜索: ' + searchKeyword);
+            searchInstance.search(searchKeyword);
+          }
+          
+        } catch(e) {
+          console.error('performSearch 执行错误', e);
+          searchAttempts++;
+          if (searchAttempts < maxAttempts) {
+            setTimeout(() => performSearch(keyword + ' 医院', 10000 * searchAttempts, true), 500);
+          } else {
+            hospitalResults.innerHTML = '<h3><i class="fas fa-hospital"></i> 搜索结果</h3><p class="small">搜索发生错误，请检查网络并重试。</p>';
+            logDbg('搜索执行失败: ' + e.message, true);
+          }
+        }
+      }
+      
+      // 构建搜索关键词：如果已包含医院/科室关键词，直接使用；否则加上医院
+      let finalKeyword = keyword;
+      if (keyword.indexOf('医院') === -1 && keyword.indexOf('科') === -1) {
+        finalKeyword = keyword + ' 医院';
+      }
+      
+      // 开始搜索，初始半径5公里
+      performSearch(finalKeyword, 5000);
+    }
+
+    // Expose a few helpers for marker info buttons
+    window.openNavigationFromMarker = function(lng, lat, name){ openNavigationModeModal(name, lng, lat); };
+    window.goToHospitalSite = function(name){ window.open('https://www.12320.gov.cn/','_blank'); };
+
+    // 搜索输入框
+    const hospitalSearch = document.getElementById('hospitalSearch');
+    if (hospitalSearch) {
+      // 支持回车键搜索
+      hospitalSearch.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          const keyword = this.value.trim();
+          if (keyword) searchHospitalsByKeyword(keyword);
+        }
+      });
+    }
+    window.onload = initMap;
+    console.info('最终版 ss.html 已加载 - 附近医院使用百度 LocalSearch (searchNearby) 获取并按距离排序展示。');
+    // 登录功能相关函数
+    function showLoginModal() {
+      const modalBackdrop = document.getElementById('loginModalBackdrop');
+      if (modalBackdrop) {
+        modalBackdrop.style.display = 'flex';
+      }
+    }
+    
+    function hideLoginModal() {
+      const modalBackdrop = document.getElementById('loginModalBackdrop');
+      if (modalBackdrop) {
+        modalBackdrop.style.display = 'none';
+      }
+    }
+    
+    async function handleLogin(event) {
+      event.preventDefault();
+      const phone = document.getElementById('loginPhone').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      
+      // 简单验证
+      if (!/^1[3-9]\d{9}$/.test(phone)) {
+        alert('请输入有效的手机号码');
+        return;
+      }
+      
+      if (password.length < 6) {
+        alert('密码长度不能少于6位');
+        return;
+      }
+      
+      try {
+        // 尝试调用真实API（与login.html保持一致）
+        try {
+          const response = await fetch('http://127.0.0.1:5000/login', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ 
+                  username: phone,  // 用手机号作为用户名（与后端保持一致）
+                  password: password 
+              })
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+              // 登录成功：保存token
+              localStorage.setItem('token', result.token);
+              localStorage.setItem('userPhone', phone);
+              
+              // 显示成功消息并关闭模态框
+              alert('登录成功！');
+              hideLoginModal();
+          } else {
+              // 登录失败：显示错误信息
+              alert(result.message || '登录失败，请重试');
+          }
+        } catch (apiError) {
+          // API调用失败，使用模拟登录逻辑
+          console.log('使用模拟登录逻辑');
+          if (password === '123456') {
+            // 模拟登录成功
+            const mockToken = 'mock_token_' + Date.now();
+            localStorage.setItem('token', mockToken);
+            localStorage.setItem('userPhone', phone);
+            
+            // 显示成功消息并关闭模态框
+            alert('登录成功！');
+            hideLoginModal();
+          } else {
+            alert('登录失败，请使用密码123456进行测试登录');
+          }
+        }
+      } catch (error) {
+        console.error('登录过程出错:', error);
+        alert('登录失败，请重试');
+      }
+    }
+    
+    // 检查用户是否已登录
+    function checkLoginStatus() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // 如果未登录，自动显示登录框
+        setTimeout(showLoginModal, 1000);
+      }
+    }
+    
+    // 修改初始化函数，添加登录检查
+    const originalInitMap = initMap;
+    initMap = function() {
+      originalInitMap();
+      
+      // 添加登录相关绑定
+      safeBind('#loginForm','submit', handleLogin);
+      safeBind('#closeLoginModal','click', hideLoginModal);
+      
+      // 检查登录状态
+      checkLoginStatus();
+    };
+  })();
+  </script>
+  
+  <!-- 登录模态框 -->
+  <div class="modal-backdrop" id="loginModalBackdrop" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal" id="loginModal">
+      <div style="text-align:center;margin-bottom:20px;">
+        <h3>用户登录</h3>
+        <p class="small">请使用您注册的手机号和密码登录</p>
+      </div>
+      <form id="loginForm">
+        <div style="margin-bottom:15px;">
+          <label for="loginPhone" style="display:block;margin-bottom:5px;font-weight:bold;">手机号码</label>
+          <input type="tel" id="loginPhone" required
+                 style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;">
+        </div>
+        <div style="margin-bottom:15px;">
+          <label for="loginPassword" style="display:block;margin-bottom:5px;font-weight:bold;">密码</label>
+          <input type="password" id="loginPassword" required
+                 style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+          <button type="button" id="closeLoginModal" class="btn-light">取消</button>
+          <button type="submit" class="btn-success">登录</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
