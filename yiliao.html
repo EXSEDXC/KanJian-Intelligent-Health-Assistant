@@ -1313,6 +1313,7 @@
                 padding: 20px;
             }
         }
+        
     </style>
 </head>
 <body>
@@ -1342,6 +1343,7 @@
                     <li><a href="#">医生团队</a></li>
                     <li><a href="#">健康资讯</a></li>
                     <li><a href="#">关于我们</a></li>
+                    <li><a href="voice_emr.html">语音病历</a></li>
                 </ul>
                 <div class="auth-buttons">
                     <a href="login.html" class="btn btn-outline">登录</a>
@@ -1472,6 +1474,16 @@
                         <a href="lo.html" class="btn btn-outline btn-sm btn-service" style="color: var(--accent); border-color: var(--accent);">立即预约</a>
                     </div>
                 </div>
+                <div class="service-card">
+                    <div class="service-icon" style="background: #7b61ff;">
+                        <i class="fas fa-microphone"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>语音病历自动生成</h3>
+                        <p>实时将医患对话转写为文字，并通过算法结构化为规范门诊病历，大幅缩短书写时间。</p>
+                        <a href="voice_emr.html" class="btn btn-outline btn-sm btn-service" style="color: #7b61ff; border-color: #7b61ff;">进入工具</a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -1518,6 +1530,8 @@
         </div>
     </section>
 
+    
+
     <!-- 医生团队区域 -->
     <section class="doctors">
         <div class="container">
@@ -1534,7 +1548,7 @@
                         <div class="doctor-badge">主任医师</div>
                     </div>
                     <div class="doctor-info">
-                        <h3>张明医生</h3>
+                        <h3>周昊政医生</h3>
                         <div class="doctor-specialty">心血管内科主任</div>
                         <div class="doctor-rating">
                             <i class="fas fa-star"></i>
@@ -1545,7 +1559,7 @@
                             <span>(128评价)</span>
                         </div>
                         <p>20年临床经验，擅长高血压、冠心病等心血管疾病的诊治，曾发表学术论文30余篇。</p>
-                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                        <a href="video2.html" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
                     </div>
                 </div>
                 <div class="doctor-card">
@@ -1554,7 +1568,7 @@
                         <div class="doctor-badge">副主任医师</div>
                     </div>
                     <div class="doctor-info">
-                        <h3>李华医生</h3>
+                        <h3>熊卓溪医生</h3>
                         <div class="doctor-specialty">儿科专家</div>
                         <div class="doctor-rating">
                             <i class="fas fa-star"></i>
@@ -1565,7 +1579,7 @@
                             <span>(96评价)</span>
                         </div>
                         <p>15年儿科经验，擅长儿童常见病及生长发育问题的诊疗，深受小患者及家长的信赖。</p>
-                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                        <a href="video2.html" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
                     </div>
                 </div>
                 <div class="doctor-card">
@@ -1574,7 +1588,7 @@
                         <div class="doctor-badge">教授</div>
                     </div>
                     <div class="doctor-info">
-                        <h3>王丽医生</h3>
+                        <h3>李一乐医生</h3>
                         <div class="doctor-specialty">中医科教授</div>
                         <div class="doctor-rating">
                             <i class="fas fa-star"></i>
@@ -1585,7 +1599,7 @@
                             <span>(156评价)</span>
                         </div>
                         <p>25年中医经验，擅长中医调理和慢性病的中西医结合治疗，对亚健康调理有独到见解。</p>
-                        <a href="#" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
+                        <a href="video2.html" class="btn btn-outline btn-sm btn-service" style="color: var(--primary); border-color: var(--primary); margin-top: 15px;">预约咨询</a>
                     </div>
                 </div>
                 <div class="doctor-card">
@@ -2119,5 +2133,7 @@ async function performSearch(symptom) {
             });
         });
     </script>
+    
+    
 </body>
 </html>

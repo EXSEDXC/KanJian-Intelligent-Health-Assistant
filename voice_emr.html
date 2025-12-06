@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>语音病历自动生成</title>
+<style>
+:root{--primary:#2a7de1;--secondary:#00c896;--accent:#7b61ff;--dark:#222;--light:#f7f9fb;--border:#e8e8e8;--radius:12px;--shadow:0 8px 24px rgba(0,0,0,0.08);--font-sm:13px;--font-p:15px}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,"Noto Sans",sans-serif;color:#333;background:#fff}
+header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:10}
+.container{max-width:1080px;margin:0 auto;padding:16px}
+.title{display:flex;justify-content:space-between;align-items:center}
+.title h1{font-size:22px;color:var(--dark);margin:0}
+.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card .card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.card .card-header h2{margin:0;font-size:16px;color:#111}
+.card .card-body{padding:12px 16px}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#fff;color:#333;cursor:pointer}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.danger{background:#ff4d4f;border-color:#ff4d4f;color:#fff}
+.btn.success{background:var(--secondary);border-color:var(--secondary);color:#fff}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+.status{font-size:var(--font-sm);color:#666}
+.transcript{width:100%;height:240px;border:1px solid var(--border);border-radius:10px;padding:10px;line-height:1.6;background:#fafafa;overflow:auto;white-space:pre-wrap}
+.toolbar{display:flex;gap:8px;align-items:center;margin-top:8px}
+.badge{padding:6px 10px;border-radius:20px;border:1px solid var(--border);font-size:var(--font-sm);color:#666}
+.speaker{display:flex;gap:8px}
+.speaker .btn{padding:8px 12px}
+.section{margin-bottom:12px}
+.section h3{margin:0 0 6px 0;font-size:15px;color:#111}
+.section textarea{width:100%;min-height:80px;border:1px solid var(--border);border-radius:10px;padding:8px;font-size:var(--font-p);line-height:1.6}
+.section .readonly{background:#fafafa}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.export{display:flex;gap:8px}
+.hint{margin-top:6px;color:#999;font-size:var(--font-sm)}
+@media(max-width:960px){.grid{grid-template-columns:1fr}.transcript{height:180px}}
+@media print{body *{visibility:hidden}.emr-preview, .emr-preview *{visibility:visible}.emr-preview{position:fixed;left:0;top:0;width:100%;padding:20mm;background:#fff;box-shadow:none;border:none;margin:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="container title">
+    <h1>语音病历自动生成</h1>
+    <div class="controls">
+      <button id="startBtn" class="btn primary">开始录音</button>
+      <button id="stopBtn" class="btn danger" disabled>停止录音</button>
+      <button id="clearBtn" class="btn">清空内容</button>
+      <span id="status" class="status">待机</span>
+    </div>
+  </div>
+</header>
+<div class="container grid">
+  <div class="card">
+    <div class="card-header">
+      <h2>对话实时转写</h2>
+      <div class="speaker">
+        <span class="badge">当前说话人：<span id="speakerText">患者</span></span>
+        <span class="badge">模式：自动识别</span>
+        <select id="langSel" class="btn"><option value="zh-CN">中文(zh-CN)</option><option value="en-US">English(en-US)</option></select>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="transcript" class="transcript"></div>
+      <div class="toolbar">
+        <button id="copyTranscript" class="btn">复制文本</button>
+        <span id="chars" class="badge">0 字</span>
+      </div>
+      <div class="hint">浏览器支持度取决于本地环境。若语音识别不可用，可改用手动录入。</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <h2>病历生成</h2>
+      <div class="controls">
+        <button id="generateBtn" class="btn success">一键生成病历</button>
+        <button id="exportTxt" class="btn accent">导出为TXT</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="two-col" style="margin-bottom:10px">
+        <div class="section"><h3>患者姓名</h3><input id="patientName" class="btn" style="width:100%" placeholder="请填写"></div>
+        <div class="section"><h3>性别/年龄</h3><div class="two-col"><select id="genderSel" class="btn"><option value="男">男</option><option value="女">女</option><option value="不详">不详</option></select><input id="age" class="btn" placeholder="年龄"></div></div>
+      </div>
+      <div class="two-col" style="margin-bottom:10px">
+        <div class="section"><h3>就诊科室</h3><input id="department" class="btn" style="width:100%" placeholder="如 内科"></div>
+        <div class="section"><h3>就诊日期</h3><input id="visitDate" class="btn" style="width:100%" placeholder="YYYY-MM-DD"></div>
+      </div>
+      <div class="two-col" style="margin-bottom:10px">
+        <div class="section"><h3>门诊号</h3><input id="outNo" class="btn" style="width:100%" placeholder="未填则自动生成"></div>
+        <div class="section"><h3>发票号</h3><input id="invoiceNo" class="btn" style="width:100%" placeholder="未填则自动生成"></div>
+      </div>
+      <div class="section"><h3>主诉</h3><textarea id="chief" placeholder="自动提取主要症状与时长"></textarea></div>
+      <div class="section"><h3>现病史</h3><textarea id="hpi"></textarea></div>
+      <div class="two-col">
+        <div class="section"><h3>既往史</h3><textarea id="pmh"></textarea></div>
+        <div class="section"><h3>过敏史</h3><textarea id="allergy"></textarea></div>
+      </div>
+      <div class="two-col">
+        <div class="section"><h3>体格检查</h3><textarea id="pe"></textarea></div>
+        <div class="section"><h3>辅助检查</h3><textarea id="exam"></textarea></div>
+      </div>
+      <div class="two-col">
+        <div class="section"><h3>初步诊断</h3><textarea id="dx"></textarea></div>
+        <div class="section"><h3>处置计划</h3><textarea id="plan"></textarea></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="card">
+    <div class="card-header">
+      <h2>病历预览与导出</h2>
+      <div class="controls"><button id="previewBtn" class="btn">生成预览</button><button id="pdfBtn" class="btn accent">导出PDF</button><button id="htmlBtn" class="btn">导出HTML</button></div>
+    </div>
+    <div class="card-body">
+      <div id="emrPreview" class="emr-preview" style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px"></div>
+    </div>
+  </div>
+</div>
+<script>
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;var recog=null;var recording=false;var transcriptEl=document.getElementById('transcript');var statusEl=document.getElementById('status');var startBtn=document.getElementById('startBtn');var stopBtn=document.getElementById('stopBtn');var clearBtn=document.getElementById('clearBtn');var copyBtn=document.getElementById('copyTranscript');var charsEl=document.getElementById('chars');var langSel=document.getElementById('langSel');var speaker='patient';var lastSpeaker='patient';var speakerText=document.getElementById('speakerText');var interimTmp='';function classifySpeaker(text){var s=text.replace(/\s+/g,'');var dq=['请','描述','哪里不舒服','有什么症状','有没有','是否','从什么时候','持续','加重','缓解','考虑','建议','处方','复诊','复查','检查','安排','我给你','我们','开药','剂量','每日','每次','体格检查','查体','观察','注意','随访'];var pq=['我','我感觉','我有','不舒服','疼','痛','咳嗽','发烧','头痛','鼻塞','流涕','心悸','胸闷','气短','胃痛','腹泻','恶心','呕吐','出汗','睡不着','吃了','打针','昨天','今天','前天','一直','好几天','一个月','半年','一年','有点','厉害','难受'];var sd=0,sp=0;if(/[吗\?？]$/.test(s))sd+=2;if(/^(请|能否|是否|麻烦)/.test(s))sd+=2;if(/我们|我给你|安排|复查|开药|处方|剂量/.test(s))sd+=2;for(var i=0;i<dq.length;i++){if(s.indexOf(dq[i])>-1)sd++}for(var j=0;j<pq.length;j++){if(s.indexOf(pq[j])>-1)sp++}if(/\d+\s*(年|月|周|天|日|小时|分钟)/.test(s))sp++;var diff=sd-sp;var pred=diff>=2?'doctor':diff<=-1?'patient':lastSpeaker;return pred}
+function appendLine(text){var prefix=speaker==='patient'?'患者：':'医生：';var t=prefix+text;var prev=transcriptEl.textContent||'';var sep=prev?'\n':'';transcriptEl.textContent=prev+sep+t;charsEl.textContent=(transcriptEl.textContent||'').length+' 字'}function startRecog(){if(!SR){statusEl.textContent='当前浏览器不支持语音识别';return}if(recording)return;recog=new SR();recog.lang=langSel.value||'zh-CN';recog.continuous=true;recog.interimResults=true;recog.maxAlternatives=1;recog.onstart=function(){recording=true;startBtn.disabled=true;stopBtn.disabled=false;statusEl.textContent='录音中'};recog.onerror=function(e){statusEl.textContent='错误: '+(e.error||'未知')};recog.onend=function(){recording=false;startBtn.disabled=false;stopBtn.disabled=true;statusEl.textContent='已停止';interimTmp=''};recog.onresult=function(e){for(var i=e.resultIndex;i<e.results.length;i++){var r=e.results[i];var txt=r[0].transcript.trim();if(!txt)continue;if(r.isFinal){var pred=classifySpeaker(txt);speaker=pred;lastSpeaker=pred;speakerText.textContent=pred==='doctor'?'医生':'患者';appendLine(txt);interimTmp='';}else{interimTmp=txt;}}};try{recog.start()}catch(e){statusEl.textContent='启动失败'}}function stopRecog(){if(recog){try{recog.stop()}catch(e){} } }
+startBtn.onclick=startRecog;stopBtn.onclick=stopRecog;clearBtn.onclick=function(){transcriptEl.textContent='';charsEl.textContent='0 字'};copyBtn.onclick=function(){var s=transcriptEl.textContent||'';navigator.clipboard&&navigator.clipboard.writeText(s).then(function(){statusEl.textContent='已复制'}).catch(function(){statusEl.textContent='复制失败'})};
+function normalize(s){return (s||'').replace(/\s+/g,' ').replace(/[，,]/g,'，').replace(/[。\.]/g,'。').replace(/[；;]/g,'；').trim()}
+function findFirst(arr,s){for(var i=0;i<arr.length;i++){if(s.indexOf(arr[i])>-1)return arr[i]}return ''}
+function extractChief(s){var t=normalize(s);var dur=t.match(/([一二三四五六七八九十百千\d]+\s*(年|月|周|天|日|小时|分钟))([以来|左右|左右|余]?)/);var symptoms=['发热','咳嗽','咽痛','鼻塞','流涕','头痛','胸闷','气短','心悸','腹痛','腹泻','恶心','呕吐','乏力','肌痛','关节痛','皮疹','血尿','黑便','便秘'];var sym=findFirst(symptoms,t)||'';var res='';if(sym)res+=sym;if(dur)res+=(res?'，':'')+dur[0]+'。';if(!res){var m=t.match(/主诉[:：]([^。]+)/);if(m)res=m[1]}return res}
+function extractHPI(s){var t=normalize(s);if(/(现病史[:：]?)?(无|没有|未有|否认)/.test(t)||/(目前)?(无不适|没有不适|无症状)/.test(t))return '无';var segs=[];var onset=t.match(/(起病|开始|出现|发生)[^。]{0,40}。/);if(onset)segs.push(onset[0]);var chara=t.match(/(伴|同时出现)[^。]{0,50}。/);if(chara)segs.push(chara[0]);var course=t.match(/(加重|缓解|反复|间断|迁延)[^。]{0,40}。/);if(course)segs.push(course[0]);var treat=t.match(/(自行|口服|外用|静滴|雾化|理疗)[^。]{0,50}。/);if(treat)segs.push(treat[0]);if(!segs.length){var m=t.match(/现病史[:：]([^。]+)。?/);if(m)segs.push(m[1])}return segs.join('')}
+function extractPMH(s){var t=normalize(s);if(/(既往(病)?史[:：]?)?(无|没有|未有|否认|不曾|从未)/.test(t))return '无';var dx=['高血压','糖尿病','冠心病','脑卒中','哮喘','慢阻肺','慢性肝病','慢性肾病','甲状腺疾病','肿瘤','手术史'];var meds=t.match(/(长期|常规|规律)?(服用|使用)[^。]{0,40}。/);var res=[];for(var i=0;i<dx.length;i++){if(t.indexOf(dx[i])>-1)res.push(dx[i])}if(meds)res.push(meds[0]);var m=t.match(/既往史[:：]([^。]+)。?/);if(m&&!res.length)res.push(m[1]);return res.join('，')}
+function extractAllergy(s){var t=normalize(s);if(/(过敏史[:：]?)?(无|没有|未有|否认)/.test(t)||/(无过敏|不过敏)/.test(t))return '无';var m=t.match(/(对|对其)?[^。]{0,10}(药|食物|花粉)[^。]{0,10}过敏/);if(m)return m[0];var n=t.match(/过敏史[:：]([^。]+)。?/);return n?n[1]:''}
+function extractPE(s){var t=normalize(s);var vitals=[];var bp=t.match(/(血压|BP)[^\d]*(\d{2,3})\s*[\/\-]\s*(\d{2,3})\s*mmHg/);if(bp)vitals.push('血压 '+bp[2]+'/'+bp[3]+' mmHg');var hr=t.match(/(心率|HR)[^\d]*(\d{2,3})\s*次\/分/);if(hr)vitals.push('心率 '+hr[2]+' 次/分');var rr=t.match(/(呼吸|RR)[^\d]*(\d{2,3})\s*次\/分/);if(rr)vitals.push('呼吸 '+rr[2]+' 次/分');var temp=t.match(/(体温|T)[^\d]*(\d{2}(\.\d)?)\s*℃/);if(temp)vitals.push('体温 '+temp[2]+' ℃');var other=t.match(/查体[^。]{0,80}。/);var res=vitals.join('，');if(other)res+=(res?'，':'')+other[0];var m=t.match(/体格检查[:：]([^。]+)。?/);if(!res&&m)res=m[1];return res}
+function extractExam(s){var t=normalize(s);var items=t.match(/(血常规|尿常规|肝肾功能|CRP|胸片|X线|CT|MRI|心电图|超声)[^。]{0,40}。/g);if(items)return items.join('');var m=t.match(/辅助检查[:：]([^。]+)。?/);return m?m[1]:''}
+function extractDX(s){var t=normalize(s);var dx=t.match(/诊断[:：]([^。]+)。?/);if(dx)return dx[1];var guess=t.match(/考虑[^。]{0,40}。/);return guess?guess[0]:''}
+function extractPlan(s){var t=normalize(s);var plan=t.match(/(开药|处方|复诊|随访|休息|多饮水|观察|注意|复查|安排)[^。]{0,60}。/g);if(plan)return plan.join('');var m=t.match(/处置计划[:：]([^。]+)。?/);return m?m[1]:''}
+function setField(id,val){var v=(val||'').trim();document.getElementById(id).value=v?val:'请手动添加'}
+function fillEMRFromText(s){setField('chief',extractChief(s));setField('hpi',extractHPI(s));setField('pmh',extractPMH(s));setField('allergy',extractAllergy(s));setField('pe',extractPE(s));setField('exam',extractExam(s));setField('dx',extractDX(s));setField('plan',extractPlan(s))}
+function getDateStr(){var d=new Date();var y=d.getFullYear();var m=('0'+(d.getMonth()+1)).slice(-2);var day=('0'+d.getDate()).slice(-2);return y+'-'+m+'-'+day}
+document.getElementById('visitDate').value=getDateStr()
+function genId(p){var d=new Date();var y=d.getFullYear();var m=('0'+(d.getMonth()+1)).slice(-2);var day=('0'+d.getDate()).slice(-2);var rnd=(''+Math.floor(Math.random()*10000)).padStart(4,'0');return p+y+m+day+'-'+rnd}
+function getEMRData(){return{name:(document.getElementById('patientName').value||'未填'),gender:(document.getElementById('genderSel').value||'不详'),age:(document.getElementById('age').value||'未填'),dept:(document.getElementById('department').value||'未填'),date:(document.getElementById('visitDate').value||getDateStr()),outNo:(document.getElementById('outNo').value||genId('OP')),invoiceNo:(document.getElementById('invoiceNo').value||genId('FP')),chief:(document.getElementById('chief').value||''),hpi:(document.getElementById('hpi').value||''),pmh:(document.getElementById('pmh').value||''),allergy:(document.getElementById('allergy').value||''),pe:(document.getElementById('pe').value||''),exam:(document.getElementById('exam').value||''),dx:(document.getElementById('dx').value||''),plan:(document.getElementById('plan').value||''),raw:(transcriptEl.textContent||'')}}
+function buildEMRHTML(d){return '<div style="text-align:center;margin-bottom:10px"><h2 style="margin:0;color:#111">门诊病历</h2><div style="color:#666">'+d.date+'</div></div>'+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+
+  '<div>患者姓名：'+d.name+'</div><div>性别：'+d.gender+' 年龄：'+d.age+'</div>'+
+  '<div>就诊科室：'+d.dept+'</div><div>就诊日期：'+d.date+'</div>'+
+  '<div>门诊号：'+d.outNo+'</div><div>发票号：'+d.invoiceNo+'</div></div>'+
+  '<div style="line-height:1.8;color:#222">'+
+  '<div><strong>主诉：</strong>'+d.chief+'</div>'+
+  '<div><strong>现病史：</strong>'+d.hpi+'</div>'+
+  '<div><strong>既往史：</strong>'+d.pmh+'</div>'+
+  '<div><strong>过敏史：</strong>'+d.allergy+'</div>'+
+  '<div><strong>体格检查：</strong>'+d.pe+'</div>'+
+  '<div><strong>辅助检查：</strong>'+d.exam+'</div>'+
+  '<div><strong>初步诊断：</strong>'+d.dx+'</div>'+
+  '<div><strong>处置计划：</strong>'+d.plan+'</div>'+
+  '</div>'}
+function renderPreview(){var d=getEMRData();var html=buildEMRHTML(d);document.getElementById('emrPreview').innerHTML=html;statusEl.textContent='已生成预览'}
+function exportPDF(){renderPreview();window.print()}
+function exportHTML(){var d=getEMRData();var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>门诊病历</title></head><body>'+buildEMRHTML(d)+'</body></html>';var blob=new Blob([html],{type:'text/html;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='门诊病历_'+d.date+'.html';a.click();URL.revokeObjectURL(a.href)}
+document.getElementById('previewBtn').onclick=renderPreview;document.getElementById('pdfBtn').onclick=exportPDF;document.getElementById('htmlBtn').onclick=exportHTML
+document.getElementById('generateBtn').onclick=function(){var s=transcriptEl.textContent||'';fillEMRFromText(s);statusEl.textContent='已生成'}
+document.getElementById('exportTxt').onclick=function(){var sections=['主诉','现病史','既往史','过敏史','体格检查','辅助检查','初步诊断','处置计划'];var ids=['chief','hpi','pmh','allergy','pe','exam','dx','plan'];var out=[];for(var i=0;i<sections.length;i++){var v=document.getElementById(ids[i]).value||'';out.push(sections[i]+': '+v)}var blob=new Blob([out.join('\n')],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='门诊病历.txt';a.click();URL.revokeObjectURL(a.href)}
+</script>
+</body>
+</html>
