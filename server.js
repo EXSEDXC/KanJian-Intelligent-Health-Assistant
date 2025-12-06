@@ -1,45 +1,30 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs'); // Node.js 内置模块，用于读取文件
-const path = require('path'); // 处理文件路径
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
 
-// 接口：接收症状，读取 JSON 文档并返回对应药品
-app.post('/api/getDrugsBySymptom', (req, res) => {
-  const { symptom } = req.body; // 前端传的症状
+// Serve project static files
+app.use(express.static(path.join(__dirname)));
 
-  // 1. 拼接 JSON 文档路径（确保路径正确）
-  const jsonPath = path.join(__dirname, 'drug-dataset.json');
-
-  // 2. 读取 JSON 文件
-  fs.readFile(jsonPath, 'utf8', (err, data) => {
-    if (err) {
-      // 读取失败（如文件不存在）
-      return res.json({ success: false, message: '读取数据集失败' });
-    }
-
-    // 3. 解析 JSON 数据
-    const dataset = JSON.parse(data);
-    const symptomItem = dataset.症状列表.find(item => item.symptom === symptom);
-
-    // 4. 返回结果
-    if (symptomItem) {
-      res.json({
-        success: true,
-        symptom: symptom,
-        drugs: symptomItem.drugs // 匹配到的药品列表
-      });
-    } else {
-      res.json({ success: true, symptom: symptom, drugs: [] }); // 无匹配结果
-    }
-  });
+// Serve libs from node_modules
+app.get('/lib/vtk.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'node_modules', 'vtk.js', 'dist', 'vtk.js'));
+});
+app.get('/lib/dicomParser.min.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'node_modules', 'dicom-parser', 'dist', 'dicomParser.min.js'));
+});
+app.get('/lib/cornerstone.min.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'node_modules', 'cornerstone-core', 'dist', 'cornerstone.min.js'));
+});
+app.get('/lib/cornerstoneWADOImageLoader.min.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'node_modules', 'cornerstone-wado-image-loader', 'dist', 'cornerstoneWADOImageLoader.min.js'));
 });
 
-// 启动服务
-const port = 3000;
-app.listen(port, () => {
-  console.log(`后端服务启动：http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}/`);
 });
+
