@@ -164,6 +164,69 @@
                 height: 220px;
             }
         }
+        /* 模型切换开关样式 */
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: flex;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 30px;
+            padding: 4px;
+            border: 2px solid #b3e5fc;
+            box-shadow: 0 4px 12px rgba(179, 229, 252, 0.4);
+            width: 300px; /* 控制总宽度 */
+        }
+
+        .toggle-switch input[type="radio"] {
+            display: none;
+        }
+
+        .toggle-switch label {
+            flex: 1;
+            text-align: center;
+            z-index: 2;
+            cursor: pointer;
+            padding: 8px 0;
+            font-size: 15px;
+            font-weight: bold;
+            color: #1565c0;
+            transition: color 0.3s ease;
+            border-radius: 25px;
+        }
+
+        /* 滑块背景 */
+        .toggle-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: linear-gradient(90deg, #81d4fa 0%, #4fc3f7 100%);
+            border-radius: 25px;
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 1;
+            box-shadow: 0 2px 8px rgba(129, 212, 250, 0.6);
+        }
+
+        /* 选中状态逻辑 */
+        #model-local:checked ~ .toggle-slider {
+            transform: translateX(100%);
+            background: linear-gradient(90deg, #ffe082 0%, #ffd54f 100%); /* 本地模式变金色 */
+            box-shadow: 0 2px 8px rgba(255, 224, 130, 0.6);
+        }
+
+        #model-cloud:checked + label {
+            color: #01579b;
+        }
+
+        #model-local:checked + label {
+            color: #e65100;
+}
     </style>
 </head>
 <body>
@@ -189,6 +252,17 @@
         <div id="statusArea" class="status-area"></div>
         
         <h2>智能健康咨询</h2>
+        <div class="toggle-container">
+            <div class="toggle-switch">
+                <input type="radio" id="model-cloud" name="aiModel" value="cloud" checked onchange="toggleModel('cloud')">
+                <label for="model-cloud">☁️ 云端大模型</label>
+                
+                <input type="radio" id="model-local" name="aiModel" value="local" onchange="toggleModel('local')">
+                <label for="model-local">💻 本地小模型</label>
+                
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
         <div style="margin-bottom:18px; text-align:right;">
             <form id="uploadForm" enctype="multipart/form-data" style="display:inline-block;">
                 <label for="imageUpload" style="cursor:pointer; color:#1565c0; font-weight:bold; margin-right:10px;">上传图片</label>
@@ -213,7 +287,43 @@
         const uploadPreview = document.getElementById('uploadPreview');
         const statusArea = document.getElementById('statusArea');
         const chatBox = document.getElementById('chatBox');
-
+        let currentModel = 'cloud'; // 默认云端
+        let currentImageFile = null; // 存储用户图片用于本地发送
+        imageUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            currentImageFile = file; // <--- 关键：保存文件给本地模型用
+            const previewUrl = URL.createObjectURL(file);
+            // ... 原有预览代码保持不变 ...
+            uploadPreview.innerHTML = `
+                <img src="${previewUrl}" style="max-width:120px;max-height:120px;border-radius:10px;border:2px solid #81d4fa;box-shadow:0 0 8px #81d4fa88;" alt="预览">
+                <p style="font-size:0.9rem;color:#666;margin-top:5px;">${file.name} (${(file.size/1024/1024).toFixed(2)}MB)</p>
+            `;
+            showStatus('', '');
+        } else {
+            uploadPreview.innerHTML = '';
+            currentImageFile = null;
+        }
+    });
+        function toggleModel(mode) {
+            currentModel = mode;
+            const badge = mode === 'cloud' ? '☁️ 云端在线模式' : '💻 本地离线模式';
+            const type = mode === 'cloud' ? 'success' : 'loading'; // 用loading样式显示黄色/警告色
+            
+            // 清空聊天框的提示，给个反馈
+            statusArea.textContent = `已切换至：${badge}`;
+            statusArea.className = 'status-area status-success';
+            
+            // 如果切换到本地，提示用户需要启动脚本
+            if (mode === 'local') {
+                statusArea.style.background = '#fff3cd'; // 浅黄色背景
+                statusArea.style.color = '#856404';
+                statusArea.textContent = `已切换至：${badge} (请确保后台 server.py 已运行)`;
+            } else {
+                statusArea.style.background = '#d4edda'; // 浅绿色背景
+                statusArea.style.color = '#155724';
+            }
+        }
         function appendMessage(sender, text) {
             const msgDiv = document.createElement('div');
             msgDiv.className = 'chat-message';
@@ -357,22 +467,58 @@
             }
         }
 
-        function sendMessage() {
-            const input = document.getElementById('userInput');
-            const text = input.value.trim();
-            if (!text) return;
+        async function sendMessage() {
+        const input = document.getElementById('userInput');
+        const text = input.value.trim();
+        if (!text) return;
+        
+        appendMessage('user', text);
+        input.value = '';
+        
+        // === 分流逻辑 ===
+        if (currentModel === 'local') {
+            // [本地模式逻辑]
             
-            appendMessage('user', text);
-            input.value = '';
+            showStatus('💻 本地 MiniMind 正在思考...', 'loading');
+            await callLocalMiniMind(text, currentImageFile);
+        } else {
+            // [云端模式逻辑 - 保持你原有的]
             showStatus('健康助手正在思考...', 'loading');
             
-            // 模拟聊天功能（真实API可能无法访问）
+            // 这里保留你原来的 DeepSeek 或 模拟逻辑
+            // 如果你之前用的是模拟数据：
             setTimeout(() => {
                 const mockResponse = getMockHealthResponse(text);
                 appendMessage('model', mockResponse);
                 showStatus('回复已生成', 'success');
             }, 1500);
         }
+    }
+
+    // === 新增：调用本地 Python 后端 ===
+    async function callLocalMiniMind(prompt, imageFile) {
+        const formData = new FormData();
+        formData.append('prompt', prompt);
+        formData.append('image', imageFile);
+
+        try {
+            // 假设 Python 服务跑在 5000 端口
+            const response = await fetch('http://localhost:5000/chat', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('本地服务连接错误');
+            const data = await response.json();
+            
+            appendMessage('model', data.response);
+            showStatus('本地模型回答完毕', 'success');
+        } catch (error) {
+            console.error(error);
+            appendMessage('model', '❌ 连接失败：请检查 scripts/server.py 是否在运行？');
+            showStatus('连接错误', 'error');
+        }
+    }
         
         function getMockHealthResponse(question) {
             const responses = {
