@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 智慧医疗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        neutral: '#F5F7FA',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .form-input-focus {
+                @apply focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none;
+            }
+            .btn-hover {
+                @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* 保持一致的卡片阴影 */
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral font-inter min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-lg">
+        <div class="bg-white p-8 md:p-10 rounded-xl card-shadow">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-6">个人中心</h2>
+            <p class="text-center text-gray-500 mb-8">管理您的健康数据（仅本地缓存）</p>
+
+            <form id="profileForm" class="space-y-6">
+                <div>
+                    <label for="height" class="block text-sm font-medium text-gray-700 mb-1">身高 (cm)</label>
+                    <input type="number" id="height" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg placeholder-gray-400 form-input-focus"
+                           placeholder="请输入身高，例如 175" min="50" max="300" step="0.1">
+                </div>
+
+                <div>
+                    <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">体重 (kg)</label>
+                    <input type="number" id="weight" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg placeholder-gray-400 form-input-focus"
+                           placeholder="请输入体重，例如 65" min="10" max="500" step="0.1">
+                </div>
+
+                <div>
+                    <label for="stepGoal" class="block text-sm font-medium text-gray-700 mb-1">每日步数目标</label>
+                    <input type="number" id="stepGoal" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg placeholder-gray-400 form-input-focus"
+                           placeholder="请输入每日步数目标，例如 8000" min="1000" max="50000" step="100">
+                </div>
+
+                <button type="submit" id="submitBtn"
+                        class="w-full bg-primary text-white py-3 rounded-lg font-semibold text-lg btn-hover focus:outline-none focus:ring-4 focus:ring-primary/40">
+                    保存个人信息到本地
+                </button>
+            </form>
+
+            <div class="mt-8 text-center">
+                <a href="yiliao.html" class="text-sm text-primary hover:underline transition duration-150">返回首页</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const profileForm = document.getElementById('profileForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const heightInput = document.getElementById('height');
+        const weightInput = document.getElementById('weight');
+        const stepGoalInput = document.getElementById('stepGoal');
+
+        // 1. 验证登录状态
+        if (!token) {
+            alert('请先登录才能管理个人信息。');
+            window.location.href = 'login.html';
+        }
+
+        // 2. 定义本地存储的 Key (使用 token 作为唯一标识，确保不同用户数据隔离)
+        const PROFILE_KEY = `user_profile_data_${token}`;
+
+        // 3. 页面加载时：从本地缓存获取现有数据
+        function fetchProfileFromLocal() {
+            const dataJson = localStorage.getItem(PROFILE_KEY);
+
+            if (dataJson) {
+                const data = JSON.parse(dataJson);
+                if (data.height) heightInput.value = data.height;
+                if (data.weight) weightInput.value = data.weight;
+                if (data.daily_step_goal) stepGoalInput.value = data.daily_step_goal;
+            }
+        }
+
+        // 4. 表单提交时：保存数据到本地缓存
+        profileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const profileData = {
+                height: parseFloat(heightInput.value),
+                weight: parseFloat(weightInput.value),
+                daily_step_goal: parseInt(stepGoalInput.value, 10)
+            };
+
+            // 简单验证
+            if (isNaN(profileData.height) || isNaN(profileData.weight) || isNaN(profileData.daily_step_goal)) {
+                alert('请填写有效的数字。');
+                return;
+            }
+
+            // 模拟保存状态
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 保存中...';
+
+            setTimeout(() => {
+                try {
+                    // 保存到 localStorage
+                    localStorage.setItem(PROFILE_KEY, JSON.stringify(profileData));
+                    alert('个人信息已成功保存到本地缓存！');
+                } catch (error) {
+                    console.error('保存到本地缓存出错:', error);
+                    alert('保存失败，请检查浏览器设置。');
+                } finally {
+                    // 恢复按钮状态
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }, 500); // 模拟延迟 0.5 秒
+        });
+
+        fetchProfileFromLocal();
+    </script>
+</body>
+</html>
