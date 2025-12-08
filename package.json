@@ -7,6 +7,7 @@
     "dicom-parser": "^1.8.21",
     "express": "^5.1.0",
     "nifti-reader-js": "^0.8.0",
-    "vtk.js": "^34.15.1"
+    "vtk.js": "^34.15.1",
+    "ws": "^8.18.3"
   }
 }
