@@ -3,7 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 import jwt
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_cors import CORS  # 导入CORS扩展解决跨域问题
+from flask_cors import CORS
+import os
+import json
+import urllib.request
+import urllib.error
 
 app = Flask(__name__)
 # 配置跨域支持（允许所有域名访问，开发环境适用）
@@ -81,6 +85,48 @@ def login():
             return jsonify({'message': '账号或密码错误'}), 401
     except Exception as e:
         return jsonify({'message': f'登录失败：{str(e)}'}), 500  # 增加错误详情
+
+@app.route('/deepseek-chat', methods=['POST'])
+def deepseek_chat():
+    data = request.get_json(force=True) or {}
+    prompt = data.get('prompt')
+    if not prompt:
+        return jsonify({'message': '缺少prompt'}), 400
+    api_key = os.getenv('sk-a4e46691467949b199c55473d7cb6326')
+    if not api_key:
+        return jsonify({'message': '服务未配置API密钥'}), 500
+    req_data = {
+        'model': 'deepseek-chat',
+        'messages': [
+            {'role': 'system', 'content': '你是一个专业的助手，需要基于提供的图片识别结果，对内容进行解读、分析，用自然流畅的中文回复用户。回复中无需提及识别结果等字样，直接针对内容展开分析。'},
+            {'role': 'user', 'content': prompt}
+        ],
+        'stream': False
+    }
+    body = json.dumps(req_data).encode('utf-8')
+    req = urllib.request.Request(
+        'https://api.deepseek.com/chat/completions',
+        data=body,
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}'
+        },
+        method='POST'
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            resp_body = resp.read()
+            parsed = json.loads(resp_body.decode('utf-8'))
+            reply = ''
+            try:
+                reply = parsed.get('choices', [{}])[0].get('message', {}).get('content', '') or ''
+            except Exception:
+                reply = ''
+            return jsonify({'reply': reply, 'raw': parsed}), 200
+    except urllib.error.HTTPError as e:
+        return jsonify({'message': f'上游错误：{e.code}', 'detail': e.read().decode('utf-8', errors='ignore')}), 502
+    except Exception as e:
+        return jsonify({'message': f'代理失败：{str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)  # 开发环境使用debug模式，生产环境需关闭

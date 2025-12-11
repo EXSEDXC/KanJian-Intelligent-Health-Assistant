@@ -637,31 +637,41 @@
         // 连接信令服务器 (使用WebSocket)
         async function connectSignalingServer() {
             try {
-                // 这里使用简单的WebSocket连接模拟（实际项目需替换为真实WebSocket地址）
-                // 模拟WebSocket对象，包含send方法和onmessage回调
+                const ws = new WebSocket(((location.protocol==='https:')?'wss://':'ws://') + location.host + '/ws');
                 socket = {
-                    send: (data) => {
-                        console.log('发送信令:', data);
-                        // 模拟信令传输延迟
-                        setTimeout(() => {
-                            // 若为挂断信令，直接触发本地处理
-                            if (data.type === 'hangup') {
-                                handleHangupSignal();
-                            } else {
-                                handleSignalingMessage(data);
-                            }
-                        }, 100);
-                    },
-                    close: () => {
-                        console.log('信令连接已关闭');
-                        socket = null;
-                    }
+                    send: (data) => { try { ws.send(JSON.stringify({ ...data, roomId })); } catch(e){} },
+                    close: () => { try { ws.close(); } catch(e){} }
                 };
-
-                statusText.textContent = '已连接到信令服务器';
-                connectionStatus.textContent = '已连接';
-                statusIndicator.classList.add('connected');
-
+                ws.onopen = () => {
+                    statusText.textContent = '已连接到信令服务器';
+                    connectionStatus.textContent = '已连接';
+                    statusIndicator.classList.add('connected');
+                    ws.send(JSON.stringify({ type: 'join', roomId, userRole }));
+                };
+                ws.onmessage = (evt) => {
+                    try {
+                        const msg = JSON.parse(evt.data);
+                        if (msg.type === 'joined') {
+                            addChatMessage('system', `信令就绪，成员数：${(msg.peers||[]).length+1}`);
+                        } else if (msg.type === 'peer-joined') {
+                            addChatMessage('system', '有新成员加入房间');
+                        } else if (msg.type === 'peer-left') {
+                            addChatMessage('system', '有成员离开房间');
+                        } else if (msg.type === 'hangup') {
+                            handleHangupSignal();
+                        } else {
+                            handleSignalingMessage(msg);
+                        }
+                    } catch(e){}
+                };
+                ws.onclose = () => {
+                    statusText.textContent = '信令连接已关闭';
+                    connectionStatus.textContent = '未连接';
+                    statusIndicator.classList.remove('connected');
+                };
+                ws.onerror = (err) => {
+                    statusText.textContent = '连接失败';
+                };
             } catch (error) {
                 console.error('连接信令服务器失败:', error);
                 statusText.textContent = '连接失败: ' + error.message;
@@ -680,6 +690,8 @@
                 handleIceCandidate(message);
             } else if (message.type === 'chat') {
                 addChatMessage('remote', message.text);
+            } else if (message.type === 'hangup') {
+                handleHangupSignal();
             }
         }
 
