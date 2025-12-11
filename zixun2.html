@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康资讯 - 智慧医疗平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2a7de1;
+            --secondary: #4fb0ae;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --border-radius: 10px;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 动态背景效果 */
+        .dynamic-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e3f2fd 100%);
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(42, 125, 225, 0.1);
+            animation: float 20s infinite linear;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            left: 10%;
+            animation-delay: -5s;
+            background: rgba(79, 176, 174, 0.08);
+        }
+
+        .floating-element:nth-child(3) {
+            width: 180px;
+            height: 180px;
+            top: 20%;
+            right: 8%;
+            animation-delay: -10s;
+            background: rgba(255, 107, 107, 0.06);
+        }
+
+        .floating-element:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            bottom: 15%;
+            right: 15%;
+            animation-delay: -7s;
+            background: rgba(42, 125, 225, 0.05);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(30px, 40px) rotate(90deg);
+            }
+            50% {
+                transform: translate(0, 60px) rotate(180deg);
+            }
+            75% {
+                transform: translate(-30px, 40px) rotate(270deg);
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 导航栏样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 25px;
+            position: relative;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 5px 0;
+        }
+
+        .nav-links a:hover {
+            color: #ffeb3b;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffeb3b;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            border: none;
+        }
+
+        .btn-outline {
+            border: 2px solid white;
+            color: white;
+            margin-right: 10px;
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid white;
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-lg {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 页面标题样式 */
+        .page-header {
+            padding: 100px 0 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            animation: fadeInDown 1s ease;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 资讯分类样式 */
+        .news-categories {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title p {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            text-align: center;
+            padding: 30px 20px;
+            border-top: 5px solid var(--primary);
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(42, 125, 225, 0.05), rgba(79, 176, 174, 0.05));
+            z-index: -1;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .category-card:hover::before {
+            opacity: 1;
+        }
+
+        .category-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 2rem;
+            transition: var(--transition);
+        }
+
+        .category-card:hover .category-icon {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .category-card h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .category-card p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        /* 最新资讯样式 */
+        .latest-news {
+            padding: 60px 0;
+            background: linear-gradient(135deg, rgba(248, 249, 250, 0.9), rgba(243, 247, 251, 0.9));
+            position: relative;
+            z-index: 1;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .news-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .news-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .news-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .news-card:hover .news-image img {
+            transform: scale(1.05);
+        }
+
+        .news-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--accent);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .news-content {
+            padding: 20px;
+        }
+
+        .news-content h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .news-meta {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .news-content p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* 热点资讯样式 */
+        .hot-news {
+            padding: 60px 0;
+        }
+
+        .hot-news-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            margin-bottom: 30px;
+        }
+
+        .hot-news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .hot-news-content {
+            padding: 30px;
+        }
+
+        .hot-news-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        /* 健康知识样式 */
+        .health-knowledge {
+            padding: 60px 0;
+            background: linear-gradient(135deg, rgba(248, 249, 250, 0.9), rgba(243, 247, 251, 0.9));
+            position: relative;
+            z-index: 1;
+        }
+
+        .knowledge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .knowledge-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            text-align: center;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .knowledge-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .knowledge-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 20px;
+            background: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.8rem;
+            transition: var(--transition);
+        }
+
+        .knowledge-card:hover .knowledge-icon {
+            background: var(--primary);
+            color: white;
+            transform: rotate(15deg);
+        }
+
+        .knowledge-card h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .knowledge-card p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        /* 页脚样式 */
+        footer {
+            background: linear-gradient(135deg, var(--dark), #2a2a2a);
+            color: white;
+            padding: 60px 0 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background: var(--primary);
+            bottom: 0;
+            left: 0;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-column a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .social-icons a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--primary);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(10px);
+                background-color: rgba(42, 125, 225, 0.98);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links li {
+                margin: 10px 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-title h2 {
+                font-size: 2rem;
+            }
+
+            .auth-buttons {
+                display: none;
+            }
+
+            .mobile-auth {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .logo span {
+                font-size: 1.2rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 动态背景 -->
+    <div class="dynamic-background">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>智慧医疗</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="yiliao.html">首页</a></li>
+                    <li><a href="health_news.html">健康资讯</a></li>
+                    <li><a href="#">医生团队</a></li>
+                    <li><a href="#">健康管理</a></li>
+                    <li><a href="#">关于我们</a></li>
+                </ul>
+                <div class="auth-buttons">
+                    <a href="#" class="btn btn-outline">登录</a>
+                    <a href="#" class="btn btn-primary">注册</a>
+                </div>
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 页面标题 -->
+    <section class="page-header">
+        <div class="container">
+            <h1>健康资讯</h1>
+            <p>获取最新、最权威的健康资讯和医学知识，为您和家人的健康保驾护航</p>
+            <a href="#latest-news" class="btn btn-primary btn-lg" style="margin-top: 30px;">浏览最新资讯</a>
+        </div>
+    </section>
+
+    <!-- 资讯分类 -->
+    <section class="news-categories">
+        <div class="container">
+            <div class="section-title">
+                <h2>健康资讯分类</h2>
+                <p>根据您的兴趣选择不同类别的健康资讯</p>
+            </div>
+            <div class="categories-grid">
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-virus"></i>
+                    </div>
+                    <h3>疾病预防</h3>
+                    <p>了解各类疾病的预防方法和健康知识，做好健康防护</p>
+                    <a href="https://www.nhc.gov.cn/" target="_blank" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary);">查看更多</a>
+                </div>
+                <div class="category-card" style="border-color: var(--secondary);">
+                    <div class="category-icon">
+                        <i class="fas fa-apple-alt"></i>
+                    </div>
+                    <h3>营养饮食</h3>
+                    <p>科学的饮食指导和营养搭配，吃出健康好身体</p>
+                    <a href="https://www.cnsoc.org/" target="_blank" class="btn btn-outline btn-sm" style="color: var(--secondary); border-color: var(--secondary);">查看更多</a>
+                </div>
+                <div class="category-card" style="border-color: var(--accent);">
+                    <div class="category-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <h3>运动健身</h3>
+                    <p>科学的运动方法和健身指导，保持活力状态</p>
+                    <a href="https://www.sport.gov.cn/" target="_blank" class="btn btn-outline btn-sm" style="color: var(--accent); border-color: var(--accent);">查看更多</a>
+                </div>
+                <div class="category-card" style="border-color: #9c27b0;">
+                    <div class="category-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>心理健康</h3>
+                    <p>关注心理健康，学习压力管理和情绪调节方法</p>
+                    <a href="https://www.camh.cn/" target="_blank" class="btn btn-outline btn-sm" style="color: #9c27b0; border-color: #9c27b0;">查看更多</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 最新资讯 -->
+    <section class="latest-news" id="latest-news">
+        <div class="container">
+            <div class="section-title">
+                <h2>最新健康资讯</h2>
+                <p>每日更新的权威健康资讯，助您掌握健康动态</p>
+            </div>
+            <div class="news-grid">
+                <div class="news-card">
+                    <div class="news-image">
+                        <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="流感预防">
+                        <div class="news-badge">热点</div>
+                    </div>
+                    <div class="news-content">
+                        <h3>冬季流感高发季防控指南发布</h3>
+                        <div class="news-meta">
+                            <span><i class="far fa-calendar-alt"></i> 2025-12-08</span>
+                            <span><i class="far fa-eye"></i> 2356次阅读</span>
+                        </div>
+                        <p>国家卫健委发布最新冬季流感防控指南，针对不同人群提供科学的预防建议和就医指引，强调疫苗接种的重要性。</p>
+                        <a href="https://www.nhc.gov.cn/" target="_blank" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary);">查看详情</a>
+                    </div>
+                </div>
+                <div class="news-card">
+                    <div class="news-image">
+                        <img src="https://images.unsplash.com/photo-1494390248081-4e521a5940db?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="健康饮食">
+                        <div class="news-badge">营养</div>
+                    </div>
+                    <div class="news-content">
+                        <h3>冬季营养膳食指南权威发布</h3>
+                        <div class="news-meta">
+                            <span><i class="far fa-calendar-alt"></i> 2025-12-05</span>
+                            <span><i class="far fa-eye"></i> 1892次阅读</span>
+                        </div>
+                        <p>中国营养学会发布冬季膳食指南，针对不同人群提供科学的饮食建议，增强免疫力，预防冬季常见疾病。</p>
+                        <a href="https://www.cnsoc.org/" target="_blank" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary);">查看详情</a>
+                    </div>
+                </div>
+                <div class="news-card">
+                    <div class="news-image">
+                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="运动健身">
+                        <div class="news-badge">运动</div>
+                    </div>
+                    <div class="news-content">
+                        <h3>冬季室内运动指南发布</h3>
+                        <div class="news-meta">
+                            <span><i class="far fa-calendar-alt"></i> 2025-12-03</span>
+                            <span><i class="far fa-eye"></i> 3120次阅读</span>
+                        </div>
+                        <p>冬季天气寒冷，户外运动受限。专家推荐适合冬季的室内运动方式，帮助保持身体活力，增强抵抗力。</p>
+                        <a href="https://www.sport.gov.cn/" target="_blank" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary);">查看详情</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 热点资讯 -->
+    <section class="hot-news">
+        <div class="container">
+            <div class="section-title">
+                <h2>热点健康资讯</h2>
+                <p>关注当前最受关注的健康话题和医学进展</p>
+            </div>
+            <div class="hot-news-card">
+                <div class="hot-news-content">
+                    <h3>人工智能在医疗健康领域的应用进展</h3>
+                    <div class="news-meta">
+                        <span><i class="far fa-calendar-alt"></i> 2025-12-07</span>
+                        <span><i class="far fa-eye"></i> 5423次阅读</span>
+                        <span><i class="fas fa-user-md"></i> 科技前沿</span>
+                    </div>
+                    <p>随着人工智能技术的快速发展，AI在医疗健康领域的应用越来越广泛。从疾病诊断、药物研发到健康管理，人工智能正在改变传统医疗模式。最新研究显示，AI辅助诊断系统在多种疾病的识别准确率上已经超过人类专家...</p>
+                    <a href="https://www.most.gov.cn/" target="_blank" class="btn btn-primary" style="margin-top: 20px;">阅读全文</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 健康知识 -->
+    <section class="health-knowledge">
+        <div class="container">
+            <div class="section-title">
+                <h2>健康知识宝库</h2>
+                <p>学习实用的健康知识和自我保健技巧</p>
+            </div>
+            <div class="knowledge-grid">
+                <div class="knowledge-card">
+                    <div class="knowledge-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h3>心血管健康</h3>
+                    <p>了解心血管疾病的预防和保健知识，维护心脏健康</p>
+                    <a href="https://www.heart.org/" target="_blank" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary);">学习更多</a>
+                </div>
+                <div class="knowledge-card">
+                    <div class="knowledge-icon">
+                        <i class="fas fa-lungs"></i>
+                    </div>
+                    <h3>呼吸系统健康</h3>
+                    <p>学习呼吸道疾病的预防和呼吸健康的维护方法</p>
+                    <a href="https://www.lung.org/" target="_blank" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary);">学习更多</a>
+                </div>
+                <div class="knowledge-card">
+                    <div class="knowledge-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>大脑健康</h3>
+                    <p>了解大脑保健和认知功能维护的科学方法</p>
+                    <a href="https://www.alz.org/" target="_blank" class="btn btn-outline btn-sm" style="color: var(--primary); border-color: var(--primary);">学习更多</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>智慧医疗</h3>
+                    <p>为您提供全面、便捷、专业的医疗健康服务</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-weixin"></i></a>
+                        <a href="#"><i class="fab fa-weibo"></i></a>
+                        <a href="#"><i class="fab fa-qq"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>健康资讯</h3>
+                    <ul>
+                        <li><a href="https://www.nhc.gov.cn/" target="_blank">国家卫健委</a></li>
+                        <li><a href="https://www.cdc.gov/" target="_blank">中国疾控中心</a></li>
+                        <li><a href="https://www.who.int/" target="_blank">世界卫生组织</a></li>
+                        <li><a href="https://www.cnsoc.org/" target="_blank">中国营养学会</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>关于我们</h3>
+                    <ul>
+                        <li><a href="#">公司简介</a></li>
+                        <li><a href="#">编辑团队</a></li>
+                        <li><a href="#">加入我们</a></li>
+                        <li><a href="#">联系我们</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>联系方式</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> 北京市海淀区科技园区88号</li>
+                        <li><i class="fas fa-phone"></i> 400-888-9999</li>
+                        <li><i class="fas fa-envelope"></i> info@smartmed.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>© 2025 智慧医疗平台 版权所有 | 京ICP备12345678号</p>
+                <p style="font-size: 0.8rem; margin-top: 10px;">本站资讯仅供参考，不能替代专业医疗建议，如有健康问题请咨询医生</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 菜单切换
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+
+            menuToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+
+                if (navLinks.classList.contains('active')) {
+                    if (!document.querySelector('.mobile-auth')) {
+                        const mobileAuth = document.createElement('div');
+                        mobileAuth.className = 'mobile-auth';
+                        mobileAuth.innerHTML = `
+                            <a href="#" class="btn btn-outline" style="display: block; text-align: center;">登录</a>
+                            <a href="#" class="btn btn-primary" style="display: block; text-align: center;">注册</a>
+                        `;
+                        navLinks.appendChild(mobileAuth);
+                    }
+                }
+            });
+
+            // 卡片悬停效果
+            const cards = document.querySelectorAll('.news-card, .category-card, .knowledge-card, .hot-news-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = this.classList.contains('category-card') ? 'translateY(-10px)' : 'translateY(-5px)';
+                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.15)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+                });
+            });
+
+            // 动态背景交互
+            const floatingElements = document.querySelectorAll('.floating-element');
+            document.addEventListener('mousemove', function(e) {
+                const mouseX = e.clientX / window.innerWidth;
+                const mouseY = e.clientY / window.innerHeight;
+                
+                floatingElements.forEach((el, index) => {
+                    const speed = 0.3 + (index * 0.1);
+                    const x = (mouseX * 15 * speed) - 7.5;
+                    const y = (mouseY * 15 * speed) - 7.5;
+                    
+                    el.style.transform = `translate(${x}px, ${y}px) rotate(${index * 45}deg)`;
+                });
+            });
+
+            // 导航栏滚动效果
+            window.addEventListener('scroll', function() {
+                const header = document.querySelector('header');
+                if (window.scrollY > 100) {
+                    header.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.15)';
+                } else {
+                    header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+                }
+            });
+
+            // 资讯卡片点击效果
+            const newsCards = document.querySelectorAll('.news-card');
+            newsCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (!e.target.closest('a')) {
+                        const link = this.querySelector('a');
+                        if (link) {
+                            window.open(link.href, '_blank');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
