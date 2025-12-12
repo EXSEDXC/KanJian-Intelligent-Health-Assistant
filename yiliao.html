@@ -1893,17 +1893,19 @@ async function performSearch(symptom) {
     collapseBtn.style.display = 'inline-block';
 
     try {
-        // 1. 向后端发送请求（携带症状参数）
-        const response = await fetch('/api/getDrugsBySymptom', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ symptom: symptom }) // 传症状给后端
-        });
-
-        // 2. 解析后端返回的结果
-        const result = await response.json();
+        const payload = { symptom: symptom };
+        const headers = { 'Content-Type': 'application/json' };
+        const endpoints = [
+            new URL('/api/getDrugsBySymptom', window.location.origin).toString(),
+            'http://127.0.0.1:3000/api/getDrugsBySymptom'
+        ];
+        let result = { drugs: [] };
+        for (var i = 0; i < endpoints.length; i++) {
+            try {
+                const response = await fetch(endpoints[i], { method: 'POST', headers: headers, body: JSON.stringify(payload) });
+                if (response && response.ok) { result = await response.json(); break; }
+            } catch (e) {}
+        }
         const drugs = result.drugs || [];
 
         // 3. 渲染结果（动态生成药品卡片）
@@ -1940,9 +1942,8 @@ async function performSearch(symptom) {
         document.querySelector('.drug-results').scrollIntoView({ behavior: 'smooth' });
 
     } catch (error) {
-        // 错误处理
-        resultsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px 0; color: #ff6b6b;">查询失败，请重试！</div>';
-        console.error('请求错误：', error);
+        resultsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px 0; color: #ff6b6b;">查询失败，请确保已启动本地服务(http://127.0.0.1:3000)。</div>';
+        try { console.error('请求错误：', error); } catch(e){}
     }
 }
 

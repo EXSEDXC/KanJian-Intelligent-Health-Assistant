@@ -129,4 +129,4 @@ def deepseek_chat():
         return jsonify({'message': f'代理失败：{str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)  # 开发环境使用debug模式，生产环境需关闭
+    app.run(host='0.0.0.0', port=5001, debug=True)
