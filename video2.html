@@ -454,10 +454,10 @@
                     <i class="fas fa-heartbeat"></i>
                     <span>智慧医疗 - 远程问诊</span>
                 </div>
-                <div class="auth-buttons">
-                    <a href="#" class="btn btn-outline">医生登录</a>
-                    <a href="#" class="btn btn-primary">患者登录</a>
-                </div>
+                <ul class="nav-links">
+                    <li><a href="yiliao.html">首页</a></li>
+                </ul>
+                
             </nav>
         </div>
     </header>
@@ -634,48 +634,82 @@
             return Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
-        // 连接信令服务器 (使用WebSocket)
+        // 连接信令服务器 (自动适配 URL)
         async function connectSignalingServer() {
-            try {
-                const ws = new WebSocket(((location.protocol==='https:')?'wss://':'ws://') + location.host + '/ws');
-                socket = {
-                    send: (data) => { try { ws.send(JSON.stringify({ ...data, roomId })); } catch(e){} },
-                    close: () => { try { ws.close(); } catch(e){} }
-                };
-                ws.onopen = () => {
-                    statusText.textContent = '已连接到信令服务器';
-                    connectionStatus.textContent = '已连接';
-                    statusIndicator.classList.add('connected');
-                    ws.send(JSON.stringify({ type: 'join', roomId, userRole }));
-                };
-                ws.onmessage = (evt) => {
-                    try {
-                        const msg = JSON.parse(evt.data);
-                        if (msg.type === 'joined') {
-                            addChatMessage('system', `信令就绪，成员数：${(msg.peers||[]).length+1}`);
-                        } else if (msg.type === 'peer-joined') {
-                            addChatMessage('system', '有新成员加入房间');
-                        } else if (msg.type === 'peer-left') {
-                            addChatMessage('system', '有成员离开房间');
-                        } else if (msg.type === 'hangup') {
-                            handleHangupSignal();
-                        } else {
-                            handleSignalingMessage(msg);
+            return new Promise((resolve, reject) => {
+                // 1. 自动获取当前页面的 IP 和端口
+                // 如果是 https 协议则用 wss，否则用 ws
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const host = window.location.host; // 获取 "IP:端口"，例如 "192.168.1.5:3000"
+                
+                // 拼接成 WebSocket 地址，例如 ws://192.168.1.5:3000
+                const signalingUrl = `${protocol}//${host}`;
+
+                console.log(`正在连接信令服务器: ${signalingUrl}`);
+
+                try {
+                    // 创建原生 WebSocket 连接
+                    const ws = new WebSocket(signalingUrl);
+
+                    // 2. 重新封装全局 socket 对象，以适配原有的代码逻辑
+                    socket = {
+                        // 原代码调用 socket.send({obj})，这里将其转为字符串发送
+                        send: (data) => {
+                            if (ws.readyState === WebSocket.OPEN) {
+                                ws.send(JSON.stringify(data));
+                            } else {
+                                console.warn('信令服务器未连接，消息发送失败');
+                            }
+                        },
+                        // 关闭连接
+                        close: () => ws.close()
+                    };
+
+                    // 3. WebSocket 事件监听
+                    ws.onopen = () => {
+                        console.log('WebSocket 连接成功');
+                        statusText.textContent = '已连接到信令服务器';
+                        connectionStatus.textContent = '已连接';
+                        statusIndicator.classList.add('connected');
+                        resolve(); // Promise 完成
+                    };
+
+                    ws.onmessage = (event) => {
+                        try {
+                            // 解析收到的消息
+                            const data = JSON.parse(event.data);
+                            
+                            // 过滤消息：只有当消息里的 roomId 和当前房间号一致时才处理
+                            // (防止收到其他房间的消息)
+                            if (data.roomId === roomId) {
+                                handleSignalingMessage(data);
+                            }
+                        } catch (e) {
+                            console.error('解析信令消息失败:', e);
                         }
-                    } catch(e){}
-                };
-                ws.onclose = () => {
-                    statusText.textContent = '信令连接已关闭';
-                    connectionStatus.textContent = '未连接';
-                    statusIndicator.classList.remove('connected');
-                };
-                ws.onerror = (err) => {
-                    statusText.textContent = '连接失败';
-                };
-            } catch (error) {
-                console.error('连接信令服务器失败:', error);
-                statusText.textContent = '连接失败: ' + error.message;
-            }
+                    };
+
+                    ws.onerror = (error) => {
+                        console.error('WebSocket 错误:', error);
+                        statusText.textContent = '信令服务器连接出错';
+                        // 注意：WebSocket 的 onerror 通常不包含具体错误信息，需看控制台网络面板
+                        reject(error);
+                    };
+
+                    ws.onclose = () => {
+                        console.log('WebSocket 连接断开');
+                        statusText.textContent = '信令连接已断开';
+                        connectionStatus.textContent = '未连接';
+                        statusIndicator.classList.remove('connected');
+                        socket = null;
+                    };
+
+                } catch (error) {
+                    console.error('建立连接失败:', error);
+                    statusText.textContent = '连接失败: ' + error.message;
+                    reject(error);
+                }
+            });
         }
 
         // 处理信令消息

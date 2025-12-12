@@ -1,20 +1,21 @@
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
-const { Server: WebSocketServer } = require('ws');
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
+const WebSocket = require('ws');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
+app.use(express.json());
 
-// Serve project static files
+// --- 1. 原有的静态资源服务 ---
 app.use(express.static(path.join(__dirname)));
 
-// Serve libs from node_modules
+// Serve libs from node_modules (保持你们团队原有的医学影像库路由)
 app.get('/lib/vtk.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'node_modules', 'vtk.js', 'dist', 'vtk.js'));
 });
@@ -28,89 +29,109 @@ app.get('/lib/cornerstoneWADOImageLoader.min.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'node_modules', 'cornerstone-wado-image-loader', 'dist', 'cornerstoneWADOImageLoader.min.js'));
 });
 
+// 简易症状找药接口（支持前端 yiliao.html 的 POST 请求）
+let drugDataset = null;
+function loadDrugDataset(){
+  if (drugDataset) return drugDataset;
+  const p = path.join(__dirname, 'drug-dataset.json');
+  try {
+    const raw = fs.readFileSync(p, 'utf8');
+    const obj = JSON.parse(raw);
+    const list = Array.isArray(obj['症状列表']) ? obj['症状列表'] : [];
+    drugDataset = list.map((item)=>({
+      symptom: String(item.symptom || '').toLowerCase(),
+      description: String(item.description || ''),
+      drugs: Array.isArray(item.drugs) ? item.drugs.map(d=>({
+        id: d.id,
+        name: d.name,
+        desc: d.desc,
+        usage: d.usage,
+        price: d.price,
+        taboo: d.taboo,
+        attention: d.attention
+      })) : []
+    }));
+  } catch(e) {
+    drugDataset = [];
+  }
+  return drugDataset;
+}
+
+app.all('/api/getDrugsBySymptom', (req, res) => {
+  const symptom = String(((req.body && req.body.symptom) || (req.query && req.query.symptom) || '')).trim();
+  const s = symptom.toLowerCase();
+  const data = loadDrugDataset();
+  const synonyms = {
+    '发热': '发烧',
+    '感冒咳嗽': '咳嗽',
+    '偏头痛': '头痛',
+    '胃疼': '胃痛',
+    '鼻炎': '鼻塞'
+  };
+  const mapped = synonyms[s] || s;
+  const result = [];
+  for (const item of data){
+    const target = item.symptom;
+    if (!target) continue;
+    if (mapped === target || mapped.includes(target) || target.includes(mapped)){
+      for (const d of item.drugs){
+        if (!d || !d.name) continue;
+        if (result.find(x=>x.name===d.name)) continue;
+        result.push({ name: d.name, desc: d.desc, usage: d.usage, price: d.price });
+      }
+    }
+  }
+  if (!result.length){
+    for (const item of data){
+      if (item.description && item.description.toLowerCase().includes(mapped)){
+        for (const d of item.drugs){
+          if (!d || !d.name) continue;
+          if (result.find(x=>x.name===d.name)) continue;
+          result.push({ name: d.name, desc: d.desc, usage: d.usage, price: d.price });
+        }
+      }
+    }
+  }
+  res.json({ drugs: result });
+});
+
+// --- 2. 创建服务器并挂载 WebSocket（支持 HTTPS 自动切换） ---
 let server;
 const certPath = process.env.SSL_CERT_PATH;
 const keyPath = process.env.SSL_KEY_PATH;
 if (certPath && keyPath && fs.existsSync(certPath) && fs.existsSync(keyPath)) {
   const options = { cert: fs.readFileSync(certPath), key: fs.readFileSync(keyPath) };
-  server = https.createServer(options, app).listen(PORT, () => {
-    console.log(`Server running at https://localhost:${PORT}/`);
-  });
+  server = https.createServer(options, app);
+  console.log('HTTPS 已启用');
 } else {
-  server = http.createServer(app).listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}/`);
-  });
+  server = http.createServer(app);
 }
+const wss = new WebSocket.Server({ server });
 
-const rooms = new Map();
-let nextId = 1;
+console.log('信令 WebSocket 服务已就绪');
 
-const wss = new WebSocketServer({ server, path: '/ws' });
+// WebSocket 广播逻辑 (用于视频通话)
+wss.on('connection', function connection(ws) {
+  console.log('新用户连接到信令服务器');
 
-wss.on('connection', (ws) => {
-  ws.id = String(nextId++);
-  ws.roomId = null;
-  ws.role = null;
-
-  ws.on('message', (msg) => {
-    let data;
-    try { data = JSON.parse(msg.toString()); } catch { return; }
-    const t = data.type;
-    if (t === 'join') {
-      const r = String(data.roomId || '');
-      const role = String(data.userRole || '');
-      ws.roomId = r;
-      ws.role = role;
-      if (!rooms.has(r)) rooms.set(r, new Map());
-      const room = rooms.get(r);
-      room.set(ws.id, ws);
-      const peers = Array.from(room.keys()).filter((id) => id !== ws.id);
-      ws.send(JSON.stringify({ type: 'joined', clientId: ws.id, roomId: r, peers }));
-      for (const [pid, client] of room.entries()) {
-        if (pid !== ws.id) {
-          client.send(JSON.stringify({ type: 'peer-joined', roomId: r, peerId: ws.id }));
+  ws.on('message', function incoming(message) {
+    try {
+      const str = (typeof message === 'string') ? message : message.toString();
+      const data = JSON.parse(str);
+      // 简单的广播机制：转发给除了自己以外的所有人
+      wss.clients.forEach(function each(client) {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(data));
         }
-      }
-    } else if (t === 'chat') {
-      const room = rooms.get(ws.roomId);
-      if (!room) return;
-      for (const [pid, client] of room.entries()) {
-        if (pid !== ws.id) {
-          client.send(JSON.stringify({ type: 'chat', roomId: ws.roomId, text: String(data.text || ''), from: ws.id }));
-        }
-      }
-    } else if (t === 'hangup') {
-      const room = rooms.get(ws.roomId);
-      if (!room) return;
-      for (const [pid, client] of room.entries()) {
-        if (pid !== ws.id) {
-          client.send(JSON.stringify({ type: 'hangup', roomId: ws.roomId, from: ws.id }));
-        }
-      }
-    } else if (t === 'offer' || t === 'answer' || t === 'ice-candidate') {
-      const room = rooms.get(ws.roomId);
-      if (!room) return;
-      const to = String(data.roomId ? '' : '');
-      for (const [pid, client] of room.entries()) {
-        if (pid !== ws.id) {
-          const payload = { type: t, roomId: ws.roomId, from: ws.id };
-          if (t === 'offer') payload.offer = data.offer;
-          else if (t === 'answer') payload.answer = data.answer;
-          else if (t === 'ice-candidate') payload.candidate = data.candidate;
-          client.send(JSON.stringify(payload));
-        }
-      }
+      });
+    } catch (e) {
+      console.error('信令解析错误:', e);
     }
   });
+});
 
-  ws.on('close', () => {
-    const r = ws.roomId;
-    if (!r || !rooms.has(r)) return;
-    const room = rooms.get(r);
-    room.delete(ws.id);
-    for (const [, client] of room.entries()) {
-      client.send(JSON.stringify({ type: 'peer-left', roomId: r, peerId: ws.id }));
-    }
-    if (room.size === 0) rooms.delete(r);
-  });
+// --- 3. 启动服务器 ---
+server.listen(PORT, () => {
+  const proto = server instanceof https.Server ? 'https' : 'http';
+  console.log(`项目运行中: ${proto}://localhost:${PORT}/`);
 });
