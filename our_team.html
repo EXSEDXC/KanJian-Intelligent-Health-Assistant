@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>医生团队 - 智慧医疗</title>
+	<link rel="stylesheet" href="css/base.css">
+	<link rel="stylesheet" href="css/layouts.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	<style>
+		/* 顶部背景与导航统一为 yiliao 风格 */
+		header {
+			background: linear-gradient(135deg, var(--primary, #2a7de1), var(--secondary, #4fb0ae));
+			color: white;
+			padding: 15px 0;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+			position: sticky;
+			top: 0;
+			z-index: 1000;
+		}
+		nav {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.logo {
+			display: flex;
+			align-items: center;
+			font-size: var(--font-h3, 1.5rem);
+			font-weight: bold;
+			text-decoration: none;
+			color: white;
+			transition: var(--transition, all 0.3s ease);
+		}
+		.logo:hover {
+			transform: scale(1.05);
+		}
+		.logo i {
+			margin-right: 10px;
+			font-size: 2rem;
+		}
+		.nav-links {
+			display: flex;
+			list-style: none;
+		}
+		.nav-links li {
+			margin-left: 25px;
+			position: relative;
+		}
+		.nav-links a {
+			color: white;
+			text-decoration: none;
+			font-weight: 500;
+			transition: var(--transition, all 0.3s ease);
+			padding: 5px 0;
+			font-size: var(--font-base, 16px);
+			position: relative;
+		}
+		.nav-links a:hover {
+			color: #ffeb3b;
+		}
+		.nav-links a::after {
+			content: '';
+			position: absolute;
+			width: 0;
+			height: 2px;
+			bottom: 0;
+			left: 0;
+			background-color: #ffeb3b;
+			transition: var(--transition, all 0.3s ease);
+		}
+		.nav-links a:hover::after {
+			width: 100%;
+		}
+		.auth-buttons {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+		.btn {
+			padding: 10px 20px;
+			border-radius: 50px;
+			text-decoration: none;
+			font-weight: 500;
+			transition: var(--transition, all 0.3s ease);
+			cursor: pointer;
+			display: inline-block;
+			text-align: center;
+			border: none;
+			font-size: var(--font-base, 16px);
+		}
+		.btn-outline {
+			border: 2px solid white;
+			color: white;
+			margin-right: 10px;
+			background: transparent;
+		}
+		.btn-outline:hover {
+			background: white;
+			color: var(--primary, #2a7de1);
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		}
+		.btn-primary {
+			background: white;
+			color: var(--primary, #2a7de1);
+			border: 2px solid white;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		}
+		.btn-primary:hover {
+			background: transparent;
+			color: white;
+			transform: translateY(-2px);
+			box-shadow: none;
+		}
+		.menu-toggle {
+			display: none;
+			font-size: 1.5rem;
+			color: white;
+			background: none;
+			border: none;
+			cursor: pointer;
+			transition: var(--transition, all 0.3s ease);
+		}
+		.menu-toggle:hover {
+			transform: rotate(90deg);
+		}
+		@media (max-width: 900px) {
+			.nav-links {
+				display: none;
+				flex-direction: column;
+				position: absolute;
+				top: 60px;
+				left: 0;
+				width: 100%;
+				background: var(--primary, #2a7de1);
+				z-index: 1000;
+				padding: 20px;
+				box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+				animation: fadeIn 0.3s ease;
+			}
+			.nav-links.active {
+				display: flex;
+			}
+			.nav-links li {
+				margin: 10px 0;
+			}
+			.menu-toggle {
+				display: block;
+			}
+		}
+
+		/* 医生卡片（来自 yiliao 首页样式，去掉图片展示） */
+		.doctors-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+			gap: 30px;
+		}
+
+		.doctor-card {
+			background: white;
+			border-radius: var(--border-radius, 10px);
+			overflow: hidden;
+			box-shadow: var(--box-shadow, 0 5px 15px rgba(0,0,0,0.08));
+			text-align: center;
+			transition: var(--transition, all 0.3s ease);
+			position: relative;
+			padding-bottom: 16px;
+		}
+
+		.doctor-card:hover {
+			transform: translateY(-5px);
+			box-shadow: var(--box-shadow-hover, 0 10px 25px rgba(0,0,0,0.12));
+		}
+
+		.doctor-info {
+			padding: 20px;
+		}
+
+		.doctor-info h3 {
+			margin-bottom: 5px;
+			color: var(--dark, #343a40);
+			font-size: var(--font-h3, 1.25rem);
+		}
+
+		.doctor-specialty {
+			color: var(--primary, #2a7de1);
+			margin-bottom: 12px;
+			font-weight: 500;
+			font-size: var(--font-base, 16px);
+		}
+
+		.doctor-rating {
+			color: #ffc107;
+			margin-bottom: 10px;
+			font-size: var(--font-base, 16px);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 6px;
+		}
+
+		.doctor-info p {
+			font-size: var(--font-p, 1.1rem);
+			color: #666;
+			margin-bottom: 12px;
+		}
+
+		.doctor-actions {
+			display: flex;
+			gap: 10px;
+			justify-content: center;
+		}
+
+		.doctor-actions .btn {
+			padding: 8px 14px;
+			border-radius: 8px;
+			font-size: 0.95rem;
+		}
+
+		/* 横向医生列表样式（无图，放在核心团队下方） */
+		.doctors-horizontal {
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+			margin-top: 24px;
+		}
+
+		.doctor-box {
+			display: flex;
+			align-items: flex-start;
+			gap: 16px;
+			background: white;
+			padding: 16px;
+			border-radius: var(--border-radius, 10px);
+			box-shadow: var(--box-shadow, 0 5px 15px rgba(0,0,0,0.08));
+		}
+
+		.doctor-box .doctor-box-main {
+			flex: 1;
+		}
+
+		.doctor-box .doctor-box-actions {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.doctor-box .doctor-badge {
+			position: static;
+			display: inline-block;
+			padding: 6px 10px;
+			border-radius: 16px;
+			background: var(--primary, #2a7de1);
+			color: #fff;
+			font-size: 0.9rem;
+			font-weight: 500;
+		}
+
+		/* 科室 chips */
+		.department-list {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+		}
+
+		.department-chip {
+			padding: 6px 12px;
+			border-radius: 20px;
+			background: rgba(255,255,255,0.08);
+			color: white;
+			border: 1px solid rgba(255,255,255,0.08);
+			cursor: pointer;
+			font-size: 0.95rem;
+		}
+
+		.department-chip.active {
+			background: white;
+			color: var(--primary, #2a7de1);
+		}
+	</style>
+</head>
+<body>
+	<!-- 导航栏 -->
+	<header>
+		<div class="container">
+            <nav>
+					<!-- 身份切换组件已移除（保持页面简洁） -->
+
+                <a href="#" class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>智慧医疗</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="yiliao.html">首页</a></li>
+                    <li><a href="chat.html">服务</a></li>
+                    <li><a href="our_team.html">医生团队</a></li>
+                    <li><a href="#">健康资讯</a></li>
+                    <li><a href="#">关于我们</a></li>
+                    <li><a href="voice_emr.html">语音病历</a></li>
+                </ul>
+                
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+	
+
+	<section class="hero">
+		<div class="container hero-content">
+			<h1>我们的医生团队</h1>
+			<p>由多学科资深专家组成，覆盖内科、外科、儿科、妇科等多个专科，为您提供专业、温暖的医疗服务。</p>
+		</div>
+	</section>
+
+	<main>
+		<section class="doctors container">
+			<div class="section-title">
+				<h2>核心团队</h2>
+				<p>查看我们部分代表性医生，或点击“查看全部”了解更多医生详细介绍。</p>
+			</div>
+
+			<!-- 科室筛选 -->
+			<div id="department-list" class="department-list" style="margin-bottom:18px;">
+				<!-- 静态科室 chips（已替换动态生成） -->
+				<div class="department-chip active" data-key="all">三大团队</div>
+				<div class="department-chip" data-key="cardiology">心血管</div>
+				<div class="department-chip" data-key="pediatrics">儿科</div>
+				<div class="department-chip" data-key="tcm">中医</div>
+				<div class="department-chip" data-key="orthopedics">骨科</div>
+			</div>
+
+			<div id="team-grid" class="doctors-grid">
+				<!-- 静态核心团队（已替换动态渲染） -->
+				<div class="doctor-card">
+					<div class="doctor-info">
+						<h3>周昊政医生</h3>
+						<div class="doctor-specialty">心血管内科主任</div>
+						<div class="doctor-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> <span>(91评价)</span></div>
+						<p>20年临床经验，擅长高血压、冠心病等心血管疾病的诊治，曾发表学术论文30余篇。</p>
+						<div class="doctor-actions"><a href="doctors.html#doc001" class="btn btn-outline">查看介绍</a> <a href="#book?doctor=doc001" class="btn btn-primary">预约</a></div>
+					</div>
+				</div>
+
+				<div class="doctor-card">
+					<div class="doctor-info">
+						<h3>魏思祺医生</h3>
+						<div class="doctor-specialty">儿科专家</div>
+						<div class="doctor-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> <span>(96评价)</span></div>
+						<p>15年儿科经验，擅长儿童常见病及生长发育问题的诊疗，深受小患者及家长的信赖。</p>
+						<div class="doctor-actions"><a href="doctors.html#doc002" class="btn btn-outline">查看介绍</a> <a href="#book?doctor=doc002" class="btn btn-primary">预约</a></div>
+					</div>
+				</div>
+
+				<div class="doctor-card">
+					<div class="doctor-info">
+						<h3>姜雨锦医生</h3>
+						<div class="doctor-specialty">中医科教授</div>
+						<div class="doctor-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> <span>(156评价)</span></div>
+						<p>25年中医经验，擅长中医调理和慢性病的中西医结合治疗，对亚健康调理有独到见解。</p>
+						<div class="doctor-actions"><a href="doctors.html#doc003" class="btn btn-outline">查看介绍</a> <a href="#book?doctor=doc003" class="btn btn-primary">预约</a></div>
+					</div>
+				</div>
+			</div>
+
+			<!-- 横向无图医生列表（核心团队下方，动态渲染） -->
+			<div id="doctors-horizontal" class="doctors-horizontal">
+				<div class="doctor-box">
+					<div class="doctor-box-left">
+						<div class="doctor-badge">主任医师</div>
+					</div>
+					<div class="doctor-box-main">
+						<h3>周昊政医生</h3>
+						<div class="doctor-specialty">心血管内科主任</div>
+						<div class="doctor-rating">
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star-half-alt"></i>
+							<span>(91评价)</span>
+						</div>
+						<p>20年临床经验，擅长高血压、冠心病等心血管疾病的诊治，曾发表学术论文30余篇。</p>
+					</div>
+					<div class="doctor-box-actions">
+						<a href="video2.html" class="btn btn-outline btn-sm">预约咨询</a>
+					</div>
+				</div>
+
+				<div class="doctor-box">
+					<div class="doctor-box-left">
+						<div class="doctor-badge">副主任医师</div>
+					</div>
+					<div class="doctor-box-main">
+						<h3>熊卓熹医生（成员）</h3>
+						<div class="doctor-specialty">儿科专家</div>
+						<div class="doctor-rating">
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<span>(96评价)</span>
+						</div>
+						<p>15年儿科经验，擅长儿童常见病及生长发育问题的诊疗，深受小患者及家长的信赖。</p>
+					</div>
+					<div class="doctor-box-actions">
+						<a href="video2.html" class="btn btn-outline btn-sm">预约咨询</a>
+					</div>
+				</div>
+
+				<div class="doctor-box">
+					<div class="doctor-box-left">
+						<div class="doctor-badge">教授</div>
+					</div>
+					<div class="doctor-box-main">
+						<h3>李一乐医生（成员）</h3>
+						<div class="doctor-specialty">中医科教授</div>
+						<div class="doctor-rating">
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<span>(156评价)</span>
+						</div>
+						<p>25年中医经验，擅长中医调理和慢性病的中西医结合治疗，对亚健康调理有独到见解。</p>
+					</div>
+					<div class="doctor-box-actions">
+						<a href="video2.html" class="btn btn-outline btn-sm">预约咨询</a>
+					</div>
+				</div>
+
+				<div class="doctor-box">
+					<div class="doctor-box-left">
+						<div class="doctor-badge">主任医师</div>
+					</div>
+					<div class="doctor-box-main">
+						<h3>杨书泓医生（成员）</h3>
+						<div class="doctor-specialty">骨科主任</div>
+						<div class="doctor-rating">
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star"></i>
+							<i class="fas fa-star-half-alt"></i>
+							<span>(87评价)</span>
+						</div>
+						<p>18年骨科经验，擅长关节疾病和运动损伤的诊断与治疗，成功完成手术逾千例。</p>
+					</div>
+					<div class="doctor-box-actions">
+						<a href="video2.html" class="btn btn-outline btn-sm">预约咨询</a>
+					</div>
+				</div>
+			</div>
+
+			<div style="text-align:center;margin-top:30px;">
+				<a href="doctors.html" class="btn btn-primary">查看全部医生</a>
+			</div>
+		</section>
+	</main>
+
+	<footer>
+		<div class="container footer-content">
+			<div class="footer-column">
+				<h3>关于我们</h3>
+				<p style="color:#ddd;">智慧医疗致力于为患者提供便捷、专业的线上医疗服务。</p>
+			</div>
+			<div class="footer-column">
+				<h3>导航</h3>
+				<ul>
+					<li><a href="yiliao.html">首页</a></li>
+					<li><a href="medical purchase.html">医药商城</a></li>
+					<li><a href="our_team.html">医生团队</a></li>
+				</ul>
+			</div>
+			<div class="footer-column">
+				<h3>联系我们</h3>
+				<p style="color:#ddd;">电话：400-123-4567</p>
+				<p style="color:#ddd;">邮箱：service@example.com</p>
+			</div>
+		</div>
+		<div class="copyright">© 2025 智慧医疗</div>
+	</footer>
+	<script src="js/nav.js"></script>
+</body>
+</html>

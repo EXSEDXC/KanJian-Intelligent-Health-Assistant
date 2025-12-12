@@ -454,10 +454,10 @@
                     <i class="fas fa-heartbeat"></i>
                     <span>智慧医疗 - 远程问诊</span>
                 </div>
-                <div class="auth-buttons">
-                    <a href="#" class="btn btn-outline">医生登录</a>
-                    <a href="#" class="btn btn-primary">患者登录</a>
-                </div>
+                <ul class="nav-links">
+                    <li><a href="yiliao.html">首页</a></li>
+                </ul>
+                
             </nav>
         </div>
     </header>
@@ -724,6 +724,8 @@
                 handleIceCandidate(message);
             } else if (message.type === 'chat') {
                 addChatMessage('remote', message.text);
+            } else if (message.type === 'hangup') {
+                handleHangupSignal();
             }
         }
 
