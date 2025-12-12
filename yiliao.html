@@ -47,13 +47,13 @@
             --secondary: #2d93ad;
             --accent: #ff8787;
             /* 字体放大，提升可读性 */
-            --font-base: 18px;
-            --font-h1: 3.5rem;
-            --font-h2: 3rem;
-            --font-h3: 1.8rem;
-            --font-p: 1.3rem;
-            --font-sm: 1.1rem;
-            --font-stat-number: 3rem;
+            --font-base: 20px;
+            --font-h1: 4rem;
+            --font-h2: 3.5rem;
+            --font-h3: 2.2rem;
+            --font-p: 1.5rem;
+            --font-sm: 1.2rem;
+            --font-stat-number: 3.6rem;
             /* 背景更柔和，减少视觉疲劳 */
             background-color: #f0f2f5;
         }
@@ -329,8 +329,8 @@
         /* 英雄区域样式 - 优化搜索框 */
         .hero {
             padding: 80px 0;
-            background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
-            color: white;
+            background: linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.55)), url('image.png') no-repeat center center/cover;
+            color: var(--dark);
             position: relative;
             overflow: hidden;
         }
@@ -484,7 +484,7 @@
         .med-symptom-tag {
             padding: 6px 15px;
             background: rgba(255, 255, 255, 0.15);
-            color: white;
+            color: var(--dark);
             border-radius: 20px;
             font-size: var(--font-base);
             cursor: pointer;
@@ -525,7 +525,7 @@
             font-size: var(--font-stat-number);
             font-weight: bold;
             margin-bottom: 5px;
-            color: #ffeb3b;
+            color: #1e3a8a;
         }
 
         .stat-text {
@@ -646,8 +646,9 @@
 
         .services-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(2, minmax(360px, 1fr));
+            gap: 24px;
+            align-items: stretch;
         }
 
         .service-card {
@@ -658,8 +659,9 @@
             transition: var(--transition);
             position: relative;
             height: 100%;
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            align-items: stretch;
         }
 
         .service-card:hover {
@@ -672,14 +674,16 @@
         }
 
         .service-icon {
-            background: var(--primary);
-            height: 120px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            height: auto;
+            min-height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             transition: var(--transition);
+            border-right: 1px solid rgba(42,125,225,0.12);
         }
 
         .service-content {
@@ -1217,6 +1221,18 @@
             .hero {
                 padding: 60px 0;
             }
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            .service-card {
+                display: flex;
+                flex-direction: column;
+            }
+            .service-icon {
+                height: 120px;
+                border-right: none;
+            }
+        }
 
             .hero h1 {
                 font-size: calc(var(--font-h1) * 0.7);
@@ -1242,7 +1258,7 @@
             }
 
             .auth-buttons {
-                display: none;
+                display: flex;
             }
 
             .mobile-auth {
@@ -1253,14 +1269,8 @@
             }
 
             .hero-stats {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-item {
-                width: 100%;
-                max-width: 300px;
-                margin-left: auto;
-                margin-right: auto;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
             }
 
             /* 移动端身份组件调整 */
@@ -1276,7 +1286,7 @@
             .services, .health-data, .doctors, .appointment, .app-download, .health-news {
                 padding: 60px 0;
             }
-        }
+        
 
         @media (max-width: 576px) {
             .logo span {
@@ -1342,7 +1352,6 @@
                     <li><a href="chat.html">服务</a></li>
                     <li><a href="our_team.html">医生团队</a></li>
                     <li><a href="zixun2.html">健康资讯</a></li>
-                    <li><a href="voice_emr.html">语音病历</a></li>
                 </ul>
                 <div class="auth-buttons">
                     <a href="login.html" class="btn btn-outline">登录</a>
@@ -1368,6 +1377,7 @@
                         <input type="text" id="symptom-search" placeholder="输入症状（如‘咳嗽’‘发烧’），找对症药品">
                         <button id="search-btn"><i class="fas fa-pills"></i> 找药品</button>
                     </div>
+                    <button id="collapse-results-btn" class="btn btn-outline" style="display:none;margin-top:10px;color: var(--primary); border-color: var(--primary);">收起</button>
                     
                     <!-- 症状联想下拉框 -->
                     <div id="search-suggest" class="med-search-suggest">
@@ -1422,7 +1432,7 @@
         </div>
     </section>
 <!-- 药品展示区域 -->
-<section class="drug-results" style="padding: 40px 0; background: white;">
+<section id="drug-results-section" class="drug-results" style="padding: 40px 0; display: none;">
     <div class="container">
         <div id="drug-results-container" class="services-grid" style="display: none;">
             <!-- 药品卡片将动态插入这里 -->
@@ -1625,53 +1635,7 @@
         </div>
     </section>
 
- 
 
-    <!-- 预约区域 -->
-    <section class="appointment">
-        <div class="container">
-            <div class="appointment-container">
-                <div class="appointment-content">
-                    <h2>立即预约专家门诊</h2>
-                    <p>填写基本信息，我们的医疗顾问将尽快与您联系，为您安排最合适的专家和就诊时间，让您的就医更加便捷高效。</p>
-                    <ul class="appointment-features">
-                        <li><i class="fas fa-check-circle"></i> 专业医疗团队，经验丰富</li>
-                        <li><i class="fas fa-check-circle"></i> 快速预约通道，无需排队</li>
-                        <li><i class="fas fa-check-circle"></i> 个性化服务，量身定制</li>
-                        <li><i class="fas fa-check-circle"></i> 全程跟踪服务，就医无忧</li>
-                    </ul>
-                </div>
-                <div class="appointment-form">
-                    <h3>预约咨询</h3>
-                    <form>
-                        <div class="form-group">
-                            <label for="name">姓名</label>
-                            <input type="text" id="name" class="form-control" placeholder="请输入您的姓名">
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">手机号</label>
-                            <input type="tel" id="phone" class="form-control" placeholder="请输入您的手机号">
-                        </div>
-                        <div class="form-group">
-                            <label for="department">科室</label>
-                            <select id="department" class="form-control">
-                                <option value="">请选择科室</option>
-                                <option value="cardiology">心血管内科</option>
-                                <option value="pediatrics">儿科</option>
-                                <option value="orthopedics">骨科</option>
-                                <option value="tcm">中医科</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="date">预约时间</label>
-                            <input type="date" id="date" class="form-control">
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%; background: var(--primary); color: white; border: none;">提交预约</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- 应用下载区域 -->
     <section class="app-download">
@@ -1917,15 +1881,20 @@
 async function performSearch(symptom) {
     const resultsContainer = document.getElementById('drug-results-container');
     const noResult = document.getElementById('no-result');
+    const resultsSection = document.getElementById('drug-results-section');
+    const collapseBtn = document.getElementById('collapse-results-btn');
     
     // 清空容器，显示加载状态
     resultsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px 0;">加载中...</div>';
     resultsContainer.style.display = 'grid';
     noResult.style.display = 'none';
+    resultsSection.style.display = 'block';
+    resultsSection.style.background = 'white';
+    collapseBtn.style.display = 'inline-block';
 
     try {
         // 1. 向后端发送请求（携带症状参数）
-        const response = await fetch('http://localhost:3000/api/getDrugsBySymptom', {
+        const response = await fetch('/api/getDrugsBySymptom', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1976,6 +1945,12 @@ async function performSearch(symptom) {
         console.error('请求错误：', error);
     }
 }
+
+document.getElementById('collapse-results-btn').addEventListener('click', function(){
+    const resultsSection = document.getElementById('drug-results-section');
+    resultsSection.style.display = 'none';
+    this.style.display = 'none';
+});
             // 服务卡片悬停效果
             const serviceCards = document.querySelectorAll('.service-card');
             serviceCards.forEach(card => {

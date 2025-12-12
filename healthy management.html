@@ -778,10 +778,7 @@
                     <li><a href="medical purchase.html">药品购买</a></li>
                     <li><a href="#">关于我们</a></li>
                 </ul>
-                <div class="auth-buttons">
-                    <a href="#" class="btn btn-outline">登录</a>
-                    <a href="#" class="btn btn-primary">注册</a>
-                </div>
+                
                 <button class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -1232,21 +1229,7 @@
                 menuToggle.addEventListener('click', function() {
                     navLinks.classList.toggle('active');
                     
-                    if (navLinks.classList.contains('active')) {
-                        if (!document.querySelector('.mobile-auth')) {
-                            const mobileAuth = document.createElement('div');
-                            mobileAuth.className = 'mobile-auth';
-                            mobileAuth.innerHTML = `
-                                <a href="#" class="btn btn-outline" style="display: block; text-align: center;">登录</a>
-                                <a href="#" class="btn btn-primary" style="display: block; text-align: center;">注册</a>
-                            `;
-                            navLinks.appendChild(mobileAuth);
-                        }
-                    } else {
-                        // 移除移动设备认证按钮
-                        const mobileAuth = document.querySelector('.mobile-auth');
-                        if (mobileAuth) mobileAuth.remove();
-                    }
+                    // 本页面不注入移动端登录/注册按钮
                 });
             }
             
@@ -1512,7 +1495,7 @@
             }
             
             // 导航栏登录/注册按钮事件
-            const authButtons = document.querySelectorAll('.auth-buttons a, .mobile-auth a');
+            const authButtons = document.querySelectorAll('.auth-buttons a');
             authButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -1665,7 +1648,7 @@
             // 报告生成相关的事件监听器已在前面定义
             
             // 导航栏登录/注册按钮事件
-            const authButtons = document.querySelectorAll('.auth-buttons a, .mobile-auth a');
+            const authButtons = document.querySelectorAll('.auth-buttons a');
             authButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();

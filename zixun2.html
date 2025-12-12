@@ -742,10 +742,7 @@
                     <li><a href="#">健康管理</a></li>
                     <li><a href="#">关于我们</a></li>
                 </ul>
-                <div class="auth-buttons">
-                    <a href="#" class="btn btn-outline">登录</a>
-                    <a href="#" class="btn btn-primary">注册</a>
-                </div>
+                
                 <button class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -978,17 +975,7 @@
             menuToggle.addEventListener('click', function() {
                 navLinks.classList.toggle('active');
 
-                if (navLinks.classList.contains('active')) {
-                    if (!document.querySelector('.mobile-auth')) {
-                        const mobileAuth = document.createElement('div');
-                        mobileAuth.className = 'mobile-auth';
-                        mobileAuth.innerHTML = `
-                            <a href="#" class="btn btn-outline" style="display: block; text-align: center;">登录</a>
-                            <a href="#" class="btn btn-primary" style="display: block; text-align: center;">注册</a>
-                        `;
-                        navLinks.appendChild(mobileAuth);
-                    }
-                }
+                // 保持简洁，不在本页面注入登录/注册按钮
             });
 
             // 卡片悬停效果

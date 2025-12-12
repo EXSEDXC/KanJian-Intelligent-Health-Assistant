@@ -22,7 +22,7 @@ def main():
     print("   (请勿关闭弹出的黑色窗口，否则 AI 无法回答问题)")
     print("-" * 50)
 
-    # 2. 启动 server.py
+    # 2. 启动本地模型 server.py
     use_shell = True if sys.platform.startswith('win') else False
     try:
         # cwd参数保证了server.py是在它的目录下运行，能找到 ../model
@@ -36,11 +36,25 @@ def main():
         input("按回车键退出...")
         return
 
-    # 3. 等待模型加载 (给它一点时间预热)
+    # 3. 启动用户认证与云端代理服务 ad.py（端口 5001）
+    ad_script = os.path.join(current_dir, 'ad.py')
+    ad_process = None
+    if os.path.exists(ad_script):
+        try:
+            print("2. 正在启动用户认证服务 (ad.py, 端口5001)...")
+            ad_process = subprocess.Popen(
+                [sys.executable, ad_script],
+                cwd=current_dir,
+                shell=use_shell
+            )
+        except Exception as e:
+            print(f"⚠️ 启动认证服务失败: {e}")
+
+    # 4. 等待服务加载 (给它一点时间预热)
     print("⏳ 等待模型加载 (约 5 秒)...")
     time.sleep(5) 
 
-    # 4. 自动打开主页 (yiliao.html)
+    # 5. 自动打开主页 (yiliao.html)
     # 注意：这里改成了打开主页，而不是直接进聊天页
     html_file = os.path.join(current_dir, 'yiliao.html')
     
@@ -53,6 +67,7 @@ def main():
     print("="*50)
     print("✅ 系统启动成功！")
     print("   -> 你现在可以在网页浏览，点击【服务】进入 AI 问诊。")
+    print("   -> 登录/注册接口运行在 http://127.0.0.1:5001/")
     print("="*50)
     
     # 保持主进程运行，以便监控
@@ -61,6 +76,8 @@ def main():
     except KeyboardInterrupt:
         print("\n正在停止服务...")
         server_process.terminate()
+        if ad_process:
+            ad_process.terminate()
 
 if __name__ == '__main__':
     main()
