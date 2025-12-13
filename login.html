@@ -100,6 +100,16 @@
     </div>
 
     <script>
+        (function(){
+            try {
+                var p = localStorage.getItem('prefillPhone');
+                if (p) {
+                    var input = document.getElementById('loginPhone');
+                    if (input) { input.value = p; }
+                    localStorage.removeItem('prefillPhone');
+                }
+            } catch(e){}
+        })();
         // 密码显示/隐藏切换
         document.querySelectorAll('.toggle-password').forEach(button => {
             button.addEventListener('click', () => {
@@ -137,7 +147,8 @@
             }
             
             try {
-                const response = await fetch('http://127.0.0.1:5001/login', {
+                const API_BASE = (location.hostname ? (`http://${location.hostname}:5001`) : 'http://127.0.0.1:5001');
+                const response = await fetch(`${API_BASE}/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
