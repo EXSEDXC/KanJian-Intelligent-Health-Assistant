@@ -1,31 +1,45 @@
-datasets==3.6.0
-datasketch==1.6.4
-Flask==3.0.3
-Flask_Cors==4.0.0
-jieba==0.42.1
+# --- Web 服务与 API 框架 ---
+Flask==3.0.3                  # server.py, ad.py 使用的 Web 框架
+Flask_Cors==4.0.0             # Flask 跨域支持 (server.py, ad.py)
+Flask-SQLAlchemy>=3.0.0       # ad.py 数据库 ORM (缺失)
+fastapi>=0.95.0               # main.py API框架 (缺失)
+httpx>=0.23.0                 # 异步 HTTP 客户端，用于 main.py 中调用外部 API (缺失)
+requests>=2.20.0              # start_server.py 健康检查 (缺失)
+uvicorn>=0.20.0               # FastAIP服务器 (main.py, start_server.py) (缺失)
+
+# --- 认证、安全与工具 ---
+PyJWT>=2.0.0                  # ad.py JWT认证 (缺失)
+Werkzeug>=2.0.0               # ad.py 密码哈希（check_password_hash, generate_password_hash）(缺失)
+jinja2==3.1.2
 jsonlines==4.0.0
 marshmallow==3.22.0
-matplotlib==3.5.1
 ngrok==1.4.0
+pydantic==2.8.2               # main.py 中用于定义请求和响应模型
+psutil==5.9.8
+rich==13.7.1
+ujson==5.1.0
+
+# --- 核心深度学习/VLM/CV/NLP 依赖 ---
+Pillow>=9.0.0                 # PIL/Pillow 图像处理库 (server.py, main.py, eval_vlm.py 中核心图像处理) (缺失)
+datasets==3.6.0
+datasketch==1.6.4
+jieba==0.42.1
+matplotlib==3.5.1
 nltk==3.8
 numpy==1.26.4
-openai==1.59.6
+openai==1.59.6                # 用于调用 OpenAI 接口或兼容的 API (如 DeepSeek, main.py, ad.py)
 peft==0.7.1
-psutil==5.9.8
-pydantic==2.8.2
-rich==13.7.1
 scikit_learn==1.5.1
 sentence_transformers==2.3.1
 simhash==2.1.2
 tiktoken==0.10.0
-transformers==4.57.1
-jinja2==3.1.2
-jsonlines==4.0.0
-trl==0.13.0
-ujson==5.1.0
-wandb==0.18.3
-streamlit==1.50.0 
-gradio==5.49.0
-swanlab==0.6.12
-torch==2.6.0
+torch==2.6.0                  # PyTorch 核心
 torchvision==0.21.0
+transformers==4.57.1          # Hugging Face Transformers
+trl==0.13.0
+
+# --- 实验追踪与界面 (可选，但已包含在列表中) ---
+gradio==5.49.0
+streamlit==1.50.0
+swanlab==0.6.12
+wandb==0.18.3
